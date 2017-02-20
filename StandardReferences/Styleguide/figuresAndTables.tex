@@ -1,0 +1,33 @@
+\epigraph{Lack of consistency can bring on a lack of interest.}{\textit{Anonymous}}
+\section{Figures and tables}
+
+\paragraph{Caption placement}
+Place table captions above the table.
+Place figure captions bellow the figure.
+
+\paragraph{Caption content}
+Make sure that captions are self-contained.
+Captions are sentences.
+Sentences start with a capital letter, and end with a dot.
+
+\paragraph{Referring}
+Refer at least once to every table or figure.
+
+\paragraph{Tables}
+The preferred table style is demonstrated in \cref{tab:defaulttable}.
+Remember to use the \verb|\toprule|, \verb|\midrule|, \verb|\midrule| commands.
+
+\begin{table}[H]
+    \begin{center}
+    \caption{Example of how tables should be styled}
+    \label{tab:defaulttable}
+    \begin{tabular}{ll}
+    \toprule
+    Key & Value \\ \midrule
+    Foo & Alice \\
+    Bar & Bob \\
+    Smokey & Eve \\
+    Stover & Clara \\ \bottomrule
+    \end{tabular}
+    \end{center}
+\end{table}

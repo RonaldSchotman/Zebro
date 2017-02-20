@@ -1,0 +1,73 @@
+\epigraph{Leadership comes with consistency}{\textit{Junior Seau}}
+\section{General style and structure}
+\paragraph{Latex}
+All reports and documentation have to be made using \LaTeX  because other team members have to be able to update and reuse the content and because Latex allows for version control.
+
+\paragraph{Language}
+All documents intended for publication should be written in English, do not use any Americanisms. Please use the correct tenses.\\
+For referring to research done in the past use the past perfect. ``Research has been done by Maxwell...''\\
+The correct tenses for our experiments are the past simple, past continuous. ``A leg was made...''.\\
+Conclusions that still apply are indicated by a present perfect tense: ``Is is concluded ...''.\\
+General facts are stated in the present simple tense ``The permeability of vacuum is...''.
+
+\paragraph{Zebro} Always capitalise the Z. Write about Zebro like you would write about a person. \\
+E.g. Zebro has six rotational motors. The Zebro leg module only has one.
+
+\paragraph{`We' form}
+Do not write in the `we' form, that is only use passive sentences. \\
+E.g. do \emph{not} write ``We conclude that the earth is flat'', but ``It is concluded that the earth is flat''.
+
+\paragraph{Titles, chapters, sections and paragraphs}
+Use title case for titles.
+Use sentence case for chapters, sections and paragraphs.
+
+\paragraph{Quotation marks} 
+Always use left (`) and right (') quotation marks appropriately.
+Use single quotes for words or bits.
+Use double quotes for word groups or bit strings.
+Always use double quotes for citations.
+In code samples always use the original quotation marks.\\
+E.g. `book', ``a pile of books'', the third bit is `1', The incoming bits are ``1011101''
+
+\paragraph{Emphasizing}
+Do not use \textbf{bold}, \textit{italic} or \underline{underlining}.
+The only proper way to emphasize text is using the \verb|\emph{}| command. \\
+E.g. Marnix's collection of hats is \emph{truly} amazing.
+
+\paragraph{Numbers}
+When writing in regular text, write numbers out in full, unless that would be weird. \\
+E.g. Marnix has five hundred hats.
+
+\paragraph{Dashes}
+\begin{itemize}
+\item use a single dash between elements or word compounds. \\
+E.g. 2-bit value.
+\item use a double dash to indicated ranges. Put a space before and after it.\\
+E.g: 2 -- 5 members.
+\item use a triple (em) dash for digressions in a sentence. Put a space before and after it. \\
+E.g. The world is coming to an end --- or so we thought.
+\end{itemize}
+
+\paragraph{References}
+The use of the IEEE reference style is mandatory. 
+It is found in the folder of this document.\\
+Always use the \verb|\cref{}| or \verb|\Cref{}| command to create references. \verb|\Cref{}| should only --- and always --- be used for references at the beginning of a sentence.
+
+\paragraph{Labels}
+Use the prefixes in \cref{tab:prefixes} to label latex elements.
+
+\begin{table}[H]
+    \begin{center}
+    \caption{Prefixes that should be used when labeling latex elements}
+    \label{tab:prefixes}
+    \begin{tabular}{ll}
+    \toprule
+    Element & Prefix \\ \midrule
+    Table & tbl: \\
+    Figure & fig: \\
+    Equation & eq: \\
+    Section, Subsection & sec: \\
+    Appendix section & app: \\ \bottomrule
+    \end{tabular}
+    \end{center}
+\end{table}

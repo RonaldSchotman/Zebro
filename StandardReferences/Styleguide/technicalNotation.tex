@@ -1,0 +1,34 @@
+\epigraph{Order is the law of all intelligible existence
+}{\textit{John Stuart Blackie}}
+\section{Technical notation}
+
+\paragraph{Decimal separator}
+Use a point as decimal separator. \\
+E.g. $ 12.34 $
+
+\paragraph{Text in equations}
+When writing text in equations always use the \verb|\text{}| equation. \\
+E.g. 
+\[ \text{Speedup} = \frac{t_\text{old}}{t_\text{new}} \]
+
+\paragraph{Multiplication}
+When explicitly indication a multiplication, use the \verb|\cdot| command. \\
+E.g. $ 5 \cdot 10 = 50 $
+
+\paragraph{Units}
+Always use the \verb|sinuitx| package. There goes a space between a number and a unit.\\
+E.g. The secret physical quantity is \SI{12e-13}{\kilogram\metre\per\second}
+
+\paragraph{Variables and filenames}
+Always use the \verb|\verb| command for variables and filenames. \\
+E.g. \verb|foo|, \verb|bar = 3|, \verb|someFile.c| 
+
+\paragraph{Functions}
+Always use the \verb|\verb| command for function names.
+Also always use parenthesis after the name, with or without parameters. \\
+E.g. \verb|foo()|, \verb|foo(int a, char *b)|
+
+\paragraph{Very short code snippets}
+For very short (one line or shorter) code snippets, you are allowed to use the \verb|\verb| command.\\
+E.g. \verb|for(int i = 0; i < 9001; i++);|
+

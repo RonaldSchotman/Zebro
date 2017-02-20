@@ -1,0 +1,89 @@
+\documentclass[a4paper, twoside]{article}
+\usepackage{amsmath}
+\usepackage[english]{babel}
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}           % Necessary to be able to write '<'
+\usepackage{graphicx}
+\usepackage{a4wide}
+\usepackage{caption}
+\usepackage{subcaption}        % have subfigures
+\usepackage[hidelinks]{hyperref}    % clickable links
+\usepackage[dvipsnames,svgnames]{xcolor}
+\usepackage{float}            % better figure and table aligmnenbt
+\usepackage[parfill]{parskip}    % newlines instead of indents
+\usepackage[nottoc]{tocbibind}     % Include Bibliography in ToC
+%\usepackage[english]{isodate} % to superscripted 'th'
+\usepackage[iso]{datetime}
+\usepackage{listings}              % Used to include source-code and fragments
+\usepackage{verbatim}
+\usepackage{epstopdf}              % Enable when using pdflatex instead of latex
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}  % Fix autref to appendix subsections
+\usepackage{tabularx}              % For easy wrapping in tables
+\usepackage{enumitem}
+\usepackage{booktabs}    % better tables
+\usepackage{epigraph}
+\usepackage{todonotes} 
+\usepackage{acronym}
+\usepackage{siunitx}
+\usepackage{cleveref}
+\usepackage{eurosym}
+\usepackage{tikz,calc}
+\usepackage[section]{placeins} % place figures in the right sections
+
+\pagestyle{headings}    % headings on top of the pages
+
+
+
+\lstset{breaklines=true,
+        basicstyle=\scriptsize,
+        captionpos=b,
+        numbers=left,
+        language=C,
+        xleftmargin=40pt}
+        
+\setlist[description]{leftmargin=2cm,labelindent=1cm}
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+\includegraphics[width=14cm]{fig/combinedLogo.pdf} \\ \vspace{1cm}
+
+\begin{LARGE}
+\textbf{Delft University of Technology}\\
+\textbf{The Zebro Project}\\ \vspace{1cm}
+
+\textbf{Standard Specification}\\
+
+\vspace{0.5cm}
+ 
+
+\end{LARGE}
+\vspace{1em}
+\begin{Huge}
+\textbf{ZebroBus}\\
+\end{Huge}
+v1
+
+\vspace{1 cm}
+Authors:
+
+\begin{tabular}{l l}
+Piet De Vaere	    &piet@devae.re\\
+Dani\"el Booms		&d.booms@solcon.nl\\
+\end{tabular}\\[2em]
+
+Latest revision:
+\today
+\end{center}
+\vfill
+\end{titlepage}
+
+\cleardoublepage
+\tableofcontents
+\listoftables
+
+\input{introduction}
+\input{design_principles}
+\input{fields}
+
+\end{document}

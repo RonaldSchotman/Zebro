@@ -1,0 +1,76 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{epigraph}
+\usepackage{float}
+\usepackage{cleveref}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{siunitx}
+
+\sisetup{exponent-product = \cdot, per-mode=fraction}
+
+\title{Zebro Style Guide for Code}
+\author{Piet De Vaere --- piet@devae.re\\ Dani\"el Booms --- d.booms@solcon.nl}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+Following a styleguide can make code a lot more professional! Thus, you \textbf{have} to follow this styleguide.
+Please read it before starting to write code, and keep an eye out for changes.
+
+\section{Naming things}
+\begin{itemize}
+\item Make all names descriptive.
+\item Use underscores in filenames when needed.
+\item Always use underscores when naming variables and functions, CamelCase is \emph{not} ok.
+\item \verb|#defines| should always be written in full \verb|CAPS| with the \verb|SPACES_REPLACED_BY_UNDERSCORES|.
+\item Do not use systems hungarian notation. It is evil and must die.
+\item See \cref{sec:types} on how to name fixed point variables.
+\end{itemize}
+
+\section{Types}\label{sec:types}
+\begin{itemize}
+\item Do no use the regular \verb|int| type. Instead use the types from \verb|stdint.h|.
+\item The default type is \verb|int32_t|. If you have no reason to use another type, use this one.
+\item Avoid using \verb|floats|, use fixed point numbers where possible.
+\item When using fixed point variables, prefix the variable with \verb|fpX_| where x is the offset.
+    For example: if the value ``1245'' was stored in the variable \verb|fp2_leg_position|, it should be interpreted as
+    ``12.45''.
+\end{itemize}
+
+\section{Varia}
+\begin{itemize}
+\item Start all files with the correct project header. For example:
+\begin{verbatim}
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: uart1.c
+ *
+ * Description:
+ * Code to drive UART1, used for debugging
+ *
+ * Authors:
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+\end{verbatim}
+
+\item Use the following system for create header file protectors: \verb|__FILE_NAME_H__|.
+
+\item Use \verb|/* */| style comments for information. \verb|//| style comments are used to comment out parts of code.
+
+\end{itemize}
+
+\end{document}
+
+
