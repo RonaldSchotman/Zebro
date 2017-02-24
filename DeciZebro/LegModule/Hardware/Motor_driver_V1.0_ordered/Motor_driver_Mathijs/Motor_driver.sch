@@ -1,0 +1,234 @@
+EESchema Schematic File Version 2
+LIBS:Motor_driver-rescue
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:Basic
+LIBS:extended
+LIBS:IC
+LIBS:MOTOR
+LIBS:SmartPrj
+LIBS:Motor_driver-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 6
+Title "ROOT"
+Date "2017-01-19"
+Rev "0"
+Comp "Zebro"
+Comment1 "Lisanne Kesselaar"
+Comment2 "Concept Version 0.1"
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 6600 4650 725  500 
+U 58813887
+F0 "Driver" 60
+F1 "driver.sch" 60
+F2 "PWM1" I L 6600 4775 60 
+F3 "PWM2" I L 6600 4875 60 
+F4 "M1" O R 7325 4775 60 
+F5 "M2_S" O L 6600 5000 60 
+$EndSheet
+$Sheet
+S 6400 1775 1175 200 
+U 58816FF7
+F0 "Buck_converter" 60
+F1 "buck_converter.sch" 60
+F2 "PG" O L 6400 1875 60 
+$EndSheet
+$Sheet
+S 3050 1775 1200 1550
+U 58813872
+F0 "Sensor" 60
+F1 "Sensor.sch" 60
+F2 "HALL" O R 4250 1925 60 
+F3 "V_Imotor" O R 4250 2075 60 
+F4 "M2_S" I L 3050 3250 60 
+F5 "M2" I L 3050 3150 60 
+F6 "ENCODER_2" O R 4250 2500 60 
+F7 "ENCODER_1" O R 4250 2600 60 
+F8 "~FAULT_CURRENT" O R 4250 2300 60 
+F9 "SCL_SL" I R 4250 2975 60 
+F10 "SDA_SL" B R 4250 3100 60 
+F11 "~ALERT_TEMP" O R 4250 2800 60 
+F12 "current_sense_fault_en" I R 4250 2175 60 
+F13 "V_Imotor0V" O R 4250 2375 60 
+$EndSheet
+$Sheet
+S 6400 2150 1175 2175
+U 5881389D
+F0 "Connectors" 60
+F1 "connectors.sch" 60
+F2 "INT" O L 6400 3350 60 
+F3 "RX" I L 6400 2425 60 
+F4 "TX" O L 6400 2550 60 
+F5 "M1" I R 7575 4150 60 
+F6 "M2" I R 7575 4075 60 
+F7 "ID-1" O L 6400 3675 60 
+F8 "ID-2" O L 6400 3775 60 
+F9 "SCL_M" O L 6400 3425 60 
+F10 "SDA_M" O L 6400 3500 60 
+F11 "SCL_SL" O R 7575 3725 60 
+F12 "SDA_SL" O R 7575 3850 60 
+F13 "EN_I2C" O L 6400 3950 60 
+F14 "PDI_CLK" I L 6400 3150 60 
+F15 "PDI_DATA" I L 6400 3050 60 
+$EndSheet
+Text Label 3875 3775 0    60   ~ 0
+SDA_SL
+Text Label 3875 3975 0    60   ~ 0
+SCL_SL
+Text Label 8075 3725 2    60   ~ 0
+SDA_SL
+Text Label 8075 3850 2    60   ~ 0
+SCL_SL
+Wire Wire Line
+	6125 1875 6400 1875
+Wire Wire Line
+	6125 2425 6400 2425
+Wire Wire Line
+	6125 2550 6400 2550
+Wire Wire Line
+	6125 3050 6400 3050
+Wire Wire Line
+	6400 3150 6125 3150
+Wire Wire Line
+	6125 3350 6400 3350
+Wire Wire Line
+	6400 3425 6125 3425
+Wire Wire Line
+	6125 3500 6400 3500
+Wire Wire Line
+	6125 3675 6400 3675
+Wire Wire Line
+	6125 3775 6400 3775
+Wire Wire Line
+	4250 1925 4475 1925
+Wire Wire Line
+	4475 2075 4250 2075
+Wire Wire Line
+	4250 2175 4475 2175
+Wire Wire Line
+	4475 2300 4250 2300
+Wire Wire Line
+	4250 2500 4475 2500
+Wire Wire Line
+	4475 2600 4250 2600
+Wire Wire Line
+	4250 2800 4475 2800
+Wire Wire Line
+	4250 2975 4475 2975
+Wire Wire Line
+	4250 3100 4475 3100
+Wire Wire Line
+	6600 4775 6250 4775
+Wire Wire Line
+	6250 4775 6250 4175
+Wire Wire Line
+	6250 4175 6125 4175
+Wire Wire Line
+	6125 4275 6175 4275
+Wire Wire Line
+	6175 4275 6175 4875
+Wire Wire Line
+	6175 4875 6600 4875
+Wire Wire Line
+	2725 5000 2725 3250
+Wire Wire Line
+	2725 3250 3050 3250
+Wire Wire Line
+	3050 3150 2625 3150
+Wire Wire Line
+	2625 3150 2625 5325
+Wire Wire Line
+	2625 5325 7700 5325
+Wire Wire Line
+	7700 5325 7700 4075
+Wire Wire Line
+	7700 4075 7575 4075
+Wire Wire Line
+	7325 4775 7650 4775
+Wire Wire Line
+	7650 4775 7650 4150
+Wire Wire Line
+	7650 4150 7575 4150
+Wire Wire Line
+	6125 3950 6400 3950
+Wire Wire Line
+	6600 5000 2725 5000
+Wire Wire Line
+	4300 3775 4300 3100
+Connection ~ 4300 3100
+Wire Wire Line
+	4400 3975 4400 2975
+Wire Wire Line
+	3875 3975 4400 3975
+Connection ~ 4400 2975
+Wire Wire Line
+	3875 3775 4300 3775
+Wire Wire Line
+	7575 3850 8075 3850
+Wire Wire Line
+	7575 3725 8075 3725
+$Sheet
+S 4475 1775 1650 2700
+U 58813892
+F0 "Xmega" 60
+F1 "Xmega.sch" 60
+F2 "RX" I R 6125 2425 60 
+F3 "TX" O R 6125 2550 60 
+F4 "SCL_M" I R 6125 3425 60 
+F5 "SDA_M" B R 6125 3500 60 
+F6 "ID-1" I R 6125 3675 60 
+F7 "ID-2" I R 6125 3775 60 
+F8 "PWM1" O R 6125 4175 60 
+F9 "HALL" I L 4475 1925 60 
+F10 "INT" O R 6125 3350 60 
+F11 "Encoder_2" I L 4475 2500 60 
+F12 "Encoder_1" I L 4475 2600 60 
+F13 "SCL_SL" I L 4475 2975 60 
+F14 "SDA_SL" B L 4475 3100 60 
+F15 "PG" I R 6125 1875 60 
+F16 "PWM2" O R 6125 4275 60 
+F17 "V_Imotor" I L 4475 2075 60 
+F18 "current_sense_fault_en" O L 4475 2175 60 
+F19 "~FAULT_CURRENT" I L 4475 2300 60 
+F20 "~ALERT_TEMP" O L 4475 2800 60 
+F21 "EN_I2C" O R 6125 3950 60 
+F22 "PDI_CLK" I R 6125 3150 60 
+F23 "PDI_DATA" I R 6125 3050 60 
+F24 "V_Imotor0V" O L 4475 2375 60 
+$EndSheet
+Wire Wire Line
+	4250 2375 4475 2375
+$EndSCHEMATC
