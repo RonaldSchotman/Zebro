@@ -1,6 +1,4 @@
-src/ASF/common/boards/user_board/init.d \
- src/ASF/common/boards/user_board/init.o: \
- ../src/ASF/common/boards/user_board/init.c ../src/asf.h \
+src/leds.d src/leds.o: ../src/leds.c ../src/asf.h \
  ../src/ASF/xmega/drivers/cpu/ccp.h ../src/ASF/xmega/utils/compiler.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\sfr_defs.h \
@@ -47,7 +45,7 @@ src/ASF/common/boards/user_board/init.d \
  ../src/ASF/common/services/ioport/xmega/ioport.h \
  ../src/ASF/common/services/ioport/xmega/ioport_compat.h \
  ../src/ASF/common/services/ioport/xmega/../ioport.h \
- ../src/ASF/xmega/utils/status_codes.h
+ ../src/ASF/xmega/utils/status_codes.h ../src/../inc/leds.h
 
 ../src/asf.h:
 
@@ -152,3 +150,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 ../src/ASF/common/services/ioport/xmega/../ioport.h:
 
 ../src/ASF/xmega/utils/status_codes.h:
+
+../src/../inc/leds.h:

@@ -37,3 +37,6 @@ noGit/
 # MS Office documents
 *.doc
 *.docx
+
+# Latex outputs
+*.pdf
