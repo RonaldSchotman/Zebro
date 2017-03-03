@@ -31,8 +31,10 @@
   <options>
     <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.basic.clock" value="Add" config="" content-id="Atmel.ASF" />
-    <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="xmega.drivers.pmic" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="common.utils.interrupt" value="Add" config="" content-id="Atmel.ASF" />
   </options>
   <configurations />
   <files>
@@ -75,6 +77,7 @@
     <file path="src/Config/conf_clock.h" framework="" version="3.32.0" source="common\services\clock\xmega\module_config\conf_clock.h" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/common/services/delay/delay.h" framework="" version="3.32.0" source="common\services\delay\delay.h" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/common/services/delay/xmega/cycle_counter.h" framework="" version="3.32.0" source="common\services\delay\xmega\cycle_counter.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/xmega/drivers/pmic/pmic.h" framework="" version="3.32.0" source="xmega\drivers\pmic\pmic.h" changed="False" content-id="Atmel.ASF" />
   </files>
   <documentation help="http://asf.atmel.com/docs/3.32.0/common.applications.user_application.user_board.xmegad/html/index.html" />
   <offline-documentation help="" />
@@ -131,6 +134,7 @@
       <Value>../src/ASF/xmega/drivers/cpu</Value>
       <Value>../src/ASF/common/services/clock</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/xmega/drivers/pmic</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
@@ -161,6 +165,7 @@
       <Value>../src/ASF/xmega/drivers/cpu</Value>
       <Value>../src/ASF/common/services/clock</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/xmega/drivers/pmic</Value>
     </ListValues>
   </avrgcc.assembler.general.IncludePaths>
 </AvrGcc>
@@ -197,6 +202,7 @@
       <Value>../src/ASF/xmega/drivers/cpu</Value>
       <Value>../src/ASF/common/services/clock</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/xmega/drivers/pmic</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
@@ -228,6 +234,7 @@
       <Value>../src/ASF/xmega/drivers/cpu</Value>
       <Value>../src/ASF/common/services/clock</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/xmega/drivers/pmic</Value>
     </ListValues>
   </avrgcc.assembler.general.IncludePaths>
   <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
@@ -260,9 +267,6 @@
       <SubType>compile</SubType>
     </None>
     <Compile Include="inc\asf.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="inc\leds.h">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\asf.h">
@@ -358,7 +362,19 @@
     <None Include="src\config\conf_clock.h">
       <SubType>compile</SubType>
     </None>
+    <None Include="src\ASF\xmega\drivers\pmic\pmic.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\interrupts.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\interrupts.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\leds.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\leds.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\main.c">
@@ -366,6 +382,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="inc\" />
     <Folder Include="src\" />
     <Folder Include="src\ASF\" />
     <Folder Include="src\ASF\common\" />
@@ -386,6 +403,7 @@
     <Folder Include="src\ASF\xmega\" />
     <Folder Include="src\ASF\xmega\drivers\" />
     <Folder Include="src\ASF\xmega\drivers\cpu\" />
+    <Folder Include="src\ASF\xmega\drivers\pmic\" />
     <Folder Include="src\ASF\xmega\utils\" />
     <Folder Include="src\ASF\xmega\utils\assembler\" />
     <Folder Include="src\ASF\xmega\utils\bit_handling\" />

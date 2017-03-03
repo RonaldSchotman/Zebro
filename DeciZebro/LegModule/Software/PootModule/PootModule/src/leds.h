@@ -25,19 +25,19 @@
 #define LEDS_LD1_PIN			PIN3_bm
 #define LEDS_LD2_PIN			PIN0_bm
 #define LEDS_LD1_PORT			PORTE
-#define LEDS_LD2_PORT			PORTD
+#define LEDS_LD2_PORT			PORTR
 
 #define LEDS_H_BLINK_SPEED		500 // milliseconds
 
 
-void leds_init();
-void leds_set_LD1();
-void leds_clear_LD1();
-void leds_toggle_LD1();
-void leds_blink_LD1_blocking();
-void leds_set_LD2();
-void leds_clear_LD2();
-void leds_toggle_LD2();
-void leds_blink_LD2_blocking();
+void leds_init(void);
+void leds_set_LD1(void);
+void leds_clear_LD1(void);
+void leds_toggle_LD1(void);
+void leds_blink_LD1_blocking(void);
+void leds_set_LD2(void);
+void leds_clear_LD2(void);
+void leds_toggle_LD2(void);
+void leds_blink_LD2_blocking(void);
 
 #endif /* __LEDS_H_ */

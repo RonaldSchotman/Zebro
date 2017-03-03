@@ -16,7 +16,7 @@
  */
 
 #include "asf.h"
-#include "../inc/leds.h"
+#include "leds.h"
 
 /** 
  * Initialise the leds

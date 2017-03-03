@@ -74,6 +74,9 @@
 // From module: Interrupt management - XMEGA implementation
 #include <interrupt.h>
 
+// From module: PMIC - Programmable Multi-level Interrupt Controller
+#include <pmic.h>
+
 // From module: Part identification macros
 #include <parts.h>
 

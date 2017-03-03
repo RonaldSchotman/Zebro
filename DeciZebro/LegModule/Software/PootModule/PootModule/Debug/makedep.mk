@@ -10,6 +10,8 @@ src\ASF\common\boards\user_board\init.c
 
 src\ASF\xmega\drivers\cpu\ccp.s
 
+src\interrupts.c
+
 src\leds.c
 
 src\main.c

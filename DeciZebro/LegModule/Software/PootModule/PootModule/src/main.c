@@ -14,7 +14,7 @@
  *  
  */
 #include <asf.h>
-#include "../inc/leds.h"
+#include "leds.h"
 
 int main (void)
 {
@@ -30,6 +30,9 @@ int main (void)
 	/* Insert application code here, after the board has been initialized. */
 		/* Initialise leds */
 		leds_init();
+		interrupts_enable();
+		
+		leds_set_LD2();
 		leds_blink_LD1_blocking();
 	
 	
