@@ -46,7 +46,7 @@ src/leds.d src/leds.o: ../src/leds.c ../src/asf.h \
  ../src/ASF/common/services/ioport/xmega/ioport_compat.h \
  ../src/ASF/common/services/ioport/xmega/../ioport.h \
  ../src/ASF/xmega/drivers/pmic/pmic.h \
- ../src/ASF/xmega/utils/status_codes.h ../src/leds.h
+ ../src/ASF/xmega/utils/status_codes.h ../src/../inc/leds.h
 
 ../src/asf.h:
 
@@ -154,4 +154,4 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 
 ../src/ASF/xmega/utils/status_codes.h:
 
-../src/leds.h:
+../src/../inc/leds.h:

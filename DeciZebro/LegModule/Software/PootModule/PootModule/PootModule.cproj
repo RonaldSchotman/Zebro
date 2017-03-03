@@ -242,6 +242,9 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\vregs.c">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="src\ASF\common\services\ioport\ioport.h">
       <SubType>compile</SubType>
     </None>
@@ -266,12 +269,21 @@
     <None Include="src\ASF\common\services\clock\sysclk.h">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="inc\asf.h">
-      <SubType>compile</SubType>
-    </Compile>
     <None Include="src\asf.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="inc\globals.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="inc\interrupts.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="inc\leds.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="inc\vregs.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\ASF\common\services\clock\xmega\sysclk.c">
       <SubType>compile</SubType>
     </Compile>
@@ -368,13 +380,7 @@
     <Compile Include="src\interrupts.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\interrupts.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\leds.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\leds.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\main.c">

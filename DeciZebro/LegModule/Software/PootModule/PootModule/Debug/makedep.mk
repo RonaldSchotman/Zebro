@@ -2,6 +2,8 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
+src\vregs.c
+
 src\ASF\common\services\clock\xmega\sysclk.c
 
 src\ASF\common\services\ioport\xmega\ioport_compat.c

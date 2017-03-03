@@ -20,7 +20,7 @@
 
 
 #include "asf.h"
-#include "interrupts.h"
+#include "../inc/interrupts.h"
 
 int8_t interrupt_counter = 0;
 

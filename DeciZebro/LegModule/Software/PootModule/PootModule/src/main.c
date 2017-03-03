@@ -14,7 +14,11 @@
  *  
  */
 #include <asf.h>
-#include "leds.h"
+#include "../inc/leds.h"
+#include "../inc/interrupts.h"
+#include "../inc/globals.h"
+#include "../inc/vregs.h"
+
 
 int main (void)
 {
@@ -31,6 +35,7 @@ int main (void)
 		/* Initialise leds */
 		leds_init();
 		interrupts_enable();
+		vregs_init();
 		
 		leds_set_LD2();
 		leds_blink_LD1_blocking();
