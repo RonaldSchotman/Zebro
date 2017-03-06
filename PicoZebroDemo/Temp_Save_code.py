@@ -1,3 +1,135 @@
+    cv2.imshow("Zebro_s", Zebro_edges)
+
+    #Function for finding larges contour in image Zebro
+    (_,contours2,hierarchy2) = cv2.findContours(Zebro_edges,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # Find contours with hierarchy
+    areaArray = []
+
+    cv2.drawContours(Zebro_edges, contours2, -1, (255, 0,0 ), 1)
+    cv2.imshow("Zebro_edges", Zebro_edges)
+    
+    for i, c in enumerate(contours2):
+        area = cv2.contourArea(c)
+        areaArray.append(area)
+        [vx,vy,x,y] = cv2.fitLine(contours2[0], cv2.DIST_L2,0,1,1)
+        lefty = int((-x*vy/vx)+y)
+        righty = int(((200-x)*vy/vx)+y)
+        cv2.line(Zebro_edges, (200-1,righty),(0,lefty),(0,255,255),2)
+
+    cv2.imshow("Zebro_lines", Zebro_edges)
+
+    minLineLength = 20
+    lines = cv2.HoughLinesP(image = Zebro_edges, rho=0.5, theta = np.pi/180, threshold = 20,
+                            lines=np.array([]),minLineLength=minLineLength,maxLineGap=100)
+
+    a,b,c = lines.shape
+    for i in range(a):
+        cv2.line(Zebro_res, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]),
+                 (0,0,255), 3, cv2.LINE_AA)
+
+    cv2.imshow("Zebro_res ",Zebro_res)
+
+    Zebro_template = cv2.imread("Pico/fourdots2.jpg", 1)
+
+    Zebro_height, Zebro_width = Zebro_image.shape[:2]
+    Zebro_template_height, Zebro_template_width = Zebro_template.shape[:2]
+    result_size = [ s[0] - s[1] + 1 for s in zip([Zebro_height, Zebro_width], [Zebro_template_height, Zebro_template_width]) ]
+
+    #result = cv2.createImage(result_size, cv.IPL_DEPTH_32F, 1)
+
+    result = cv2.matchTemplate(image, Zebro_template, cv2.TM_CCORR)
+
+    min_val, Max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    
+    cv2.imshow("Zeres", result)
+
+    ret, thresh = cv2.threshold(Zebro_gray, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    kernel = np.ones((3,3),np.uint8)
+    opening = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel,iterations=2)
+
+    sure_bg = cv2.dilate(opening,kernel,iterations=3)
+
+    dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2,5)
+    ret, sure_fg = cv2.threshold(dist_transform, 0.7*dist_transform.max(),255,0)
+
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv2.subtract(sure_bg,sure_fg)
+
+    cv2.imshow("unknown", sure_bg)
+
+black = [([0,0,0],[0,0,40])] #=black
+white = [([0,0,0],[0,0,255])] #=white
+
+    Zebro_image= cv2.imread("Pico/rect.jpg", 1)
+
+    # color in cube is hsv values for easier detection of green.
+    black_hsv = cv2.cvtColor(Zebro_image, cv2.COLOR_BGR2HSV)
+
+    #green the important color
+    for(black_lower,black_upper) in black:
+            black_lower = np.array(black_lower,dtype=np.uint8)
+            black_upper = np.array(black_upper,dtype=np.uint8) 
+    # the mask 
+    mask_black = cv2.inRange(black_hsv,black_lower,black_upper)
+
+    #green the important color
+    for(white_lower,white_upper) in white:
+            white_lower = np.array(white_lower,dtype=np.uint8)
+            white_upper = np.array(white_upper,dtype=np.uint8) 
+    # the mask 
+    mask_white = cv2.inRange(black_hsv,white_lower,white_upper)
+
+    Black_white_out = cv2.bitwise_and(Zebro_image, Zebro_image, mask = mask_white)
+    cv2.imshow("HSV white mask", mask_white)
+    cv2.imshow("HSV white", Black_white_out)
+
+    #Function for finding larges contour in image
+    image_gray2 = cv2.cvtColor(qr2_image, cv2.COLOR_BGR2GRAY) # Convert Image captured from Image Input to GrayScale
+    edges2 = cv2.Canny(image_gray2,100,200,3)      # Apply Canny edge detection on the gray image
+    (_,contours2,hierarchy2) = cv2.findContours(edges2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # Find contours with hierarchy
+    areaArray = []
+    for i, c in enumerate(contours2):
+        area = cv2.contourArea(c)
+        areaArray.append(area)
+    #first sort the array by area
+ 
+    sorteddata = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
+
+    #find the nth largest contour [n-1][1], in this case 1
+    try:
+        largestcontour = sorteddata[0][1]
+        #draw it
+        x, y, w, h = cv2.boundingRect(largestcontour)
+        appelkoek = qr2_image[y:y+h, x:x+w]
+        cv2.rectangle(qr2_image, (x, y), (x+w, y+h), (0,255,0), 2)
+        cv2.imwrite("Pico/testing.jpg", appelkoek)
+
+    except IndexError:
+        pass
+
+
+        while True:        
+            i = 0
+            for c in contours2:
+                peri = cv2.arcLength(c, True)
+                approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+                if i == 1:
+                    break
+     
+                # if the shape has 4 vertices, it is either a square or
+                # a rectangle
+                if len(approx) == 4:
+                # compute the bounding box of the contour and use the
+                # bounding box to compute the aspect ratio
+                    (x, y, w, h) = cv2.boundingRect(approx)
+                    ar = w / float(h)
+     
+                    # a square will have an aspect ratio that is approximately
+                    # equal to one, otherwise, the shape is a rectangle
+                    if ar >= 0.95 and ar <= 1.05:
+                        break
+                i = i + 1
+
+
     g = sum(sum(mask_green))
 
     # blue

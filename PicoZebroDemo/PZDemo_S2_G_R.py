@@ -27,11 +27,11 @@ import cv2                              # Include OpenCV library (Most important
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (1280, 720)
-camera.framerate = 15
+camera.framerate = 40
 rawCapture = PiRGBArray(camera, size=(1280, 720))
 
 #Standard hsv color values. These are obtained through code converter.py
-green = [([50,25,25],[80,150,255])] #=green
+green = [([37,30,30],[90,150,255])] #=green
 
 # allow the camera to warmup (So this is only during start up once).
 time.sleep(0.1)
@@ -43,9 +43,20 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # grab the NumPy array representing the image, the initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
+
+    # making light levels less invuential
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l,a,b = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(2,2))
+    cl = clahe.apply(l)
+    limg = cv2.merge((cl,a,b))
+    final = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
+    #adjusting Gamma level if highly needed
+    adjusted = funct.adjust_gamma(final, 1)
     
     # color in cube is hsv values for easier detection of green.
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(adjusted, cv2.COLOR_BGR2HSV)
 
     #green the important color
     for(lower,upper) in green:
@@ -55,7 +66,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     mask_green = cv2.inRange(hsv,lower,upper)
 
     #Show the green and the current view
-    output = cv2.bitwise_and(image, image, mask = mask_green)
+    output = cv2.bitwise_and(adjusted, adjusted, mask = mask_green)
     cv2.imshow("HSV green visable  ", output)
 
     # Use current frame image and hsv green value to find 2 largest
