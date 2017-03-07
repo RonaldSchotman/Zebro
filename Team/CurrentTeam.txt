@@ -1,6 +1,6 @@
 List of Members of the Zebro Team
 
-Name				e-mail					telephone
-Daniël Booms		d.booms@solcon.nl		0620371295
-Floris
+Name				e-mail						telephone
+Daniël Booms		d.booms@solcon.nl			0620371295
+Floris Rouwen		florisrouwen@outlook.com	+316 164 16 252
 Mattijs
