@@ -1,0 +1,37 @@
+/*
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: encoder.h
+ *
+ * Description:
+ * Code to read the rotational encoder
+ *
+ * Authors:
+ * Daniel Booms -- d.booms@solcon.nl
+ */
+
+#include "stdint.h"
+
+#ifndef __ENCODER_H__
+#define __ENCODER_H__
+
+// http://www.andymark.com/PG71-Gearmotor-With-Encoder-p/am-2971.htm
+// 32.5 * 7 pulses per round * 4 edges = 910 (32.5k7)
+//#define ENCODER_PULSES_PER_ROTATION 910
+
+#define ENCODER_SIG_A_PIN GPIO_PIN_6 //PA6, PIN22
+#define ENCODER_SIG_A_BANK GPIOA
+#define ENCODER_SIG_B_PIN GPIO_PIN_7 //PC7, PIN38
+#define ENCODER_SIG_B_BANK GPIOC
+
+void encoder_init(void);
+int32_t encoder_pins_init(void);
+void encoder_write_to_vregs(void);
+uint16_t encoder_get_position(void);
+void encoder_reset_position(void);
+void TIM3_IRQHandler(void);
+
+#endif /* __ENCODER_H__ */

@@ -1,0 +1,131 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: fans.c
+ *
+ * Description:
+ * Code to drive the cooling fans.
+ *
+ * Authors:
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+
+#include "stdint.h"
+#include "stm32f0xx_hal.h"
+
+#include "fans.h"
+#include "vregs.h"
+#include "pootbus.h"
+
+/**
+  * Initialise the fans GPIO pins and timers
+  */
+void fans_init(void){
+
+	/* enable timer clock */
+	__HAL_RCC_TIM15_CLK_ENABLE();
+
+
+	///* enable fans on idle */
+	//TIM15->CR2 |= TIM_CR2_OIS2 | TIM_CR2_OIS1;
+	/* set PWM mode on CH1 and CH2 */
+	TIM15->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1
+			| TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1;
+	/* enable capture / compare outputs */
+	TIM15->CCER |= TIM_CCER_CC2E | TIM_CCER_CC1E;
+	/* set prescaler to 0, so f=48MHz */
+	TIM15->PSC = FANS_PRESCALER;
+	/* set ARR to 4800, so we have a 10 KHz pwm frequency */
+	TIM15->ARR = FANS_ARR;
+	/* fans continuously on */
+	fans_set_speed(FANS_MAX_SPEED, FANS_FAN_1);
+	fans_set_speed(FANS_MAX_SPEED, FANS_FAN_2);
+	/* enable output */
+	TIM15->BDTR = TIM_BDTR_MOE;
+	/* enable counter */
+	TIM15->CR1 |= TIM_CR1_CEN;
+
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+
+	/* enable GPIO */
+	GPIO_InitTypeDef  GPIO_InitStruct;
+
+	GPIO_InitStruct.Mode  = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull  = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	GPIO_InitStruct.Alternate = GPIO_AF0_TIM15;
+
+	GPIO_InitStruct.Pin = FANS_OUTPUT_1_PIN;
+	HAL_GPIO_Init(FANS_OUTPUT_1_BANK, &GPIO_InitStruct);
+
+	GPIO_InitStruct.Pin = FANS_OUTPUT_2_PIN;
+	HAL_GPIO_Init(FANS_OUTPUT_2_BANK, &GPIO_InitStruct);
+
+}
+
+/**
+ * Set the speed of a fan.
+ * fan should be either FANS_FAN_1 or FANS_FAN_2
+ */
+int32_t fans_set_speed(int32_t speed, int32_t fan){
+	uint16_t new_compare;
+
+	if (speed < 0) speed = 0;
+	if (speed > FANS_MAX_SPEED) speed = FANS_MAX_SPEED;
+
+	new_compare = ((uint16_t) speed) * FANS_ARR / FANS_MAX_SPEED;
+
+	if(fan == FANS_FAN_1){
+		TIM15->CCR1 = new_compare;
+		vregs_write(VREGS_FAN_1_SPEED, speed);
+	}
+
+	else if(fan == FANS_FAN_2){
+		TIM15->CCR2 = new_compare;
+		vregs_write(VREGS_FAN_2_SPEED, speed);
+	}
+
+	return (int32_t) new_compare;
+
+}
+
+int32_t fans_calc_speed(int32_t fan){
+	int32_t speed;
+	int32_t sensor;
+	int32_t highest_measured_temperature; // Celcius
+
+	speed = 0;
+
+	for(sensor = 0; sensor < POOTBUS_NUM_OF_TEMP_SENSORS; sensor++){
+		int32_t temperature[POOTBUS_NUM_OF_TEMP_SENSORS];
+		temperature[sensor] = pootbus_get_motor_temperature_fp3(sensor) / 1000;
+		if (sensor != 0 && temperature[sensor-1] <= temperature[sensor]){highest_measured_temperature = temperature[sensor];}
+		if (sensor == 0) {highest_measured_temperature = temperature[sensor];}
+	}
+
+//	if (highest_measured_temperature >= FANS_ON_TEMPERATURE) {
+		speed = FANS_MAX_SPEED; // * (highest_measured_temperature / (0.3 * POOTBUS_EMERGENCY_MOTOR_TEMPERATURE));
+//		if (speed >= FANS_MAX_SPEED){
+//			speed = FANS_MAX_SPEED;
+//		}
+//	}
+
+	return speed;
+}
+
+int32_t fans_calc_and_set_speeds(){
+	int32_t fan;
+
+	for(fan = 0; fan < FANS_NUM_OF_FANS; fan++){
+		int32_t speed;
+
+		speed = fans_calc_speed(fan);
+		fans_set_speed(speed, fan);
+	}
+
+	return 0;
+}

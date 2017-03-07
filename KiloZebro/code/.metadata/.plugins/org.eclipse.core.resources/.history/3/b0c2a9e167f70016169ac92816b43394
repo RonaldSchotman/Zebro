@@ -1,0 +1,89 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: motion.h
+ *
+ * Description:
+ * Motion controller. Keeps track of the current walking
+ * mode or assignment, and decides how to actuate the
+ * H-bridge.
+ * *
+ * Authors:
+ * Daniel Booms --d.booms@solcon.nl
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+
+#ifndef __MOTION_H__
+#define __MOTION_H__
+
+#define MOTION_MODE_IDLE 0
+#define MOTION_CALIBRATE 1
+#define MOTION_MODE_WALK_FORWARD 2
+#define MOTION_MODE_WALK_REVERSE 3
+#define MOTION_MODE_FIXED_POSITION 4
+#define MOTION_MODE_CONTINUOUS_ROTATION 5
+#define MOTION_MODE_FIXED_POSITION_DUMB 6
+#define MOTION_DIRVE_H_BRIDGE_DIRECT 7
+#define MOTION_DEBUG_COMMAND 8
+
+
+#define MOTION_FLAG_SET 1
+#define MOTION_FLAG_CLEAR 0
+
+#define MOTION_SEGMENTS_PER_FULL_CIRCLE 240 /*number of angle segments in a full circle*/
+#define MOTION_SEGMENTS_PER_HALF_CIRCLE (MOTION_SEGMENTS_PER_FULL_CIRCLE>>1)
+/*Conversion factor between the two basic units 10RPM and angle segments per second*/
+#define MOTION_SEGMENTS_PER_SECOND_PER_RPM (MOTION_SEGMENTS_PER_FULL_CIRCLE*10/60)
+#define MOTION_MILLISECOND_PER_SECOND 1000
+#define MOTION_SEGMENTS_PER_INDEX 10 /*index is 10 angle segments*/
+#define MOTION_CONTROLLABLE_LIMIT 200 /*angle pieces*/
+#define MOTION_NEUTRAL_DUTYCYCLE 50 /*Motor is controlled locked anti-phase, with dutycycle 50 the motor stops*/
+#define MOTION_CONTROLLER_P 1 /*Proportional control value*/
+
+/*For Debug*/
+/*#define VREGS_MOTION_MODE 32
+#define VREGS_MOTION_SPEED 33
+#define VREGS_MOTION_PHASE 34
+#define VREGS_MOTION_EXTRA 35
+#define VREGS_MOTION_CRC 36
+#define VREGS_MOTION_UPDATE 37
+#define ADDRESS_LEFT 0
+#define ADDRESS_RIGHT 1
+#define TIME_MAX_TIME_MS 256000
+*/
+
+
+#include "stdint.h"
+
+struct motion_state{
+	uint8_t mode;
+	uint8_t speed; /*speed*10=RPM*/
+	uint8_t phase; /*between 0 and 239, steps of 1.5 degree. 1/240 piece of a circular arc is the basic unit*/
+	uint8_t extra;
+	uint8_t crc;
+};
+
+struct motion_timestamped_angle{
+    int32_t angle;
+    int32_t timestamp;
+};
+
+int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data);
+void motion_set_state(uint8_t mode, int8_t speed, uint8_t phase,
+		uint8_t extra, uint8_t crc);
+int32_t motion_validate_state(struct motion_state motion_state);
+int32_t motion_write_state_to_vregs(struct motion_state motion_state);
+int32_t motion_drive_h_bridge();
+int32_t motion_virtual_angle(int32_t motion_mode, int32_t time);
+int32_t motion_estimated_currect_angle(int32_t time);
+int32_t motion_angle_error(int32_t time);
+int32_t motion_drive_h_bridge_simple(void);
+int32_t motion_update_data(void);
+int32_t motion_go_to_position_dumb(void);
+void motion_init(void);
+int32_t motion_stop(void);
+void motion_turn(void);
+#endif /* __MOTION_H__ */

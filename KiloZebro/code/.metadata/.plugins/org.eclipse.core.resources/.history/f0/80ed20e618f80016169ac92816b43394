@@ -1,0 +1,13 @@
+/*
+ * optmed.h
+ *
+ *  Created on: Feb 21, 2017
+ *      Author:
+ */
+
+#ifndef INC_OPTMED_H_
+#define INC_OPTMED_H_
+
+pixelvalue opt_med3(pixelvalue * p);
+
+#endif /* INC_OPTMED_H_ */

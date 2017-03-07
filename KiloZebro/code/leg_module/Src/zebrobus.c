@@ -220,9 +220,11 @@ int32_t zebrobus_process_write_requests(){
 
     	switch(request.address){
     	case VREGS_MOTION_MODE:
-    	case VREGS_MOTION_SPEED:
-    	case VREGS_MOTION_PHASE:
-    	case VREGS_MOTION_EXTRA:
+    	case VREGS_MOTION_LIFT_OFF_TIME_A:
+    	case VREGS_MOTION_LIFT_OFF_TIME_B:
+    	case VREGS_MOTION_TOUCH_DOWN_TIME_A:
+    	case VREGS_MOTION_TOUCH_DOWN_TIME_B:
+    	case VREGS_MOTION_NEW_DATA_FLAG:
     	case VREGS_MOTION_CRC:
     	case VREGS_MOTION_UPDATE:
     		motion_new_zebrobus_data(request.address, request.data);
@@ -235,7 +237,6 @@ int32_t zebrobus_process_write_requests(){
     	case VREGS_SYNC_COUNTER:
     		time_set_time(request.data);
     		break;
-
 
     	case VREGS_SERIAL_ID:
     		// TODO: do this properly

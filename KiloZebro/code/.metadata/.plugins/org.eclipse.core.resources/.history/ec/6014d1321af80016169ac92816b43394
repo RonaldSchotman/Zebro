@@ -1,0 +1,23 @@
+/*
+ * optmed.h
+ *
+ *  Created on: Feb 21, 2017
+ *      Author:
+ */
+
+#ifndef INC_OPTMED_H_
+#define INC_OPTMED_H_
+
+typedef float pixelvalue ;
+
+#define PIX_SORT(a,b) { if ((a)>(b)) PIX_SWAP((a),(b)); }
+#define PIX_SWAP(a,b) { pixelvalue temp=(a);(a)=(b);(b)=temp; }
+
+pixelvalue opt_med3(pixelvalue * p);
+pixelvalue opt_med5(pixelvalue * p);
+pixelvalue opt_med6(pixelvalue * p);
+pixelvalue opt_med7(pixelvalue * p);
+pixelvalue opt_med9(pixelvalue * p);
+pixelvalue opt_med25(pixelvalue * p);
+
+#endif /* INC_OPTMED_H_ */

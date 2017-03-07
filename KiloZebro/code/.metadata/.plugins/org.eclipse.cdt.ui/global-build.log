@@ -1,3 +1,98 @@
-11:31:40 **** Incremental Build of configuration Debug for project leg_module ****
+16:43:31 **** Incremental Build of configuration Debug for project leg_module ****
 make all 
-make: Nothing to be done for 'all'.
+Building file: ../Src/adc.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/adc.d" -MT"Src/adc.o" -o "Src/adc.o" "../Src/adc.c"
+Finished building: ../Src/adc.c
+ 
+Building file: ../Src/address.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/address.d" -MT"Src/address.o" -o "Src/address.o" "../Src/address.c"
+Finished building: ../Src/address.c
+ 
+Building file: ../Src/encoder.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/encoder.d" -MT"Src/encoder.o" -o "Src/encoder.o" "../Src/encoder.c"
+Finished building: ../Src/encoder.c
+ 
+Building file: ../Src/errors.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/errors.d" -MT"Src/errors.o" -o "Src/errors.o" "../Src/errors.c"
+Finished building: ../Src/errors.c
+ 
+Building file: ../Src/fans.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/fans.d" -MT"Src/fans.o" -o "Src/fans.o" "../Src/fans.c"
+Finished building: ../Src/fans.c
+ 
+Building file: ../Src/h_bridge.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/h_bridge.d" -MT"Src/h_bridge.o" -o "Src/h_bridge.o" "../Src/h_bridge.c"
+Finished building: ../Src/h_bridge.c
+ 
+Building file: ../Src/main.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/main.d" -MT"Src/main.o" -o "Src/main.o" "../Src/main.c"
+Finished building: ../Src/main.c
+ 
+Building file: ../Src/motion.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/motion.d" -MT"Src/motion.o" -o "Src/motion.o" "../Src/motion.c"
+Finished building: ../Src/motion.c
+ 
+Building file: ../Src/peak.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/peak.d" -MT"Src/peak.o" -o "Src/peak.o" "../Src/peak.c"
+Finished building: ../Src/peak.c
+ 
+Building file: ../Src/pootbus.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/pootbus.d" -MT"Src/pootbus.o" -o "Src/pootbus.o" "../Src/pootbus.c"
+Finished building: ../Src/pootbus.c
+ 
+Building file: ../Src/time.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/time.d" -MT"Src/time.o" -o "Src/time.o" "../Src/time.c"
+Finished building: ../Src/time.c
+ 
+Building file: ../Src/uart1.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/uart1.d" -MT"Src/uart1.o" -o "Src/uart1.o" "../Src/uart1.c"
+Finished building: ../Src/uart1.c
+ 
+Building file: ../Src/vregs.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/vregs.d" -MT"Src/vregs.o" -o "Src/vregs.o" "../Src/vregs.c"
+Finished building: ../Src/vregs.c
+ 
+Building file: ../Src/zebrobus.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/zebrobus.d" -MT"Src/zebrobus.o" -o "Src/zebrobus.o" "../Src/zebrobus.c"
+Finished building: ../Src/zebrobus.c
+ 
+Building target: poot.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -specs=nosys.specs -specs=nano.specs -T"../STM32F030R8Tx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -lm -o "poot.elf" @"objects.list"  
+Finished building target: poot.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "poot.elf" "poot.bin"
+arm-none-eabi-size "poot.elf"
+   text	   data	    bss	    dec	    hex	filename
+  16020	     16	   3544	  19580	   4c7c	poot.elf
+ 

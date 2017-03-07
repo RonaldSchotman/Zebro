@@ -25,8 +25,9 @@
 #define MOTION_MODE_IDLE 0
 #define MOTION_MODE_CALIBRATE 1
 #define MOTION_MODE_CONTINUOUS_ROTATION 2
-#define MOTION_MODE_WALK 3
-#define MOTION_MODE_STAND_UP 4
+#define MOTION_MODE_STAND_UP 3
+#define MOTION_MODE_WALK_FORWARD 4
+
 //#define MOTION_DEBUG_COMMAND 5
 #define MOTION_DIRECTION_FORWARD 0
 #define MOTION_DIRECTION_BACKWARD 1
@@ -51,9 +52,11 @@
 
 struct motion_state{
 	uint8_t mode;
-	uint8_t speed; /* will become lift off time */
-	uint8_t phase; /* will become touch down time */
-	uint8_t extra; /* will become direction of turning legs. 0 for forward and 1 for backward. */
+	uint8_t lift_off_time_a;
+	uint8_t lift_off_time_b;
+	uint8_t touch_down_time_a;
+	uint8_t touch_down_time_b;
+	uint8_t new_data_flag;
 	uint8_t crc;
 };
 
@@ -66,8 +69,8 @@ uint8_t motion_move_to_point(uint16_t point, uint8_t dir, uint32_t arrival_time)
 uint32_t get_std_var (void);
 uint16_t std_var_stable(uint16_t *a, uint16_t n);
 uint32_t isqrt(uint32_t x);
-void motion_set_state(uint8_t mode, int8_t speed, uint8_t phase,
-		uint8_t extra, uint8_t crc);
+void motion_set_state(uint8_t mode, uint8_t lift_off_time_a, uint8_t lift_off_time_b, uint8_t touch_down_time_a,
+		uint8_t touch_down_time_b, uint8_t new_data_flag, uint8_t crc);
 int32_t motion_stop(void);
 uint8_t get_calibrate(void);
 void set_calibrate(uint8_t value);

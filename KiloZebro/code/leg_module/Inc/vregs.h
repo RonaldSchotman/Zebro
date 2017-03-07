@@ -67,16 +67,12 @@
 #define VREGS_EMERGENCY_STOP 22
 
 #ifdef DEBUG_VREGS
-//#define VREGS_ZEBROBUS_PACKET_DATA0 32
-//#define VREGS_ZEBROBUS_PACKET_DATA1 33
-//#define VREGS_ZEBROBUS_PACKET_DATA2 34
-//#define VREGS_ZEBROBUS_PACKET_DATA3 35
-//#define VREGS_ZEBROBUS_PACKET_DATA4 36
-//#define VREGS_ZEBROBUS_PACKET_UPDATE 37
-#define VREGS_MOTION_MODE 32
-#define VREGS_MOTION_SPEED 33
-#define VREGS_MOTION_PHASE 34
-#define VREGS_MOTION_EXTRA 35
+#define VREGS_MOTION_MODE 30
+#define VREGS_MOTION_LIFT_OFF_TIME_A 31
+#define VREGS_MOTION_LIFT_OFF_TIME_B 32
+#define VREGS_MOTION_TOUCH_DOWN_TIME_A 33
+#define VREGS_MOTION_TOUCH_DOWN_TIME_B 34
+#define VREGS_MOTION_NEW_DATA_FLAG 35
 #define VREGS_MOTION_CRC 36
 #define VREGS_MOTION_UPDATE 37
 
@@ -109,16 +105,16 @@
 #define VREGS_ADC_DATA6A 77
 #define VREGS_ADC_DATA6B 78
 #endif
+
 #define VREGS_ADC_INTERNAL_TEMP_A 79
 #define VREGS_ADC_INTERNAL_TEMP_B 80
 #define VREGS_MOTOR_CURRENT 85
-
 #define VREGS_RCC_CSR31_24 90
 #define VREGS_RCC_CSR23_16 91
 #define VREGS_TEST_FIELD 92
-
 #define VREGS_POOTBUS_TEMP111 100
 #define VREGS_POOTBUS_TEMP100 101
+
 #ifdef DEBUG_VREGS
 #define VREGS_POOTBUS_STATE 102
 #define VREGS_POOTBUS_BUSY	103
@@ -157,15 +153,14 @@
 #define VREGS_PEAK_1_ADC_AVERAGE 130 //[Debug] Average of adc-samples hall sensor 1
 #define VREGS_PEAK_2_ADC_AVERAGE 131 //[Debug] Average of adc-samples hall sensor 2
 #define VREGS_PEAK_3_ADC_AVERAGE 132 //[Debug] Average of adc-samples hall sensor 3
-#define VREGS_PEAK_1_ADC_SD 133 //[Debug] standard deviation of adc-samples sensor 1
-#define VREGS_PEAK_2_ADC_SD 134 //[Debug] standard deviation of adc-samples sensor 2
-#define VREGS_PEAK_3_ADC_SD 135 //[Debug] standard deviation of adc-samples sensor 3
+//#define VREGS_PEAK_1_ADC_SD 133 //[Debug] standard deviation of adc-samples sensor 1
+//#define VREGS_PEAK_2_ADC_SD 134 //[Debug] standard deviation of adc-samples sensor 2
+//#define VREGS_PEAK_3_ADC_SD 135 //[Debug] standard deviation of adc-samples sensor 3
 #define VREGS_PEAK_1_DETECTED 136 //[Debug] Variable showing if currently a peak is being detected or not at sensor 1
 #define VREGS_PEAK_2_DETECTED 137 //[Debug] Variable showing if currently a peak is being detected or not at sensor 2
 #define VREGS_PEAK_3_DETECTED 138 //[Debug] Variable showing if currently a peak is being detected or not at sensor 3
 #define VREGS_PEAK_MAX_AVG_DELTA 139 // [Debug] maximum value of average between two successive hall-sensor samples.
 #define VREGS_PEAK_AVG_DELTA 140 // [Debug] maximum value between two successive hall-sensor samples.
-#endif
 //#define VREGS_PEAK_1_HISTORY_1 141
 //#define VREGS_PEAK_1_HISTORY_2 142
 //#define VREGS_PEAK_1_HISTORY_3 143
@@ -196,7 +191,7 @@
 //#define VREGS_SEQUENCER_STATE 180
 //#define VREGS_SEQUENCER_MOVEMENT_STATE 181
 //#define VREGS_SEQUENCER_START_DELAY 182
-
+#endif
 /* END FIELD NAME DEFINITIONS */
 /* Important: do not remove the line above, it is used by the debug tools */
 

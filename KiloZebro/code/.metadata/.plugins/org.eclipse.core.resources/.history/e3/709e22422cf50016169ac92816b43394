@@ -1,0 +1,117 @@
+/*
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: encoder.c
+ *
+ * Description:
+ * Code to read the rotational encoder
+ *
+ * Authors:
+ * Daniel Booms -- d.booms@solcon.nl
+ */
+
+#include "stm32f0xx_hal.h"
+#include "stdlib.h"
+#include "stdint.h"
+
+#include "encoder.h"
+#include "vregs.h"
+#include "errors.h"
+
+/**
+ * Initialises the rotational encoder
+ * Configures timer 3 as counter for the rotational encoder
+ *
+ * The output can directly be interpreted as a position
+ *
+ */
+void encoder_init(void) {
+	TIM_Encoder_InitTypeDef encoder;
+	TIM_HandleTypeDef timer;
+
+	timer.Instance = TIM3;
+	timer.Init.Period = ENCODER_PULSES_PER_ROTATION;
+	timer.Init.CounterMode = TIM_COUNTERMODE_UP; // Counter increments and decrements according to DIR bit.
+	timer.Init.Prescaler = 1;
+	timer.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+
+//	encoder.EncoderMode = TIM_ENCODERMODE_TI12;
+	encoder.EncoderMode = TIM_ENCODERMODE_TI1;
+//	encoder.IC1Filter = 0x0; // No difference between 0x0 and 0xF
+	encoder.IC1Polarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
+//	encoder.IC1Polarity = TIM_INPUTCHANNELPOLARITY_RISING;
+	encoder.IC1Prescaler = TIM_ICPSC_DIV1;
+	encoder.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+//	encoder.IC2Filter = 0x0; // No difference between 0x0 and 0xF
+//	encoder.IC2Polarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
+//	encoder.IC2Polarity = TIM_INPUTCHANNELPOLARITY_RISING;
+//	encoder.IC2Prescaler = TIM_ICPSC_DIV1;
+//	encoder.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+
+	if (HAL_TIM_Encoder_Init(&timer, &encoder) != HAL_OK) {
+		vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) (1));
+	}
+
+	if (HAL_TIM_Encoder_Start(&timer, TIM_CHANNEL_ALL) != HAL_OK) {
+		vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) (1));
+	}
+    TIM3->EGR = 1;           // Generate an update event
+    TIM3->CR1 = TIM_CR1_CEN;           // Enable the counter
+}
+
+void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	if (htim->Instance == TIM3) {
+
+		__HAL_RCC_TIM3_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+		__HAL_RCC_GPIOC_CLK_ENABLE();
+
+		/* set the GPIO pins */
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL; //Lines are already tied to 3v3.
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+		GPIO_InitStruct.Pin = ENCODER_SIG_A_PIN;
+		GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
+		HAL_GPIO_Init(ENCODER_SIG_A_BANK, &GPIO_InitStruct);
+
+		GPIO_InitStruct.Pin = ENCODER_SIG_B_PIN;
+		GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
+		HAL_GPIO_Init(ENCODER_SIG_B_BANK, &GPIO_InitStruct);
+	}
+}
+
+/**
+ * Stores 16 bits of the position value in the vregs
+ */
+void encoder_write_to_vregs(void) {
+	uint16_t counter_value; // Counter value is max 16 bits according to datasheet. Tested and it's true.
+	counter_value = TIM3->CNT;
+	vregs_write(VREGS_ENCODER_POSITION_A, (uint8_t) (counter_value));
+	vregs_write(VREGS_ENCODER_POSITION_B, (uint8_t) (counter_value >> 8));
+	uint16_t dir = TIM3->CR1;
+	vregs_write(VREGS_ENCODER_DIR, (uint8_t)((dir>>4)&0x0001)); // 1 = counterclockwise/count down, 0 = clockwise/count upwards looking at the front of the motor.
+}
+
+/**
+ * Returns the value of the encoder counter
+ */
+uint16_t encoder_get_position(void) {
+	uint16_t counter_value;
+
+	counter_value = TIM3->CNT;
+	return (counter_value);
+}
+
+/**
+ * Sets the position counter back to 0x0000
+ */
+void encoder_reset_position(void) {
+	/* One must not write to the higher half of the register because this is not used. */
+	TIM3->CNT &= 0xFFFF0000;
+}

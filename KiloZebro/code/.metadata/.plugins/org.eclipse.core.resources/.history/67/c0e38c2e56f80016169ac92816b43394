@@ -1,0 +1,195 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: vregs.h
+ *
+ * Description:
+ * Implementation of the virtual registers used for communication
+ * using ZebroBus (I2C1) and UART1
+ *
+ * !! IMPORTANT !!
+ * In order for the host debug tools to work, it is important that
+ * the structure of this file remains the same! Be careful when making
+ * changes.
+ *
+ * The debug tool reads out the values between the BEGIN FIELD NAME DEFINITIONS
+ * and END FIELD NAME DEFININTIONS statements. Leave these lines intact!
+ * It than generates labels for the registers by remove the '#define VREGS_'
+ * that every label has. Thus, in order for proper labels to be generated, you
+ * should start all vregs name definitions with 'VREGS_' and put them between
+ * the BEGIN and END statements.
+ *
+ * Authors:
+ * Piet De Vaere -- Piet@DeVae.re
+ * Daniel Booms -- d.booms@solcon.nl
+ */
+
+
+#ifndef __VREGS_H__
+#define __VREGS_H__
+
+#include "stdint.h"
+
+#define VREGS_NUM_OF_BUFFERS 2
+#define VREGS_FILE_SIZE 256
+#define VREGS_FILE_APPEND_SIZE 5
+#define VREGS_FILE_TOTAL_SIZE (VREGS_FILE_APPEND_SIZE + VREGS_FILE_SIZE)
+#define VREGS_SYNC_0 0xFF
+#define VREGS_SYNC_1 0x45
+#define VREGS_SYNC_2 0x12
+#define VREGS_SYNC_3 0xEA
+#define VREGS_SYNC_4 0x4B
+
+/* Important: do not remove the line below, it is used by the debug tools */
+/* BEGIN FIELD NAME DEFINITIONS */
+#define VREGS_ZEBROBUS_VERSION 0
+#define VREGS_PRODUCT_ID 1
+#define VREGS_PRODUCT_VERSION 2
+#define VREGS_SERIAL_ID 3
+#define VREGS_SOFTWARE_VERSION 4
+#define VREGS_ZEBROBUS_ADDRESS 5
+
+#define VREGS_QUICK_STATUS 17
+#define VREGS_SYNC_COUNTER 18
+#define VREGS_LOOP_COUNTER 19
+#define VREGS_ERROR_COUNTER 20
+#define VREGS_LAST_ERROR 21
+#define VREGS_EMERGENCY_STOP 22
+
+#define VREGS_MOTION_MODE 32
+#define VREGS_MOTION_SPEED 33
+#define VREGS_MOTION_PHASE 34
+#define VREGS_MOTION_EXTRA 35
+#define VREGS_MOTION_CRC 36
+#define VREGS_MOTION_UPDATE 37
+#define VREGS_MOTOR_VOLTAGE 38
+
+#define VREGS_ADC_DATA0A 65
+#define VREGS_ADC_DATA0B 66
+#define VREGS_ADC_DATA1A 67
+#define VREGS_ADC_DATA1B 68
+#define VREGS_ADC_DATA2A 69
+#define VREGS_ADC_DATA2B 70
+#define VREGS_ADC_DATA3A 71
+#define VREGS_ADC_DATA3B 72
+#define VREGS_ADC_DATA4A 73
+#define VREGS_ADC_DATA4B 74
+#define VREGS_ADC_DATA5A 75
+#define VREGS_ADC_DATA5B 76
+#define VREGS_ADC_DATA6A 77
+#define VREGS_ADC_DATA6B 78
+#define VREGS_ADC_INTERNAL_TEMP 79
+#define VREGS_MOTOR_CURRENT 80
+
+#define VREGS_CLOCK_A 81
+#define VREGS_CLOCK_B 82
+
+#define VREGS_H_BRIDGE_MODE 83
+#define VREGS_H_BRIDGE_DUTY 84
+#define VREGS_FAN_1_SPEED 85
+#define VREGS_FAN_2_SPEED 86
+
+#define VREGS_DEBUG_FLAG_1 87 //calibrated
+#define VREGS_DEBUG_FLAG_2 88 //calibration_peak_detected
+#define VREGS_DEBUG_FLAG_3 89 //peak_sensor
+#define VREGS_DEBUG_FLAG_4 90 //peak_median sensor 1
+#define VREGS_DEBUG_FLAG_5 91 //peak_median sensor 2
+#define VREGS_DEBUG_FLAG_6 92 //peak_median sensor 3
+#define VREGS_DEBUG_FLAG_7 93
+
+#define VREGS_RCC_CSR31_24 94
+#define VREGS_RCC_CSR23_16 95
+#define VREGS_TEST_FIELD 96
+
+#define VREGS_POOTBUS_TEMP111 97
+#define VREGS_POOTBUS_TEMP100 98
+#define VREGS_POOTBUS_STATE 99
+#define VREGS_POOTBUS_BUSY	100
+
+#define VREGS_ENCODER_POSITION_A 120
+#define VREGS_ENCODER_POSITION_B 121
+#define VREGS_ENCODER_DIR		 122
+
+#define VREGS_POSITION 130
+#define VREGS_MOTION_ANGLE_ERROR 131
+#define VREGS_MOTION_FLAG 132
+#define VREGS_MOTION_VIRTUAL_ANGLE 133
+
+#define VREGS_LAST_PEAK_SENSOR 135
+#define VREGS_LAST_PEAK_POLARITY 136
+#define VREGS_PEAK_DETECT_STATE 137
+#define VREGS_PEAK_DETECT_CNT 150
+#define VREGS_PEAK_DETECT_POS_CNT 151
+#define VREGS_PEAK_DEBUG_CNT 150
+#define VREGS_PEAK_POS_DEBUG_CNT 151
+
+#define VREGS_PEAK_1_STATE 152
+#define VREGS_PEAK_2_STATE 153
+#define VREGS_PEAK_3_STATE 154
+
+#define VREGS_PEAK_1_ADC_DATA 155
+#define VREGS_PEAK_2_ADC_DATA 156
+#define VREGS_PEAK_3_ADC_DATA 157
+
+#define VREGS_PEAK_1_MIN_MAX 158
+#define VREGS_PEAK_2_MIN_MAX 159
+#define VREGS_PEAK_3_MIN_MAX 160
+
+#define VREGS_PEAK_1_EQUILIBRIUM 161
+#define VREGS_PEAK_2_EQUILIBRIUM 162
+#define VREGS_PEAK_3_EQUILIBRIUM 163
+
+#define VREGS_PEAK_1_HISTORY_1 164
+#define VREGS_PEAK_1_HISTORY_2 165
+#define VREGS_PEAK_1_HISTORY_3 166
+#define VREGS_PEAK_1_HISTORY_4 167
+
+#define VREGS_POSITION_POSITION 168
+#define VREGS_POSITION_DIRECTION 169
+#define VREGS_ADDRESS_SIDE 170
+
+#define VREGS_WALK_REQ_MOTOR_SPEED 171
+#define VREGS_WALK_COR_MOTOR_SPEED 172
+#define VREGS_WALK_SPEED_COR 173
+#define VREGS_WALK_CUR_SEGMENT 174
+#define VREGS_WALK_TAR_SEGMENT 175
+#define VREGS_WALK_NEXT_SEGMENT 176
+#define VREGS_WALK_SEGMENTS_DELTA 177
+#define VREGS_WALK_LAST_SEGMENT 178
+#define VREGS_WALK_LAG 179
+#define VREGS_WALK_SPEED_COR_MOM 180
+#define VREGS_WALK_EXP_TIME_DELTA_A 181
+#define VREGS_WALK_EXP_TIME_DELTA_B 182
+
+
+#define VREGS_SEQUENCER_STATE 183
+#define VREGS_SEQUENCER_MOVEMENT_STATE 184
+#define VREGS_WALK_UPDATE_COUNTER 185
+#define VREGS_WALK_ARRIVAL_COUNTER 186
+
+#define VREGS_PEAK_FILTERED_DATA_0 187
+#define VREGS_PEAK_FILTERED_DATA_1 188
+#define VREGS_PEAK_FILTERED_DATA_2 189
+
+#define VREGS_SEQUENCER_START_DELAY 190
+
+
+
+
+
+
+/* END FIELD NAME DEFINITIONS */
+/* Important: do not remove the line above, it is used by the debug tools */
+
+void vregs_init();
+int32_t vregs_write(uint32_t address, uint8_t data);
+uint8_t vregs_read(uint32_t address);
+uint8_t vregs_read_buffer(uint32_t address);
+int32_t vregs_writeout();
+uint8_t *vregs_get_buffer_address();
+
+
+#endif /* __VREGS_H__ */

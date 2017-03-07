@@ -32,8 +32,8 @@
 #include "peak.h"
 #include "adc.h"
 
-static struct motion_state state = { 0, 0, 0, 0, 0 };
-static struct motion_state new_state = { 0, 0, 0, 0, 0 };
+static struct motion_state state = { 0, 0, 0, 0, 0, 0, 0 };
+static struct motion_state new_state = { 0, 0, 0, 0, 0, 0, 0 };
 uint32_t std_var; /* standard deviation of the hall-sensor with a peak at hall-sensor 3. */
 uint16_t position_touch_down = 0;
 uint8_t calibrate = 1; /* When Zebro is turned on, calibrate should first be on. */
@@ -54,19 +54,24 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
 		new_state.mode = data;
 		break;
 
-		/* set speed */
-	case VREGS_MOTION_SPEED:
-		new_state.speed = data;
+	case VREGS_MOTION_LIFT_OFF_TIME_A:
+		new_state.lift_off_time_a = data;
 		break;
 
-		/* set phase */
-	case VREGS_MOTION_PHASE:
-		new_state.phase = data;
+	case VREGS_MOTION_LIFT_OFF_TIME_B:
+		new_state.lift_off_time_b = data;
 		break;
 
-		/* set extra */
-	case VREGS_MOTION_EXTRA:
-		new_state.extra = data;
+	case VREGS_MOTION_TOUCH_DOWN_TIME_A:
+		new_state.touch_down_time_a = data;
+		break;
+
+	case VREGS_MOTION_TOUCH_DOWN_TIME_B:
+		new_state.touch_down_time_b = data;
+		break;
+
+	case VREGS_MOTION_NEW_DATA_FLAG:
+		new_state.new_data_flag = data;
 		break;
 
 		/* set crc */
@@ -83,9 +88,11 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
 			motion_write_state_to_vregs(state);
 		}
 		new_state.mode = 0;
-		new_state.speed = 0;
-		new_state.phase = 0;
-		new_state.extra = 0;
+		new_state.lift_off_time_a = 0;
+		new_state.lift_off_time_b = 0;
+		new_state.touch_down_time_a = 0;
+		new_state.touch_down_time_b = 0;
+		new_state.new_data_flag = 0;
 		new_state.crc = 0;
 		break;
 
@@ -101,11 +108,13 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
  */
 int32_t motion_write_state_to_vregs(struct motion_state motion_state) {
 	vregs_write(VREGS_MOTION_MODE, motion_state.mode);
-	vregs_write(VREGS_MOTION_SPEED, (uint8_t) (motion_state.speed));
-	vregs_write(VREGS_MOTION_PHASE, motion_state.phase);
-	vregs_write(VREGS_MOTION_EXTRA, motion_state.extra);
+	vregs_write(VREGS_MOTION_LIFT_OFF_TIME_A,
+			(uint8_t) (motion_state.lift_off_time_a));
+	vregs_write(VREGS_MOTION_LIFT_OFF_TIME_B, motion_state.lift_off_time_b);
+	vregs_write(VREGS_MOTION_TOUCH_DOWN_TIME_A, motion_state.touch_down_time_a);
+	vregs_write(VREGS_MOTION_TOUCH_DOWN_TIME_B, motion_state.touch_down_time_b);
+	vregs_write(VREGS_MOTION_NEW_DATA_FLAG, motion_state.new_data_flag);
 	vregs_write(VREGS_MOTION_CRC, motion_state.crc);
-
 	return 0;
 }
 
@@ -142,7 +151,7 @@ int32_t motion_drive_h_bridge() {
 	static uint32_t stand_up_time = 0;
 	static uint32_t touch_down_time = 0;
 	static uint32_t lift_off_time = 0;
-	static uint8_t direction = 0;
+	static uint8_t position_reached = 0;
 
 	vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) fsm_flag);
 
@@ -218,6 +227,7 @@ int32_t motion_drive_h_bridge() {
 		if (fsm_flag == 4) {
 			h_bridge_drive_motor(25, !address_get_side(),
 			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+//			vregs_write((VREGS_PEAK_3_DETECTED), get_peak_detected(2));
 			if (get_peak_detected(2) == 1) {
 				h_bridge_disable();
 				encoder_reset_position();
@@ -244,27 +254,39 @@ int32_t motion_drive_h_bridge() {
 		H_BRIDGE_MODE_SIGN_MAGNITUDE);
 		break;
 
-	case MOTION_MODE_WALK:
-		// if motion_move_to_point = 1, pak dan het volgende punt. Als geen volgende punt, neem dan the stand-position. Als je daarvoor achteruit moet draaien, dan moet dat.
-		direction = state.extra;
-		lift_off_time = state.speed * 1000;
-		touch_down_time = state.phase * 1000;
+		/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
+	case MOTION_MODE_WALK_FORWARD:
+		lift_off_time = (state.lift_off_time_a * 4)
+				+ (state.lift_off_time_b * 1000);
+		touch_down_time = (state.touch_down_time_a * 4)
+				+ (state.touch_down_time_b * 1000);
 
 		if (fsm_flag == 0) {
 			fsm_flag = 8;
 		}
 
 		if (fsm_flag == 8) {
-			fsm_flag = fsm_flag
-					+ motion_move_to_point(lift_off_position, direction,
-							lift_off_time);
+			position_reached = motion_move_to_point(lift_off_position,
+					MOTION_DIRECTION_FORWARD, lift_off_time);
+			if ((position_reached == 1)) {
+//				state.new_data_flag = 0;
+				position_reached = 0;
+				fsm_flag = fsm_flag + 1;
+			}
 		}
 		if (fsm_flag == 9) {
-			fsm_flag = fsm_flag
-					+ motion_move_to_point(touch_down_position, direction,
-							touch_down_time);
+			position_reached = motion_move_to_point(touch_down_position,
+					MOTION_DIRECTION_FORWARD, touch_down_time);
+			if ((position_reached == 1) && (state.new_data_flag == 1)) {
+				state.new_data_flag = 0;
+				position_reached = 0;
+				fsm_flag = fsm_flag + 1;
+			} else if ((position_reached == 1) && (state.new_data_flag == 0)) {
+				motion_stop(); /* now the fsm_flag is still 9 */
+			}
 		}
 		if (fsm_flag == 10) {
+			fsm_flag = 0;
 			motion_stop(); /* if we use this, we only get into this loop when there actually is data. But then the leg stays at the touch down position. */
 		}
 		break;
@@ -273,11 +295,11 @@ int32_t motion_drive_h_bridge() {
 		if (fsm_flag == 0) {
 			fsm_flag = 5;
 		}
-		stand_up_time = state.speed * 1000;
+		stand_up_time = (state.lift_off_time_a * 4)
+				+ (state.lift_off_time_b * 1000);
 		if (fsm_flag == 5) {
-			fsm_flag = fsm_flag
-					+ motion_move_to_point(stand_up_position,
-					MOTION_DIRECTION_FORWARD, stand_up_time);
+			fsm_flag = fsm_flag + motion_move_to_point(stand_up_position,
+			MOTION_DIRECTION_FORWARD, stand_up_time);
 		}
 		if (fsm_flag == 6) {
 			stand_up_time = 0;
@@ -313,6 +335,10 @@ int32_t motion_drive_h_bridge() {
 
 /* Function to move the leg to a certain position (touch down, stand, or lift) with a certain direction (forward or backward).
  * dir should be 0 for forward and 1 for backward. Arrival time should be in absolute milliseconds.
+ *
+ * For fluent movement: no h_bridge_disable() in this function
+ *
+ * Don't put motion_stop() in this function. Do this after using this function.
  *
  * Info:
  * Left leg : get_address_side = 0; walking forward = counterclockwise = h_bridge_drive(x, 0, x) : encoder_dir = 1 : encoder = counting down.
@@ -504,13 +530,16 @@ uint32_t isqrt(uint32_t x) {
 /**
  * This is hard set of the motion state
  */
-void motion_set_state(uint8_t mode, int8_t speed, uint8_t phase, uint8_t extra,
-		uint8_t crc) {
-	state.mode = mode;
-	state.speed = speed;
-	state.phase = phase;
-	state.extra = extra;
-	state.crc = crc;
+void motion_set_state(uint8_t mode, uint8_t lift_off_time_a,
+		uint8_t lift_off_time_b, uint8_t touch_down_time_a,
+		uint8_t touch_down_time_b, uint8_t new_data_flag, uint8_t crc) {
+	new_state.mode = mode;
+	new_state.lift_off_time_a = lift_off_time_a;
+	new_state.lift_off_time_b = lift_off_time_b;
+	new_state.touch_down_time_a = touch_down_time_a;
+	new_state.touch_down_time_b = touch_down_time_b;
+	new_state.new_data_flag = new_data_flag;
+	new_state.crc = crc;
 	motion_write_state_to_vregs(state);
 }
 
@@ -519,9 +548,11 @@ void motion_set_state(uint8_t mode, int8_t speed, uint8_t phase, uint8_t extra,
  */
 int32_t motion_stop(void) {
 	state.mode = 0;
-	state.speed = 0;
-	state.phase = 0;
-	state.extra = 0;
+	state.lift_off_time_a = 0;
+	state.lift_off_time_b = 0;
+	state.touch_down_time_a = 0;
+	state.touch_down_time_b = 0;
+	state.new_data_flag = 0;
 	state.crc = 0;
 	motion_write_state_to_vregs(state);
 

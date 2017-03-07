@@ -1,0 +1,504 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: motion.c
+ *
+ * Description:
+ * Motion controller. Keeps track of the current walking
+ * mode or assignment, and decides how to actuate the
+ * H-bridge.
+ * *
+ * Authors:
+ * Daniel Booms -- d.booms@solcon.nl
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+
+// Todo: implement signed speed field. Or maby we shouldn't.
+#include "stdint.h"
+#include "motion.h"
+#include "vregs.h"
+#include "h_bridge.h"
+#include "address.h"
+#include "time.h"
+#include "position.h"
+#include "sequencer.h"
+#include "walk.h"
+#include "step.h"
+#include "encoder.h"
+#include "peak.h"
+
+static struct motion_state state = { 0, 0, 0, 0, 0 };
+static struct motion_state new_state = { 0, 0, 0, 0, 0 };
+static struct motion_timestamped_angle last_known_angle = { 0, 0 };
+static int32_t dutycycle = MOTION_NEUTRAL_DUTYCYCLE;
+static int32_t angular_velocity = 0;
+static int8_t data_update_flag = 1;
+static int32_t time; /* The time what the function is called, kept constant during the function call*/
+static int8_t angle_error; /*The error that that should be controlled*/
+static int32_t new_dutycycle;
+static int32_t side_of_zebro;
+
+/**
+ * Process data send to any of the addresses in the motion control range.
+ */
+int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
+
+	switch (address) {
+
+	/* set mode */
+	case VREGS_MOTION_MODE:
+		new_state.mode = data;
+		break;
+
+		/* set speed */
+	case VREGS_MOTION_SPEED:
+		new_state.speed = data;
+		break;
+
+		/* set phase */
+	case VREGS_MOTION_PHASE:
+		new_state.phase = data;
+		break;
+
+		/* set extra */
+	case VREGS_MOTION_EXTRA:
+		new_state.extra = data;
+		break;
+
+		/* set crc */
+	case VREGS_MOTION_CRC:
+		new_state.crc = data;
+		break;
+
+		/* check if the new command is sane, and if it is, activate it.
+		 * Reset the 'new_state' struct in either case
+		 */
+	case VREGS_MOTION_UPDATE:
+		if (!motion_validate_state(new_state)) {
+			state = new_state;
+			motion_write_state_to_vregs(state);
+			data_update_flag = 1;
+		}
+
+		new_state.mode = 0;
+		new_state.speed = 0;
+		new_state.phase = 0;
+		new_state.extra = 0;
+		new_state.crc = 0;
+		break;
+
+	default:
+		break;
+
+	}
+	return 0;
+}
+
+/**
+ * Write the values of the given state to the vregs
+ */
+int32_t motion_write_state_to_vregs(struct motion_state motion_state) {
+	vregs_write(VREGS_MOTION_MODE, motion_state.mode);
+	vregs_write(VREGS_MOTION_SPEED, (uint8_t) (motion_state.speed));
+	vregs_write(VREGS_MOTION_PHASE, motion_state.phase);
+	vregs_write(VREGS_MOTION_EXTRA, motion_state.extra);
+	vregs_write(VREGS_MOTION_CRC, motion_state.crc);
+
+	return 0;
+}
+
+/**
+ * Stub for the state validator.
+ * return zero is state is OK.
+ */
+int32_t motion_validate_state(struct motion_state motion_state) {
+	return 0;
+}
+
+/**
+ * Look at the drive command, the position data, and the time.
+ * Use this data to choose how to actuate the h_bridge.
+ */
+int32_t motion_drive_h_bridge_simple() {
+	// todo: implement proper function here.
+
+	if (state.mode == 0) {
+		h_bridge_disable();
+		return 0;
+	}
+
+	vregs_write(VREGS_DEBUG_FLAG_6, state.speed);
+
+	int32_t dutycycle;
+
+	dutycycle = (((int32_t) state.speed) * 100) / 255;
+
+	vregs_write(VREGS_DEBUG_FLAG_5, (uint8_t) dutycycle);
+
+	h_bridge_lock_anti_phase(dutycycle);
+
+	return 0;
+}
+
+/**
+ * Look at the drive command, the position data, and the time.
+ * Use this data to choose how to actuate the h_bridge.
+ */
+int32_t motion_drive_h_bridge() {
+	int32_t return_value = 0;
+//	int32_t current_time;
+	static uint8_t calibrated = 0;
+//	uint8_t peak_detection_hysteresis = 0;
+
+	time = motion_update_data(); /*check for new data on position and update time*/
+
+//	motion_set_state(MOTION_MODE_CALIBRATE, (uint8_t) 0, (uint8_t) 0,
+//			(uint8_t) 0, (uint8_t) 0); // Force leg to move.
+
+	side_of_zebro = address_get_side();
+//	vregs_write(VREGS_MOTION_FLAG, data_update_flag);
+
+	switch (state.mode) {
+
+	case MOTION_MODE_IDLE:
+		h_bridge_disable();
+		dutycycle = MOTION_NEUTRAL_DUTYCYCLE;
+		return 0;
+
+	case MOTION_MODE_CALIBRATE:
+		vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) (calibrated));
+//		if (!calibrated) {
+//			if (get_peak_detected(1) == 1 || get_peak_detected(1) == -1) {
+//				peak_detection_hysteresis++;
+//				if (peak_detection_hysteresis == 4) {
+//					h_bridge_disable();
+//					calibrated = 1;
+//				}
+//			} else {
+				h_bridge_drive_motor(50, address_get_side(),
+						H_BRIDGE_MODE_SIGN_MAGNITUDE);
+//			}
+//		}
+		return 1;
+
+	case MOTION_MODE_WALK_FORWARD:
+//        if (state.speed>0){
+//        	sequencer_forward(state.speed, state.phase, time, side_of_zebro, SEQUENCER_DIRECTION_FORWARD);
+//        }
+//        else {
+//        	h_bridge_disable();
+//        }
+		return 2;
+
+	case MOTION_MODE_WALK_REVERSE:
+//        if (state.speed>0){
+//        	sequencer_forward(state.speed, state.phase, time, side_of_zebro, SEQUENCER_DIRECTION_REVERSE);
+//        }
+//        else {
+//        	h_bridge_disable();
+//        }
+		return 3;
+
+	case MOTION_MODE_FIXED_POSITION_DUMB:
+//    	motion_go_to_position_dumb();
+		break;
+
+	case MOTION_DIRVE_H_BRIDGE_DIRECT:
+//    	h_bridge_drive_motor(state.speed, state.phase, state.extra);
+		break;
+
+	case MOTION_MODE_FIXED_POSITION:
+//    	if (state.extra){
+//    		current_time = time_get_time_ms();
+//    		//TODO #define the 500
+//    		walk_move_to_segment_start(state.phase, current_time + 500,
+//    				WALK_POSITIVE);
+//    		state.extra = 0;
+//    	}
+//    	else {
+//    		if(walk_move_to_segment_update()){
+//    			h_bridge_disable();
+//    			motion_stop();
+//    		}
+//    	}
+		break;
+
+	case MOTION_DEBUG_COMMAND:
+//    	if(state.extra){
+//    		step_rotate_three_start();
+//    		state.extra = 0;
+//    	}
+//    	else{
+//    		if (step_rotate_three_update()){
+//    			h_bridge_disable();
+//    			motion_stop();
+//    		}
+//    	}
+		break;
+
+	default:
+		h_bridge_disable();
+		dutycycle = MOTION_NEUTRAL_DUTYCYCLE;
+		return_value = 255;
+	}
+
+	motion_write_state_to_vregs(state);
+	return return_value;
+}
+/**
+ * Keeps track of where the motor should be.
+ * For now this makes the motor turn at a constant speed
+ */
+int32_t motion_virtual_angle(int32_t motion_mode, int32_t time) {
+	int32_t virtual_angle;
+	int32_t side;
+	side = address_get_side();
+	/*Check on what side of the Zebro the motor is.*/
+	if (side == ADDRESS_RIGHT) {
+		/* Implement kinmatic equation:
+		 * Thetha(t)=Omega*t+Thetha(0)*/
+		virtual_angle = ((state.speed * MOTION_SEGMENTS_PER_SECOND_PER_RPM)
+				* time / MOTION_MILLISECOND_PER_SECOND + state.phase)
+				% MOTION_SEGMENTS_PER_FULL_CIRCLE;
+		vregs_write(VREGS_MOTION_VIRTUAL_ANGLE, virtual_angle);
+		return (virtual_angle);
+	} else {
+		/* Implement kinmatic equation but motion is in reversed direction
+		 * Thetha(t)=Omega*t+Thetha(0)*/
+		virtual_angle = ((state.speed * -1 * MOTION_SEGMENTS_PER_SECOND_PER_RPM)
+				* time / MOTION_MILLISECOND_PER_SECOND
+				+ (MOTION_SEGMENTS_PER_FULL_CIRCLE - state.phase))
+				% MOTION_SEGMENTS_PER_FULL_CIRCLE;
+		return (virtual_angle);
+	}
+}
+
+/**
+ * This function estimates where the leg is now
+ * By again calculation the kinematic equations
+ */
+int32_t motion_estimated_currect_angle(int32_t time) {
+	int32_t diff_time;
+	diff_time = time - last_known_angle.timestamp;
+	/*Temporal wrap-around*/
+	if (time < last_known_angle.timestamp) {
+		diff_time += TIME_MAX_TIME_MS;
+	}
+	//return (last_known_angle.angle+((diff_time*angular_velocity)/MOTION_SECOND_PER_MILLISECOND))%MOTION_FULL_CIRCLE;
+	return (last_known_angle.angle);
+}
+/**
+ * Determine the error from the angle where we want to be.
+ * Positive angle implies the motor should run slower
+ * Negative angle implies the angle should run faster
+ * The leg is circular therefore:
+ *  both positive and negative angles exist, the smallest is chosen
+ *  the function has to deal with wrap-around
+ */
+int32_t motion_angle_error(int32_t time) {
+	int32_t virtual_angle, estimated_angle;
+	int32_t angle_error, angle_error_positive, angle_error_negative;
+
+	virtual_angle = motion_virtual_angle(state.mode, time);
+	estimated_angle = motion_estimated_currect_angle(time);
+
+	if (virtual_angle == estimated_angle) {
+		angle_error = 0;
+	} else if (virtual_angle < estimated_angle) {
+		angle_error_positive = estimated_angle - virtual_angle;
+		angle_error_negative = angle_error_positive
+				- MOTION_SEGMENTS_PER_FULL_CIRCLE;
+		if (angle_error_positive < MOTION_SEGMENTS_PER_HALF_CIRCLE) {
+			angle_error = angle_error_positive;
+		} else {
+			angle_error = angle_error_negative;
+		}
+	} else { /*virtual_angle>estimated_angle*/
+		angle_error_negative = estimated_angle - virtual_angle;
+		angle_error_positive = angle_error_negative
+				+ MOTION_SEGMENTS_PER_FULL_CIRCLE;
+		if (angle_error_positive < MOTION_SEGMENTS_PER_HALF_CIRCLE) {
+			angle_error = angle_error_positive;
+		} else {
+			angle_error = angle_error_negative;
+		}
+	}
+	return angle_error;
+}
+/**
+ * Updates the data on the motion using the new data of the position
+ * All actuation decisions are based on this
+ * Function should still be run if the motion state is idle
+ * Otherwise no data is available when the command to moves arrives
+ */
+int32_t motion_update_data(void) {
+	//TODO we should only do this in certain modes
+
+	uint8_t temp_angle;
+	uint8_t diff_angle;
+	int32_t temp_time;
+	int32_t diff_time;
+
+	temp_angle = position_get_current_index() * MOTION_SEGMENTS_PER_INDEX;
+	temp_time = time_get_time_ms();
+	if (temp_angle != last_known_angle.angle) {
+
+		diff_angle = temp_angle - last_known_angle.angle;
+		if (temp_angle < last_known_angle.angle) {
+			diff_angle += MOTION_SEGMENTS_PER_FULL_CIRCLE;
+		}
+		diff_time = temp_time - last_known_angle.timestamp;
+		if (temp_time < last_known_angle.timestamp) {
+			diff_time += TIME_MAX_TIME_MS;
+			/* Time wrap-around
+			 * The virtual fase calculation still needs to be correct
+			 * Therefore the phase state should be updated accordingly*/
+			state.phase = motion_virtual_angle(state.mode, TIME_MAX_TIME_MS);
+			motion_write_state_to_vregs(state);
+		}
+
+		angular_velocity = (diff_angle * MOTION_MILLISECOND_PER_SECOND)
+				/ diff_time;
+
+		/* Update the data*/
+		last_known_angle.angle = temp_angle;
+		last_known_angle.timestamp = temp_time;
+
+		data_update_flag = MOTION_FLAG_SET;
+
+	}
+	return temp_time;
+}
+/**
+ * This is hard set of the motion state
+ */
+void motion_set_state(uint8_t mode, int8_t speed, uint8_t phase, uint8_t extra,
+		uint8_t crc) {
+	state.mode = mode;
+	state.speed = speed;
+	state.phase = phase;
+	state.extra = extra;
+	state.crc = crc;
+	motion_write_state_to_vregs(state);
+}
+
+/**
+ * Clear the current motion command, and stop
+ */
+int32_t motion_stop(void) {
+	state.mode = 0;
+	state.speed = 0;
+	state.phase = 0;
+	state.extra = 0;
+	state.crc = 0;
+	motion_write_state_to_vregs(state);
+
+	return 0;
+}
+
+/**
+ * This is initialiser of the motion data
+ * This function should only be called when the position
+ * and the time are correctly initialised
+ * position and time data is needed.
+ */
+void motion_init(void) {
+	last_known_angle.timestamp = time_get_time_ms();
+	last_known_angle.angle =
+			position_get_current_index() * MOTION_SEGMENTS_PER_INDEX;
+}
+
+/**
+ * Go to the hall sensor that is closest to the given angle.
+ * Uses round down of the angle to find the hall sensor.
+ * Just rotates until the hall sensor is passed, then abruptly stops.
+ */
+int32_t motion_go_to_position_dumb(void) {
+	int32_t position_index;
+
+	position_index = state.phase / 10;
+	if (position_index >= POSITION_NUM_OF_POSITIONS)
+		return -1;
+	if (position_index < 0)
+		return -1;
+
+	vregs_write(VREGS_DEBUG_FLAG_1, position_index);
+
+	if (position_get_current_index() == position_index) {
+		h_bridge_disable();
+	}
+
+	else {
+		int32_t dutycycle;
+
+		dutycycle = (((int32_t) state.speed) * 100) / 255;
+
+		h_bridge_lock_anti_phase(dutycycle);
+	}
+
+	return 0;
+}
+
+void motion_turn(void) {
+	angle_error = motion_angle_error(time);
+	vregs_write(VREGS_MOTION_ANGLE_ERROR, angle_error);
+	/* If the the motor is within the controllable limit use a P-controller to control it*/
+	if (angle_error > -1 * MOTION_CONTROLLABLE_LIMIT
+			&& angle_error < MOTION_CONTROLLABLE_LIMIT) {
+		/* The motor is only controlled when a new reliable data point is known */
+		if (data_update_flag == MOTION_FLAG_SET) {
+			/* This is the implementation of the controller
+			 * For now this is a P controller */
+			new_dutycycle = MOTION_NEUTRAL_DUTYCYCLE
+					- (MOTION_CONTROLLER_P * angle_error >> 2);
+
+			/* Motor is not allowed to turn in the wrong direction*/
+			if (((side_of_zebro == ADDRESS_RIGHT) && (state.speed > 0)
+					&& (new_dutycycle < MOTION_NEUTRAL_DUTYCYCLE))
+					|| ((side_of_zebro == ADDRESS_RIGHT) && (state.speed < 0)
+							&& (new_dutycycle > MOTION_NEUTRAL_DUTYCYCLE))
+					|| ((side_of_zebro == ADDRESS_LEFT) && (state.speed < 0)
+							&& (new_dutycycle < MOTION_NEUTRAL_DUTYCYCLE))
+					|| ((side_of_zebro == ADDRESS_LEFT) && (state.speed > 0)
+							&& (new_dutycycle > MOTION_NEUTRAL_DUTYCYCLE))) {
+				new_dutycycle = MOTION_NEUTRAL_DUTYCYCLE;
+
+			}
+			/* Dutycycle has limits */
+			if (new_dutycycle < 2) {
+				new_dutycycle = 2;
+			}
+
+			else if (new_dutycycle > 98) {
+				new_dutycycle = 98;
+			}
+			/* For these dutycycles the motor has to little torque to move
+			 * therefore */
+			else if (new_dutycycle > 47 && new_dutycycle < 53) {
+				new_dutycycle = 50;
+			}
+
+			/* Update dutycycle and actuate the motor */
+			dutycycle = new_dutycycle;
+			h_bridge_lock_anti_phase(dutycycle);
+
+			/* When the motor is still waiting to get started in the right direction
+			 * the flag should not be cleared*/
+			if ((state.speed == 0)
+					|| (new_dutycycle != MOTION_NEUTRAL_DUTYCYCLE)) {
+				data_update_flag = MOTION_FLAG_CLEAR;
+			}
+
+		}
+	}
+	/* If the motor is outside the controllable limit it idles until it is*/
+	else {
+		h_bridge_lock_anti_phase(MOTION_NEUTRAL_DUTYCYCLE);
+		dutycycle = MOTION_NEUTRAL_DUTYCYCLE;
+		data_update_flag = MOTION_FLAG_SET;
+	}
+}
+

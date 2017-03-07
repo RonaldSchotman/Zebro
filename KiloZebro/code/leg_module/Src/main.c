@@ -66,7 +66,8 @@ int main(void) {
 	zebrobus_slave_init();
 	motion_init();
 
-	/* keep a loop counter */
+	/* keep a loop coun
+	 * ter */
 	uint8_t loop_counter = 0;
 	uint32_t start_time, stop_time = 0;
 
@@ -116,7 +117,7 @@ int main(void) {
 
 		/* Things in here for temporary debug */
 		time_check_time();
-		time_dumy_locmotive_controller();
+//		time_dumy_locmotive_controller();
 
 		/* Only process hall-sensor data when we are calibrating. After that it is just a waste of time. */
 		if (get_calibrate() == 1) {
