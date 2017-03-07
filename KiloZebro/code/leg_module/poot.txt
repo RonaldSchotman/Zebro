@@ -1,0 +1,100 @@
+Configuration	poot
+STM32CubeMX 	4.14.0
+Date	05/20/2016
+MCU	STM32F030R8Tx
+
+
+
+PERIPHERALS	MODES	FUNCTIONS	PINS
+ADC	IN4	ADC_IN4	PA4
+ADC	IN5	ADC_IN5	PA5
+ADC	IN10	ADC_IN10	PC0
+ADC	IN11	ADC_IN11	PC1
+ADC	IN12	ADC_IN12	PC2
+ADC	IN13	ADC_IN13	PC3
+ADC	IN14	ADC_IN14	PC4
+ADC	IN15	ADC_IN15	PC5
+I2C1	I2C	I2C1_SCL	PB8
+I2C1	I2C	I2C1_SDA	PB7
+I2C2	I2C	I2C2_SCL	PB10
+I2C2	I2C	I2C2_SDA	PB11
+RCC	Crystal/Ceramic Resonator	RCC_OSC_IN	PF0-OSC_IN
+RCC	Crystal/Ceramic Resonator	RCC_OSC_OUT	PF1-OSC_OUT
+SYS	Serial-WireDebug	SYS_SWCLK	PA14
+SYS	Serial-WireDebug	SYS_SWDIO	PA13
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+TIM1	Internal Clock	TIM1_VS_ClockSourceINT	VP_TIM1_VS_ClockSourceINT
+TIM1	PWM Generation CH1 CH1N	TIM1_CH1	PA8
+TIM1	PWM Generation CH1 CH1N	TIM1_CH1N	PA7
+TIM1	PWM Generation CH2 CH2N	TIM1_CH2	PA9
+TIM1	PWM Generation CH2 CH2N	TIM1_CH2N	PB0
+TIM3	Internal Clock	TIM3_VS_ClockSourceINT	VP_TIM3_VS_ClockSourceINT
+TIM3	Input Capture direct mode	TIM3_CH1	PA6
+TIM3	Input Capture direct mode	TIM3_CH2	PC7
+TIM15	Internal Clock	TIM15_VS_ClockSourceINT	VP_TIM15_VS_ClockSourceINT
+TIM15	PWM Generation CH1	TIM15_CH1	PA2
+TIM15	PWM Generation CH2	TIM15_CH2	PA3
+USART1	Asynchronous	USART1_RX	PA10
+USART1	Asynchronous	USART1_TX	PB6
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+5	PF0-OSC_IN	RCC_OSC_IN	
+6	PF1-OSC_OUT	RCC_OSC_OUT	
+8	PC0	ADC_IN10	hal_1 (ADC_IN10)
+9	PC1	ADC_IN11	hal_2 (ADC_IN11)
+10	PC2	ADC_IN12	hal_3 (ADC_IN12)
+11	PC3	ADC_IN13	id_resistor (ADC_IN13)
+14	PA0	GPIO_Output	leg_sense
+15	PA1	GPIO_Output	wheel_sense
+16	PA2	TIM15_CH1	fan_1_drive (TIM15_CH1)
+17	PA3	TIM15_CH2	fan_2_drive (TIM15_CH2)
+19	PF5	GPIO_Input	leg_actuate
+20	PA4	ADC_IN4	v_motor_l (ADC_IN4)
+21	PA5	ADC_IN5	v_motor_r (ADC_IN5)
+22	PA6	TIM3_CH1	relative_encoder_A (TIM3_CH1)
+23	PA7	TIM1_CH1N	h_bridge_ll (TIM1_CH1N)
+24	PC4	ADC_IN14	v_batt (ADC_IN14)
+25	PC5	ADC_IN15	motor_current (ADC_IN15)
+26	PB0	TIM1_CH2N	h_bridge_rl (TIM1_CH2N)
+27	PB1	GPIO_Input	motor_current_fault
+29	PB10	I2C2_SCL	internal_SCL (I2C2_SCL)
+30	PB11	I2C2_SDA	internal_SDA (I2C2_SDA)
+38	PC7	TIM3_CH2	relative_encoder_B (TIM3_CH2)
+41	PA8	TIM1_CH1	h_brdige_lh (TIM1_CH1) 
+42	PA9	TIM1_CH2	h_bridge_rh (TIM1_CH2)
+43	PA10	USART1_RX	
+46	PA13	SYS_SWDIO	
+49	PA14	SYS_SWCLK	
+58	PB6	USART1_TX	
+59	PB7	I2C1_SDA	zebrobus_SDA (I2C1_SDA)
+61	PB8	I2C1_SCL	zebrobus_SCL (I2C1_SCL)
+
+
+
+SOFTWARE PROJECT
+
+Project Settings : 
+Project Name : poot
+Project Folder : /tmp/poot
+Toolchain / IDE : SW4STM32
+Firmware Package Name and Version : STM32Cube FW_F0 V1.5.0
+
+
+Code Generation Settings : 
+STM32Cube Firmware Library Package : Copy only the necessary library files
+Generate peripheral initialization as a pair of '.c/.h' files per IP : No
+Backup previously generated files when re-generating : No
+Delete previously generated files when not re-generated : Yes
+Set all free pins as analog (to optimize the power consumption) : No
+
+
+Toolchains Settings : 
+Compiler Optimizations : Balanced Size/Speed
+
+
+
+
+
+
