@@ -149,8 +149,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         areaArray = []
         
         for i, c in enumerate(contours2):
-            area = cv2.contourArea(c)
-            areaArray.append(area)
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.01 * peri, True)
+            if len(approx) >= 2 and len(approx) <= 7:
+                area = cv2.contourArea(c)
+                areaArray.append(area)
         sorteddata = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
 
         try:
@@ -177,7 +180,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 # From here on out it is determing angle and with that direction
 
     # Pre found images for now for testing
-    QR_image = cv2.imread("Pico/QR_CODE.jpg", 1)
+    QR_image = cv2.imread("Pico/QR_CODE1.jpg", 1)
 
     # Making light levels less invluential
     # It takes the RGB it sees and adapts the light level of it
@@ -212,7 +215,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     mask_QR_black = cv2.dilate(mask_QR_black, kernel_dilate, iterations=1)
 
 #debugging
-    cv2.imshow("mask_QR_black",mask_QR_black)
+    #cv2.imshow("mask_QR_black",mask_QR_black)
     # Detecting White in QR code
     for(lower,upper) in white:
             lower = np.array(lower,dtype=np.uint8)
@@ -223,13 +226,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     mask_QR_white = cv2.dilate(mask_QR_white, kernel_dilate, iterations=1)
 
     #debugging
-    cv2.imshow("mask_QR_white",mask_QR_white)
-    cv2.imwrite("Pico/White_MASK.jpg", mask_QR_white)
+    #cv2.imshow("mask_QR_white",mask_QR_white)
+    #cv2.imwrite("Pico/White_MASK.jpg", mask_QR_white)
 
     #Add White and black mask together
     accumMask = cv2.addWeighted(mask_QR_white,1,mask_QR_black,1,0)
 #debugging
-    cv2.imshow("accumMask",accumMask)
+    #cv2.imshow("accumMask",accumMask)
     #accumMask = cv2.bitwise_not(accumMask)
     
     #Finding largest contour in black and white image     
@@ -237,7 +240,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     mask_QR = cv2.dilate(mask_QR, None, iterations=2)
     mask_QR_closing = cv2.morphologyEx(mask_QR, cv2.MORPH_CLOSE, None)
 
-    cv2.imshow("mask_QR_closing",mask_QR_closing)
+    #cv2.imshow("mask_QR_closing",mask_QR_closing)
 
     # Finds contours
     im2, cnts, hierarchy = cv2.findContours(mask_QR_closing.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -273,8 +276,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         box_new = cv2.boxPoints(rect_new)
         box_new = np.int0(cv2.boxPoints(rect_new))
         
-        P_W_Pixel = int(P_W*0.15)
-        P_H_Pixel = int(P_H*0.15)
+        P_W_Pixel = int(P_W*0.20)
+        P_H_Pixel = int(P_H*0.20)
         
         Pixel0 = (box_new[0,0],box_new[0,1])
         Pixel1 = (box_new[1,0],box_new[1,1])
@@ -355,34 +358,34 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
         if white_pixel0 > white_pixel1 and white_pixel0 > white_pixel2 and white_pixel0 > white_pixel3:
             degree = abs(rect[2])
-            print("PIXEL 000000")
-            print (degree)
+            #print("PIXEL 0")
+            #print (degree)
         if white_pixel1 > white_pixel0 and white_pixel1 > white_pixel2 and white_pixel1 > white_pixel3:
             degree = 270 + abs(rect[2])
-            print("PIXEL 1111111")
-            print (degree)
+            #print("PIXEL 1")
+            #print (degree)
         if white_pixel2 > white_pixel0 and white_pixel2 > white_pixel1 and white_pixel2 > white_pixel3:
             degree = 180 + abs(rect[2])
-            print("PIXEL 22222222")
-            print (degree)
+            #print("PIXEL 2")
+            #print (degree)
         if white_pixel3 > white_pixel0 and white_pixel3 > white_pixel1 and white_pixel3 > white_pixel2:
             degree = 90 + abs(rect[2])
-            print("PIXEL 33333333")
-            print (degree)
+            #print("PIXEL 3")
+            #print (degree)
         
         if Do_once ==1:
             print(abs(rect[2]))
             print("Found White on pixel 0")
-            white_pixel0 = cv2.countNonZero(white_pixel0)
+            #white_pixel0 = cv2.countNonZero(white_pixel0)
             print(white_pixel0)
             print("Found White on pixel 1")
-            white_pixel1 = cv2.countNonZero(white_pixel1)
+            #white_pixel1 = cv2.countNonZero(white_pixel1)
             print(white_pixel1)
             print("Found White on pixel 2")
-            white_pixel2 = cv2.countNonZero(white_pixel2)
+            #white_pixel2 = cv2.countNonZero(white_pixel2)
             print(white_pixel2)
             print("Found White on pixel 3")
-            white_pixel3 = cv2.countNonZero(white_pixel3)
+            #white_pixel3 = cv2.countNonZero(white_pixel3)
             print(white_pixel3)
 
             if white_pixel0 > white_pixel1 and white_pixel0 > white_pixel2 and white_pixel0 > white_pixel3:
@@ -422,7 +425,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print(IndexError)
         pass
     
-#    cv2.imshow('sdsdsdasada', thresh1)
+# debugging
     cv2.imshow('outout QR code', QR_image)
 
 #Show current vieuw of camera
