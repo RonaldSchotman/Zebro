@@ -1,3 +1,42 @@
+"""
+    # computes the bounding box for the contour, and draws it on the frame,
+    for cnts, hier in zip(cnts, hierarchy):
+        (x,y,w,h) = cv2.boundingRect(cnts)
+        min_x, max_x = min(x, min_x), max(x+w, max_x)
+        min_y, max_y = min(y, min_y), max(y+h, max_y)
+        if w > 5 and h > 5:
+            cv2.rectangle(Orientation_image, (x,y), (x+w,y+h), (255, 0, 0), 2)
+
+    if max_x - min_x > 0 and max_y - min_y > 0:
+        cv2.rectangle(Orientation_image, (min_x, min_y), (max_x, max_y), (255, 0, 0), 2) """
+
+    for i2, c2 in enumerate(qrc):
+        area2 = cv2.contourArea(c2)
+        areaArray2.append(area2)
+    sorteddata2 = sorted(zip(areaArray2, qrc), key=lambda x: x[0], reverse=True)
+
+    try:
+        largestcontour2 = sorteddata2[0][1]
+        #rect = cv2.minAreaRect(largestcontour) # Colud be used for finding angle
+        #draw it
+        x1, y1, w1, h1 = cv2.boundingRect(largestcontour2)
+        QR_CODE = Orientation_image[y:y+h, x:x+w]
+        cv2.imshow("QR_CODE LargestContour", QR_CODE)
+    except IndexError:
+        pass
+
+        with open('outpu_file.txt', 'w+') as f:
+            f.write('B,G,R\n')
+            for x in range(width):
+                f.write('%d ' %x)
+                f.write('\n')
+                for y in range(height):
+                    b = pix[x,y][0]
+                    g = pix[x,y][1]
+                    r = pix[x,y][2]
+                    f.write(' %d' %y)
+                    f.write('[{0}, {1}, {2}] '.format(r,g,b))
+
     cv2.imshow("Zebro_s", Zebro_edges)
 
     #Function for finding larges contour in image Zebro

@@ -19,13 +19,15 @@ class functions_shape:
     def __init__(self):
         pass
 
-    
     def adjust_gamma(self, image, gamma):
         invGamma = 1.0 / gamma
         table = np.array([((i / 255.0) ** invGamma) * 255
                           for i in np.arange(0,256)]).astype("uint8")
         return cv2.LUT(image, table)
 
+    # Basicly the most important function.
+    # This function draws large rectangles arounnd green area's which are
+    # Bigger than the defined area. (resolution matter here) 
     def Find_draw(self, image, output):
         kernel = np.ones((7,7),np.uint8)
 
@@ -39,15 +41,16 @@ class functions_shape:
 
         for c in cnts2:
             x1,y1,w1,h1 = cv2.boundingRect(c)
-            if (w1 > 25) and (h1 > 25): #(x1 > 550) and (y1 > 150) and (w1 > 500) and (h1 > 120)
+            if (w1 > 101) and (h1 > 101): #for resolution of 1920*1088
+            #if (w1 > 25) and (h1 > 25): #For resolution of 1280*720
                 # if resolution = 1280, 720 do 25 by 25 for w1 and h1
                 # if resolution = 1920, 1080 do 101 by 101 for w1 and h1
                 x  = x + 1
                 try:
-                    cv2.rectangle(image,(x1-20,y1-20),(x1+w1+20,y1+h1+20),(0,255,0),2)
-                    cv2.putText(image,'green Detected',(x1+w1+30,y1+h1+20),0,0.3,(0,255,0))
+                    cv2.rectangle(image,(x1-10,y1-10),(x1+w1+10,y1+h1+10),(0,255,0),2)
+                    cv2.putText(image,'green Detected',(x1+w1+20,y1+h1+10),0,0.3,(0,255,0))
 
-                    green_area = image[y1-20:y1+h1+20, x1-20:x1+w1+20]
+                    green_area = image[y1-10:y1+h1+10, x1-10:x1+w1+10]
                     cv2.imwrite("Pico/tests%d.jpg" % x, green_area)
 
                 except IndexError:
@@ -55,12 +58,11 @@ class functions_shape:
             else:
                 pass
 
-    #Do This function only the first time to determine values for Find_Draw:            
+    #Do This function only the first time to determine approximate values for Find_Draw:            
     def Find_draw_largest(self, image, output):
         kernel = np.ones((7,7),np.uint8)
 
         closing = cv2.morphologyEx(output, cv2.MORPH_CLOSE, kernel)
-        opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
 
         gray_green = cv2.cvtColor(closing, cv2.COLOR_BGR2GRAY)
 
@@ -83,10 +85,10 @@ class functions_shape:
             x, y, w, h = cv2.boundingRect(largestcontour)
             print (w,h)
             
-            appelkoek = image[y:y+h, x:x+w]
-            cv2.imwrite("appelkoek2.jpg", appelkoek)
+            Largest_green = image[y:y+h, x:x+w]
+            cv2.imwrite("Largest_green.jpg", Largest_green)
             cv2.rectangle(image, (x, y), (x+w, y+h), (0,255,0), 2)
-            cv2.putText(image,'GROEN JAHOOR',(x+w+10,y+h),0,0.3,(0,255,0))
+            cv2.putText(image,'Largest_green',(x+w+10,y+h),0,0.3,(0,255,0))
 
         except IndexError:
             pass        
