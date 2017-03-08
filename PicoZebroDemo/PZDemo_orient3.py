@@ -69,8 +69,8 @@ rawCapture = PiRGBArray(camera, size=(1920, 1088))
 
 #Standard hsv color values. These are obtained through code converter.py
 green = [([40,33,40],[92,153,255])] #=green
-black = [([0,0,0],[179,255,125])] #=black
-white = [([0,0,245],[179,255,255])] #=white
+black = [([0,0,0],[179,255,80])] #=black
+white = [([0,0,230],[179,255,255])] #=white
 white2 = [([0,0,245],[179,255,255])] #=white2
 white3 = [([200,200,200],[255,255,255])] #white bgr
 
@@ -142,7 +142,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             
         Zebro_edges = cv2.Canny(Zebro_erosion, 100, 200, apertureSize = 3)
 #Debugging
-        #cv2.imshow("edges Zebro",Zebro_edges)
+     #   cv2.imshow("edges Zebro",Zebro_edges)
 
         #Function for finding larges contour in image Zebro
         (_,contours2,hierarchy2) = cv2.findContours(Zebro_edges,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # Find contours with hierarchy
@@ -159,13 +159,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             # After random testing these where the values that kind of worked for area for QR
             # This still isn't perfect
             #if w > 33 and h >33 and w < 70 and h < 70:     For 1280, 720
-            if w > 20 and h > 20 and w < 35 and h < 35:
+            if w > 20 and h > 20 and w < 50 and h < 50:
                 y = y-20
                 x = x-20
-                h=h+40
-                w=w+40
+                h=h+30
+                w=w+30
                 QR_CODE = Zebro_res[y:y+h, x:x+w]
-                cv2.imshow("QR_CODE LargestContour", QR_CODE)
+               # cv2.imshow("QR_CODE LargestContour", QR_CODE)
                 cv2.imwrite("Pico/QR_CODE.jpg", QR_CODE)
         except IndexError:
             pass
@@ -176,12 +176,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 # From here on out it is determing angle and with that direction
 
     # Pre found images for now for testing
-    QR_image = cv2.imread("Pico/QR_CODE1.jpg", 1)
+    QR_image = cv2.imread("Pico/QR_CODE2.jpg", 1)
+
+    # Making light levels less invluential
+    # It takes the RGB it sees and adapts the light level of it
+    QR_lab = cv2.cvtColor(QR_image, cv2.COLOR_BGR2LAB)
+    QR_l,QR_a,QR_b = cv2.split(QR_lab)
+    QR_clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(2,2))
+    QR_cl = QR_clahe.apply(QR_l)
+    QR_limg = cv2.merge((QR_cl,QR_a,QR_b))
+    QR_final = cv2.cvtColor(QR_limg, cv2.COLOR_LAB2BGR)
 
     accumMask = np.zeros(QR_image.shape[:2], dtype="uint8")
 
     #adjusting Gamma level if highly needed
-    QR_adjust_gamma = funct.adjust_gamma(QR_image, 1)
+    QR_adjust_gamma = funct.adjust_gamma(QR_final, 1)
 
     # Converts to gray for better results
 #   QR_gray = cv2.cvtColor(QR_adjust_gamma, cv2.COLOR_BGR2GRAY)
@@ -200,32 +209,34 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     mask_QR_black = cv2.inRange(QR_hsv,lower,upper)
     mask_QR_black = cv2.erode(mask_QR_black, kernel_erode, iterations=2)
     mask_QR_black = cv2.dilate(mask_QR_black, kernel_dilate, iterations=1)
+
 #debugging
-    #cv2.imshow("TEsting 1",mask_QR_black)
+    cv2.imshow("mask_QR_black",mask_QR_black)
     # Detecting White in QR code
     for(lower,upper) in white:
             lower = np.array(lower,dtype=np.uint8)
             upper = np.array(upper,dtype=np.uint8)
     mask_QR_white = cv2.inRange(QR_hsv,lower,upper)
-        
     
     mask_QR_white = cv2.erode(mask_QR_white, kernel_erode, iterations=2)
     mask_QR_white = cv2.dilate(mask_QR_white, kernel_dilate, iterations=1)
 
     #debugging
-   # cv2.imshow("TEsting 2",mask_QR_white)
+    cv2.imshow("mask_QR_white",mask_QR_white)
     cv2.imwrite("Pico/White_MASK.jpg", mask_QR_white)
 
     #Add White and black mask together
-    accumMask = cv2.addWeighted(mask_QR_white,0.5,mask_QR_black,0.5,0)
+    accumMask = cv2.addWeighted(mask_QR_white,1,mask_QR_black,1,0)
 #debugging
-#    cv2.imshow("TEsting 3",accumMask)
+    cv2.imshow("accumMask",accumMask)
     #accumMask = cv2.bitwise_not(accumMask)
     
     #Finding largest contour in black and white image     
     mask_QR = cv2.erode(accumMask, None, iterations=1)
     mask_QR = cv2.dilate(mask_QR, None, iterations=2)
     mask_QR_closing = cv2.morphologyEx(mask_QR, cv2.MORPH_CLOSE, None)
+
+    cv2.imshow("mask_QR_closing",mask_QR_closing)
 
     # Finds contours
     im2, cnts, hierarchy = cv2.findContours(mask_QR_closing.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -238,6 +249,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         
     sorteddata_QR = sorted(zip(areaArray_QR, cnts), key=lambda x: x[0], reverse=True)
 
+    MASK_WR = cv2.imread("Pico/White_MASK.jpg")
+
+    Mask_image = np.zeros(MASK_WR.shape[:2], dtype="uint8")
+
+    Mask_image = cv2.addWeighted(MASK_WR,1,QR_image,0.01,1)
+
+    cv2.imshow("Mask_image", Mask_image)
+
     # Draws contours
     try:
         largestcontour_QR = sorteddata_QR[0][1]
@@ -247,14 +266,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         box = np.int0(box)
         
         P_W, P_H = rect[1]
-        P_W_New = P_W*0.70
-        P_H_New = P_H*0.70
+        P_W_New = int(P_W*0.65)
+        P_H_New = int(P_H*0.65)
         rect_new = (rect[0]),(P_W_New,P_H_New),rect[2]
         box_new = cv2.boxPoints(rect_new)
         box_new = np.int0(cv2.boxPoints(rect_new))
         
-        P_W_Pixel = int(P_W*0.15)
-        P_H_Pixel = int(P_H*0.15)
+        P_W_Pixel = int(P_W*0.10)
+        P_H_Pixel = int(P_H*0.10)
         
         Pixel0 = (box_new[0,0],box_new[0,1])
         Pixel1 = (box_new[1,0],box_new[1,1])
@@ -271,16 +290,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         QR_square_2_test = np.int0(cv2.boxPoints(QR_square_2))
         QR_square_3_test = np.int0(cv2.boxPoints(QR_square_3))
         
-        if rect[2] <-45:
-            QR_y_0 = (np.asscalar(np.uint16(QR_square_0_test[2,0])))
-            QR_x_0 = (np.asscalar(np.uint16(QR_square_0_test[2,1])))
-            QR_y_1 = (np.asscalar(np.uint16(QR_square_1_test[2,0])))
-            QR_x_1 = (np.asscalar(np.uint16(QR_square_1_test[2,1])))
-            QR_y_2 = (np.asscalar(np.uint16(QR_square_2_test[2,0])))
-            QR_x_2 = (np.asscalar(np.uint16(QR_square_2_test[2,1])))
-            QR_y_3 = (np.asscalar(np.uint16(QR_square_3_test[2,0])))
-            QR_x_3 = (np.asscalar(np.uint16(QR_square_3_test[2,1])))
-        elif rect[2] > -45:
+        if abs(rect[2]) <= 45:
             QR_y_0 = (np.asscalar(np.uint16(QR_square_0_test[1,0])))
             QR_x_0 = (np.asscalar(np.uint16(QR_square_0_test[1,1])))
             QR_y_1 = (np.asscalar(np.uint16(QR_square_1_test[1,0])))
@@ -289,9 +299,16 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             QR_x_2 = (np.asscalar(np.uint16(QR_square_2_test[1,1])))
             QR_y_3 = (np.asscalar(np.uint16(QR_square_3_test[1,0])))
             QR_x_3 = (np.asscalar(np.uint16(QR_square_3_test[1,1])))
+        elif abs(rect[2]) > 45:
+            QR_y_0 = (np.asscalar(np.uint16(QR_square_0_test[2,0])))
+            QR_x_0 = (np.asscalar(np.uint16(QR_square_0_test[2,1])))
+            QR_y_1 = (np.asscalar(np.uint16(QR_square_1_test[2,0])))
+            QR_x_1 = (np.asscalar(np.uint16(QR_square_1_test[2,1])))
+            QR_y_2 = (np.asscalar(np.uint16(QR_square_2_test[2,0])))
+            QR_x_2 = (np.asscalar(np.uint16(QR_square_2_test[2,1])))
+            QR_y_3 = (np.asscalar(np.uint16(QR_square_3_test[2,0])))
+            QR_x_3 = (np.asscalar(np.uint16(QR_square_3_test[2,1])))
 
-       # img = cv2.imread("Pico/White_MASK.jpg")
-       # ret,thresh1 = cv2.threshold(img,127,255,cv2.THRESH_BINARY)    
             
         QR_Area_Orientation_0 = QR_image[QR_y_0:QR_y_0+P_H_Pixel,QR_x_0:QR_x_0+P_W_Pixel]
         QR_Area_Orientation_1 = QR_image[QR_y_1:QR_y_1+P_H_Pixel,QR_x_1:QR_x_1+P_W_Pixel]
@@ -299,17 +316,17 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         QR_Area_Orientation_3 = QR_image[QR_y_3:QR_y_3+P_H_Pixel,QR_x_3:QR_x_3+P_W_Pixel]
         
         QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2GRAY)
-        #ret,QR_Orientation_hsv_0 = cv2.threshold(QR_Orientation_hsv_0,127,255,0)
-        #gray2 = gray.copy()
-        #QR_Orientation_hsv_0 = np.zeros(QR_Orientation_hsv_0.shape,np.uint8)
-        
         QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2HSV)
+        #QR_Orientation_hsv_0 = cv2.bitwise_not(QR_Orientation_hsv_0)
         QR_Orientation_hsv_1 = cv2.cvtColor(QR_Area_Orientation_1, cv2.COLOR_BGR2GRAY)
         QR_Orientation_hsv_1 = cv2.cvtColor(QR_Area_Orientation_1, cv2.COLOR_BGR2HSV)
+        #QR_Orientation_hsv_1 = cv2.bitwise_not(QR_Orientation_hsv_1)
         QR_Orientation_hsv_2 = cv2.cvtColor(QR_Area_Orientation_2, cv2.COLOR_BGR2GRAY)
         QR_Orientation_hsv_2 = cv2.cvtColor(QR_Area_Orientation_2, cv2.COLOR_BGR2HSV)
+        #QR_Orientation_hsv_2 = cv2.bitwise_not(QR_Orientation_hsv_2)
         QR_Orientation_hsv_3 = cv2.cvtColor(QR_Area_Orientation_3, cv2.COLOR_BGR2GRAY)
         QR_Orientation_hsv_3 = cv2.cvtColor(QR_Area_Orientation_3, cv2.COLOR_BGR2HSV)
+        #QR_Orientation_hsv_3 = cv2.bitwise_not(QR_Orientation_hsv_3)
 
 
         for(lower,upper) in white2:
@@ -322,36 +339,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         white_pixel3 = cv2.inRange(QR_Orientation_hsv_3,lower,upper)
 
         if Do_once ==1:
+            print(abs(rect[2]))
             print("Found White on pixel 0")
+            white_pixel0 = cv2.countNonZero(white_pixel0)
             print(white_pixel0)
             print("Found White on pixel 1")
+            white_pixel1 = cv2.countNonZero(white_pixel1)
             print(white_pixel1)
             print("Found White on pixel 2")
+            white_pixel2 = cv2.countNonZero(white_pixel2)
             print(white_pixel2)
             print("Found White on pixel 3")
+            white_pixel3 = cv2.countNonZero(white_pixel3)
             print(white_pixel3)
             Do_once = 2
-
-        if np.all(white_pixel0 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
-            if Do_once ==1:
-                print("Found White on pixel 0")
-                print(white_pixel0)
-                Do_once = 2
-        elif np.all(white_pixel1 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
-            if Do_once ==1:
-                print("Found White on pixel 1")
-                print(white_pixel1)
-                Do_once = 2
-        elif np.all(white_pixel2 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
-            if Do_once ==1:
-                print("Found White on pixel 2")
-                print(white_pixel2)
-                Do_once = 2
-        elif np.all(white_pixel3 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
-            if Do_once ==1:
-                print("Found White on pixel 3")
-                print(white_pixel3)
-                Do_once = 2     
+ 
         #draw both cantours. The one around the QR code and the one were the white pixel is determined out of.
         #cv2.drawContours(QR_image,[box],0,(0,191,255),2)
         cv2.drawContours(QR_image,[QR_square_0_test],0,(0,191,0),2)
@@ -360,6 +362,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.drawContours(QR_image,[QR_square_3_test],0,(0,191,0),2)
         # Draw a diagonal blue line with thickness of 2 px for checking where white pixel is.
         cv2.line(QR_image,(QR_square_0_test[0,0],QR_square_0_test[0,1]),(QR_square_0_test[2,0],QR_square_0_test[2,1]),(255,191,0),2)
+        cv2.line(QR_image,(QR_square_1_test[0,0],QR_square_1_test[0,1]),(QR_square_1_test[2,0],QR_square_1_test[2,1]),(255,191,0),2)
+        cv2.line(QR_image,(QR_square_2_test[0,0],QR_square_2_test[0,1]),(QR_square_2_test[2,0],QR_square_2_test[2,1]),(255,191,0),2)
+        cv2.line(QR_image,(QR_square_3_test[0,0],QR_square_3_test[0,1]),(QR_square_3_test[2,0],QR_square_3_test[2,1]),(255,191,0),2)
 
         ## END - draw rotated rectangle
     except IndexError:

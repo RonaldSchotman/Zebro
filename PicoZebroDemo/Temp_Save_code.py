@@ -10,6 +10,50 @@
     if max_x - min_x > 0 and max_y - min_y > 0:
         cv2.rectangle(Orientation_image, (min_x, min_y), (max_x, max_y), (255, 0, 0), 2) """
 
+    mask_white = cv2.imread("Pico/White_MASK.jpg", 0)
+
+    white_edges = cv2.Canny(mask_white, 100, 200, apertureSize = 3)
+
+    cv2.imshow("TEs 2",white_edges)
+    
+    (_, cnts_white, hierarchy) = cv2.findContours(white_edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    for cnt in cnts_white:
+        cv2.drawContours(mask_white, cnts_white, -1, (255,255,255), 1)
+
+    cv2.imshow("contours white",mask_white)
+    
+#    areaArray_white = []
+    
+ #   for i, c_white in enumerate(cnts_white):
+  #      area_white = cv2.contourArea(c_white)
+   #     areaArray_white.append(area_white)
+        
+    #sorteddata_white = sorted(zip(areaArray_white, cnts_white), key=lambda x: x[0], reverse=True)
+
+
+
+        if np.all(white_pixel0 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 0")
+                print(white_pixel0)
+                Do_once = 2
+        elif np.all(white_pixel1 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 1")
+                print(white_pixel1)
+                Do_once = 2
+        elif np.all(white_pixel2 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 2")
+                print(white_pixel2)
+                Do_once = 2
+        elif np.all(white_pixel3 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 3")
+                print(white_pixel3)
+                Do_once = 2    
+
     if Do_once == 1:
         sys.stdout = open("out.txt", "w")
         np.set_printoptions(threshold=np.nan)
