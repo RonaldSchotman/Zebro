@@ -59,9 +59,6 @@ import time                             # For real time video (using openCV)
 import numpy as np                      # Optimized library for numerical operations
 import cv2                              # Include OpenCV library (Most important one)
 
-from PIL import Image
-import sys
-
 # STEP 1
 
 # initialize the camera and grab a reference to the raw camera capture
