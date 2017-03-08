@@ -71,8 +71,10 @@ rawCapture = PiRGBArray(camera, size=(1920, 1088))
 green = [([40,33,40],[92,153,255])] #=green
 black = [([0,0,0],[179,255,90])] #=black
 white = [([0,0,230],[179,255,255])] #=white
-white2 = [([0,0,240],[179,255,255])] #=white2
-white3 = [([200,200,200],[255,255,255])] #white bgr
+
+white2 = [([0,0,110],[179,255,255])] #=white2
+white3 = [([200,200,200],[255,255,255])] #white bgr for testing purposes
+white4 = (200,255)
 
 
 # allow the camera to warmup (So this is only during start up once).
@@ -160,7 +162,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             # This still isn't perfect
             #if w > 33 and h >33 and w < 70 and h < 70:     For 1280, 720
             if w > 20 and h > 20 and w < 65 and h < 75:
-                print(w,h)
+                #print(w,h)
                 y = y-20
                 x = x-20
                 h=h+30
@@ -177,7 +179,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 # From here on out it is determing angle and with that direction
 
     # Pre found images for now for testing
-    QR_image = cv2.imread("Pico/QR_CODE4.jpg", 1)
+    QR_image = cv2.imread("Pico/QR_CODE2.jpg", 1)
 
     # Making light levels less invluential
     # It takes the RGB it sees and adapts the light level of it
@@ -292,23 +294,23 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         QR_square_3_test = np.int0(cv2.boxPoints(QR_square_3))
         
         if abs(rect[2]) <= 45:
-            QR_y_0 = (np.asscalar(np.uint16(QR_square_0_test[1,0])))
-            QR_x_0 = (np.asscalar(np.uint16(QR_square_0_test[1,1])))
-            QR_y_1 = (np.asscalar(np.uint16(QR_square_1_test[1,0])))
-            QR_x_1 = (np.asscalar(np.uint16(QR_square_1_test[1,1])))
-            QR_y_2 = (np.asscalar(np.uint16(QR_square_2_test[1,0])))
-            QR_x_2 = (np.asscalar(np.uint16(QR_square_2_test[1,1])))
-            QR_y_3 = (np.asscalar(np.uint16(QR_square_3_test[1,0])))
-            QR_x_3 = (np.asscalar(np.uint16(QR_square_3_test[1,1])))
+            QR_y_0 = (np.asscalar(np.uint16(QR_square_0_test[1,1])))
+            QR_x_0 = (np.asscalar(np.uint16(QR_square_0_test[1,0])))
+            QR_y_1 = (np.asscalar(np.uint16(QR_square_1_test[1,1])))
+            QR_x_1 = (np.asscalar(np.uint16(QR_square_1_test[1,0])))
+            QR_y_2 = (np.asscalar(np.uint16(QR_square_2_test[1,1])))
+            QR_x_2 = (np.asscalar(np.uint16(QR_square_2_test[1,0])))
+            QR_y_3 = (np.asscalar(np.uint16(QR_square_3_test[1,1])))
+            QR_x_3 = (np.asscalar(np.uint16(QR_square_3_test[1,0])))
         elif abs(rect[2]) > 45:
-            QR_y_0 = (np.asscalar(np.uint16(QR_square_0_test[2,0])))
-            QR_x_0 = (np.asscalar(np.uint16(QR_square_0_test[2,1])))
-            QR_y_1 = (np.asscalar(np.uint16(QR_square_1_test[2,0])))
-            QR_x_1 = (np.asscalar(np.uint16(QR_square_1_test[2,1])))
-            QR_y_2 = (np.asscalar(np.uint16(QR_square_2_test[2,0])))
-            QR_x_2 = (np.asscalar(np.uint16(QR_square_2_test[2,1])))
-            QR_y_3 = (np.asscalar(np.uint16(QR_square_3_test[2,0])))
-            QR_x_3 = (np.asscalar(np.uint16(QR_square_3_test[2,1])))
+            QR_y_0 = (np.asscalar(np.uint16(QR_square_0_test[2,1])))
+            QR_x_0 = (np.asscalar(np.uint16(QR_square_0_test[2,0])))
+            QR_y_1 = (np.asscalar(np.uint16(QR_square_1_test[2,1])))
+            QR_x_1 = (np.asscalar(np.uint16(QR_square_1_test[2,0])))
+            QR_y_2 = (np.asscalar(np.uint16(QR_square_2_test[2,1])))
+            QR_x_2 = (np.asscalar(np.uint16(QR_square_2_test[2,0])))
+            QR_y_3 = (np.asscalar(np.uint16(QR_square_3_test[2,1])))
+            QR_x_3 = (np.asscalar(np.uint16(QR_square_3_test[2,0])))
 
             
         QR_Area_Orientation_0 = QR_image[QR_y_0:QR_y_0+P_H_Pixel,QR_x_0:QR_x_0+P_W_Pixel]
@@ -317,10 +319,19 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         QR_Area_Orientation_3 = QR_image[QR_y_3:QR_y_3+P_H_Pixel,QR_x_3:QR_x_3+P_W_Pixel]
 
     #From here
+        #QR_Area_Orientation_0 = cv2.resize(QR_Area_Orientation_0, (200, 200),interpolation = cv2.INTER_CUBIC)
+        #cv2.imshow("QR_Area_Orientation_0", QR_Area_Orientation_0)
         
         QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2GRAY)
-        QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2HSV)
+
+        ret,QR_Orientation_hsv_0 = cv2.threshold(QR_Orientation_hsv_0,127,255,cv2.THRESH_BINARY)
+        QR_Orientation_hsv_0 = cv2.cvtColor(QR_Orientation_hsv_0, cv2.COLOR_GRAY2BGR)
+        QR_Orientation_hsv_0 = cv2.cvtColor(QR_Orientation_hsv_0, cv2.COLOR_BGR2HSV)
+
+        #QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2HSV)
+
         #QR_Orientation_hsv_0 = cv2.bitwise_not(QR_Orientation_hsv_0)
+
         QR_Orientation_hsv_1 = cv2.cvtColor(QR_Area_Orientation_1, cv2.COLOR_BGR2GRAY)
         QR_Orientation_hsv_1 = cv2.cvtColor(QR_Area_Orientation_1, cv2.COLOR_BGR2HSV)
         #QR_Orientation_hsv_1 = cv2.bitwise_not(QR_Orientation_hsv_1)
@@ -341,7 +352,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         white_pixel2 = cv2.inRange(QR_Orientation_hsv_2,lower,upper)
         white_pixel3 = cv2.inRange(QR_Orientation_hsv_3,lower,upper)
 
-    # TO here it is going wrong. Only here for step 3.
+    # TO here it is going wrong. Only here for step 3. I dont know what just the amount of white is not correct here
 
         if Do_once ==1:
             print(abs(rect[2]))
