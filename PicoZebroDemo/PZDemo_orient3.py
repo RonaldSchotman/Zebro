@@ -58,7 +58,9 @@ from picamera import PiCamera           # PiCamera liberary
 import time                             # For real time video (using openCV)
 import numpy as np                      # Optimized library for numerical operations
 import cv2                              # Include OpenCV library (Most important one)
+
 from PIL import Image
+import sys
 
 # STEP 1
 
@@ -70,9 +72,9 @@ rawCapture = PiRGBArray(camera, size=(1920, 1088))
 
 #Standard hsv color values. These are obtained through code converter.py
 green = [([40,33,40],[92,153,255])] #=green
-black = [([0,0,0],[180,255,125])] #=black
-white = [([0,0,245],[180,255,255])] #=white
-white2 = [([0,0,245],[180,255,255])] #=white2
+black = [([0,0,0],[179,255,125])] #=black
+white = [([0,0,245],[179,255,255])] #=white
+white2 = [([0,0,245],[179,255,255])] #=white2
 white3 = [([200,200,200],[255,255,255])] #white bgr
 
 
@@ -208,8 +210,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             lower = np.array(lower,dtype=np.uint8)
             upper = np.array(upper,dtype=np.uint8)
     mask_QR_white = cv2.inRange(QR_hsv,lower,upper)
+        
+    
     mask_QR_white = cv2.erode(mask_QR_white, kernel_erode, iterations=2)
     mask_QR_white = cv2.dilate(mask_QR_white, kernel_dilate, iterations=1)
+
     #debugging
    # cv2.imshow("TEsting 2",mask_QR_white)
     cv2.imwrite("Pico/White_MASK.jpg", mask_QR_white)

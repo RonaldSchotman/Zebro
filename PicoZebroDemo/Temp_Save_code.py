@@ -10,6 +10,12 @@
     if max_x - min_x > 0 and max_y - min_y > 0:
         cv2.rectangle(Orientation_image, (min_x, min_y), (max_x, max_y), (255, 0, 0), 2) """
 
+    if Do_once == 1:
+        sys.stdout = open("out.txt", "w")
+        np.set_printoptions(threshold=np.nan)
+        print(mask_QR_white)
+        Do_once = 2
+
     for i2, c2 in enumerate(qrc):
         area2 = cv2.contourArea(c2)
         areaArray2.append(area2)
