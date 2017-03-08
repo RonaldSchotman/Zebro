@@ -48,8 +48,8 @@ class functions_shape:
                 # if resolution = 1920, 1080 do 101 by 101 for w1 and h1
                 x  = x + 1
                 try:
-                    cv2.rectangle(image,(x1-10,y1-10),(x1+w1+10,y1+h1+10),(0,255,0),2)
-                    cv2.putText(image,'green Detected',(x1+w1+20,y1+h1+10),0,0.3,(0,255,0))
+                    #cv2.rectangle(image,(x1-10,y1-10),(x1+w1+10,y1+h1+10),(0,255,0),2)
+                    #cv2.putText(image,'green Detected',(x1+w1+20,y1+h1+10),0,0.3,(0,255,0))
 
                     green_area = image[y1-10:y1+h1+10, x1-10:x1+w1+10]
                     cv2.imwrite("Pico/tests%d.jpg" % x, green_area)
