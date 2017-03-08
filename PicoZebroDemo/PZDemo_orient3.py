@@ -72,10 +72,8 @@ green = [([40,33,40],[92,153,255])] #=green
 black = [([0,0,0],[179,255,90])] #=black
 white = [([0,0,230],[179,255,255])] #=white
 
-white2 = [([0,0,110],[179,255,255])] #=white2
+white2 = [([0,0,210],[179,255,255])] #=white2
 white3 = [([200,200,200],[255,255,255])] #white bgr for testing purposes
-white4 = (200,255)
-
 
 # allow the camera to warmup (So this is only during start up once).
 time.sleep(0.1)
@@ -179,7 +177,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 # From here on out it is determing angle and with that direction
 
     # Pre found images for now for testing
-    QR_image = cv2.imread("Pico/QR_CODE2.jpg", 1)
+    QR_image = cv2.imread("Pico/QR_CODE5.jpg", 1)
 
     # Making light levels less invluential
     # It takes the RGB it sees and adapts the light level of it
@@ -252,13 +250,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         
     sorteddata_QR = sorted(zip(areaArray_QR, cnts), key=lambda x: x[0], reverse=True)
 
-    MASK_WR = cv2.imread("Pico/White_MASK.jpg")
+    #MASK_WR = cv2.imread("Pico/White_MASK.jpg")
 
-    Mask_image = np.zeros(MASK_WR.shape[:2], dtype="uint8")
+    #Mask_image = np.zeros(MASK_WR.shape[:2], dtype="uint8")
 
-    Mask_image = cv2.addWeighted(MASK_WR,1,QR_image,0.01,1)
+    #Mask_image = cv2.addWeighted(MASK_WR,1,QR_image,0.01,1)
 
-    cv2.imshow("Mask_image", Mask_image)
+    #cv2.imshow("Mask_image", Mask_image)
 
     # Draws contours
     try:
@@ -275,8 +273,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         box_new = cv2.boxPoints(rect_new)
         box_new = np.int0(cv2.boxPoints(rect_new))
         
-        P_W_Pixel = int(P_W*0.1)
-        P_H_Pixel = int(P_H*0.1)
+        P_W_Pixel = int(P_W*0.2)
+        P_H_Pixel = int(P_H*0.2)
         
         Pixel0 = (box_new[0,0],box_new[0,1])
         Pixel1 = (box_new[1,0],box_new[1,1])
