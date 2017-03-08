@@ -6,7 +6,7 @@
 
 # Everything is being tested from 120 cm
 
-# Till now ALL steps are NOT giving satisfactory results. Sometimes they work sometimes they dont.
+# Till now step 1 and 2 are NOT giving satisfactory results. Sometimes they work sometimes they dont.
 
 # Step 1 Pico Zebro Demo
 # From live video find green and put a rectangle around it.
@@ -177,7 +177,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 # From here on out it is determing angle and with that direction
 
     # Pre found images for now for testing
-    QR_image = cv2.imread("Pico/QR_CODE5.jpg", 1)
+    QR_image = cv2.imread("Pico/QR_CODE.jpg", 1)
 
     # Making light levels less invluential
     # It takes the RGB it sees and adapts the light level of it
@@ -273,8 +273,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         box_new = cv2.boxPoints(rect_new)
         box_new = np.int0(cv2.boxPoints(rect_new))
         
-        P_W_Pixel = int(P_W*0.2)
-        P_H_Pixel = int(P_H*0.2)
+        P_W_Pixel = int(P_W*0.15)
+        P_H_Pixel = int(P_H*0.15)
         
         Pixel0 = (box_new[0,0],box_new[0,1])
         Pixel1 = (box_new[1,0],box_new[1,1])
@@ -348,7 +348,28 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         white_pixel3 = cv2.inRange(QR_Orientation_hsv_3,lower,upper)
 
     # TO here it is going wrong. Only here for step 3. I dont know what just the amount of white is not correct here
+        white_pixel0 = cv2.countNonZero(white_pixel0)
+        white_pixel1 = cv2.countNonZero(white_pixel1)
+        white_pixel2 = cv2.countNonZero(white_pixel2)
+        white_pixel3 = cv2.countNonZero(white_pixel3)
 
+        if white_pixel0 > white_pixel1 and white_pixel0 > white_pixel2 and white_pixel0 > white_pixel3:
+            degree = abs(rect[2])
+            print("PIXEL 000000")
+            print (degree)
+        if white_pixel1 > white_pixel0 and white_pixel1 > white_pixel2 and white_pixel1 > white_pixel3:
+            degree = 270 + abs(rect[2])
+            print("PIXEL 1111111")
+            print (degree)
+        if white_pixel2 > white_pixel0 and white_pixel2 > white_pixel1 and white_pixel2 > white_pixel3:
+            degree = 180 + abs(rect[2])
+            print("PIXEL 22222222")
+            print (degree)
+        if white_pixel3 > white_pixel0 and white_pixel3 > white_pixel1 and white_pixel3 > white_pixel2:
+            degree = 90 + abs(rect[2])
+            print("PIXEL 33333333")
+            print (degree)
+        
         if Do_once ==1:
             print(abs(rect[2]))
             print("Found White on pixel 0")
@@ -366,19 +387,19 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
             if white_pixel0 > white_pixel1 and white_pixel0 > white_pixel2 and white_pixel0 > white_pixel3:
                 degree = abs(rect[2])
-                print("PIXEL 000000")
+                print("PIXEL 0")
                 print (degree)
             if white_pixel1 > white_pixel0 and white_pixel1 > white_pixel2 and white_pixel1 > white_pixel3:
                 degree = 270 + abs(rect[2])
-                print("PIXEL 1111111")
+                print("PIXEL 1")
                 print (degree)
             if white_pixel2 > white_pixel0 and white_pixel2 > white_pixel1 and white_pixel2 > white_pixel3:
                 degree = 180 + abs(rect[2])
-                print("PIXEL 22222222")
+                print("PIXEL 2")
                 print (degree)
             if white_pixel3 > white_pixel0 and white_pixel3 > white_pixel1 and white_pixel3 > white_pixel2:
                 degree = 90 + abs(rect[2])
-                print("PIXEL 33333333")
+                print("PIXEL 3")
                 print (degree)
             
             Do_once = 2
