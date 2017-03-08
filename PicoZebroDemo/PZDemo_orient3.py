@@ -275,8 +275,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         box_new = cv2.boxPoints(rect_new)
         box_new = np.int0(cv2.boxPoints(rect_new))
         
-        P_W_Pixel = int(P_W*0.15)
-        P_H_Pixel = int(P_H*0.15)
+        P_W_Pixel = int(P_W*0.1)
+        P_H_Pixel = int(P_H*0.1)
         
         Pixel0 = (box_new[0,0],box_new[0,1])
         Pixel1 = (box_new[1,0],box_new[1,1])
@@ -318,30 +318,27 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         QR_Area_Orientation_2 = QR_image[QR_y_2:QR_y_2+P_H_Pixel,QR_x_2:QR_x_2+P_W_Pixel]
         QR_Area_Orientation_3 = QR_image[QR_y_3:QR_y_3+P_H_Pixel,QR_x_3:QR_x_3+P_W_Pixel]
 
-    #From here
         #QR_Area_Orientation_0 = cv2.resize(QR_Area_Orientation_0, (200, 200),interpolation = cv2.INTER_CUBIC)
         #cv2.imshow("QR_Area_Orientation_0", QR_Area_Orientation_0)
         
-        QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2GRAY)
+        #QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2GRAY)
 
-        ret,QR_Orientation_hsv_0 = cv2.threshold(QR_Orientation_hsv_0,127,255,cv2.THRESH_BINARY)
-        QR_Orientation_hsv_0 = cv2.cvtColor(QR_Orientation_hsv_0, cv2.COLOR_GRAY2BGR)
-        QR_Orientation_hsv_0 = cv2.cvtColor(QR_Orientation_hsv_0, cv2.COLOR_BGR2HSV)
+        #ret,QR_Orientation_hsv_0 = cv2.threshold(QR_Orientation_hsv_0,127,255,cv2.THRESH_BINARY)
+        #QR_Orientation_hsv_0 = cv2.cvtColor(QR_Orientation_hsv_0, cv2.COLOR_GRAY2BGR)
+        #QR_Orientation_hsv_0 = cv2.cvtColor(QR_Orientation_hsv_0, cv2.COLOR_BGR2HSV)
 
-        #QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2HSV)
+        QR_Orientation_hsv_0 = cv2.cvtColor(QR_Area_Orientation_0, cv2.COLOR_BGR2HSV)
 
         #QR_Orientation_hsv_0 = cv2.bitwise_not(QR_Orientation_hsv_0)
 
-        QR_Orientation_hsv_1 = cv2.cvtColor(QR_Area_Orientation_1, cv2.COLOR_BGR2GRAY)
+        #QR_Orientation_hsv_1 = cv2.cvtColor(QR_Area_Orientation_1, cv2.COLOR_BGR2GRAY)
         QR_Orientation_hsv_1 = cv2.cvtColor(QR_Area_Orientation_1, cv2.COLOR_BGR2HSV)
-        #QR_Orientation_hsv_1 = cv2.bitwise_not(QR_Orientation_hsv_1)
-        QR_Orientation_hsv_2 = cv2.cvtColor(QR_Area_Orientation_2, cv2.COLOR_BGR2GRAY)
-        QR_Orientation_hsv_2 = cv2.cvtColor(QR_Area_Orientation_2, cv2.COLOR_BGR2HSV)
-        #QR_Orientation_hsv_2 = cv2.bitwise_not(QR_Orientation_hsv_2)
-        QR_Orientation_hsv_3 = cv2.cvtColor(QR_Area_Orientation_3, cv2.COLOR_BGR2GRAY)
-        QR_Orientation_hsv_3 = cv2.cvtColor(QR_Area_Orientation_3, cv2.COLOR_BGR2HSV)
-        #QR_Orientation_hsv_3 = cv2.bitwise_not(QR_Orientation_hsv_3)
 
+        #QR_Orientation_hsv_2 = cv2.cvtColor(QR_Area_Orientation_2, cv2.COLOR_BGR2GRAY)
+        QR_Orientation_hsv_2 = cv2.cvtColor(QR_Area_Orientation_2, cv2.COLOR_BGR2HSV)
+
+        #QR_Orientation_hsv_3 = cv2.cvtColor(QR_Area_Orientation_3, cv2.COLOR_BGR2GRAY)
+        QR_Orientation_hsv_3 = cv2.cvtColor(QR_Area_Orientation_3, cv2.COLOR_BGR2HSV)
 
         for(lower,upper) in white2:
             lower = np.array(lower,dtype=np.uint8)
