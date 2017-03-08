@@ -63,9 +63,9 @@ import cv2                              # Include OpenCV library (Most important
 
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
-camera.resolution = (1920, 1088) #1920, 1088 #1280, 720 #1600, 912
-camera.framerate = 10
-rawCapture = PiRGBArray(camera, size=(1920, 1088))
+camera.resolution = (1648, 928) #1920, 1088 #1280, 720 #1600, 912 #1640x1232
+camera.framerate = 20
+rawCapture = PiRGBArray(camera, size=(1648, 928))
 
 #Standard hsv color values. These are obtained through code converter.py
 green = [([40,33,40],[92,153,255])] #=green
@@ -137,10 +137,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         # Turn image into gray for finding contours.
         Zebro_gray = cv2.cvtColor(Zebro_adjust_gamma, cv2.COLOR_BGR2GRAY)
 
-        Zebro_kernel= np.ones((3,3),np.uint8)
-        Zebro_erosion = cv2.erode(Zebro_gray,Zebro_kernel, iterations=1) 
+        Zebro_kernel= np.ones((1,1),np.uint8)
+        Zebro_kernel_d= np.ones((1,1),np.uint8)
+        Zebro_erosion = cv2.erode(Zebro_gray,Zebro_kernel, iterations=1)
+        Zebro_dilate = cv2.dilate(Zebro_erosion, Zebro_kernel_d, iterations=1)
+
+        cv2.imshow("Zebro_erosion",Zebro_dilate)
             
-        Zebro_edges = cv2.Canny(Zebro_erosion, 100, 200, apertureSize = 3)
+        Zebro_edges = cv2.Canny(Zebro_dilate, 100, 200, apertureSize = 3)
 #Debugging
         cv2.imshow("edges Zebro",Zebro_edges)
 
@@ -162,15 +166,20 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             # After random testing these where the values that kind of worked for area for QR
             # This still isn't perfect
             #if w > 33 and h >33 and w < 70 and h < 70:     For 1280, 720
-            if w > 20 and h > 20 and w < 65 and h < 75:
+            if w > 20 and h > 20: # and w < 65 and h < 75:
                 #print(w,h)
                 y = y-20
                 x = x-20
                 h=h+30
                 w=w+30
                 QR_CODE = Zebro_res[y:y+h, x:x+w]
-                cv2.imshow("QR_CODE LargestContour", QR_CODE)
-                cv2.imwrite("Pico/QR_CODE.jpg", QR_CODE)
+                try:
+                    cv2.imshow("QR_CODE LargestContour", QR_CODE)
+                    cv2.imwrite("Pico/QR_CODE.jpg", QR_CODE)
+                    
+                except OpenCV error:
+                    print(OpenCV error)
+                    pass
         except IndexError:
             pass
     except AttributeError:

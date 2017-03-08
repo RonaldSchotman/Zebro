@@ -41,7 +41,8 @@ class functions_shape:
 
         for c in cnts2:
             x1,y1,w1,h1 = cv2.boundingRect(c)
-            if (w1 > 101) and (h1 > 101): #for resolution of 1920*1088
+            #if (w1 > 101) and (h1 > 101): #for resolution of 1920*1088
+            if (w1 > 35) and (h1 > 35):
             #if (w1 > 25) and (h1 > 25): #For resolution of 1280*720
                 # if resolution = 1280, 720 do 25 by 25 for w1 and h1
                 # if resolution = 1920, 1080 do 101 by 101 for w1 and h1
