@@ -191,7 +191,7 @@ def main(stdscr):
     commands = CommandCollection()
     commands.add_new_command("[0x00 30 1 0 0 0 0 0 0 1]", "c", 'Calibrate Encoders')
     commands.add_new_command("[0x00 30 0 0 0 0 0 0 0 1]", " ", 'Stop all')
-    # commands.add_new_command("[0x00 22 0x12]", 'e', "Reset emergency_stop")
+    commands.add_new_command("[0x00 22 0x12]", 'e', "Reset emergency_stop")
     # commands.add_new_command("[0x00 30 7 0 120 1 0 0]", "d", "Debug Command")
 
     #print(bus_pirate.get_data())
@@ -215,9 +215,11 @@ def main(stdscr):
                 commands.add_commands_and_sequence_to_screen(display)
             if input_char == 'c':
                 command = commands.find_command_by_key(input_char)
+            if input_char == 'e':
+                command = commands.find_command_by_key(input_char)                
             if input_char == 'z':
                 stand_up_time = time_sync_counter + 2
-                command = Command("[0x00 30 3 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')
+                command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')
                 # command = commands.find_command_by_key(input_char)          
             if input_char == ' ':
                 command = commands.find_command_by_key(input_char)
@@ -226,7 +228,7 @@ def main(stdscr):
                 lift_off_time_b = time_sync_counter + 1
                 touch_down_time_a = 0
                 touch_down_time_b = lift_off_time_b + 1
-                command = Command("[0x20 30 4 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk')
+                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk')
             if command:
                 bus_pirate.transmit_command(command)
   
@@ -236,7 +238,6 @@ def main(stdscr):
         if  current_time >= last_time_update + datetime.timedelta(seconds = 1):
             command = "[0x00 11 {}]".format(time_sync_counter)
             command = bytes(command, "ascii")
-            #command = bytes(command)
             bus_pirate.transmit_bytes(command)
             last_time_update = current_time
             time_sync_counter = (time_sync_counter + 1) % 256

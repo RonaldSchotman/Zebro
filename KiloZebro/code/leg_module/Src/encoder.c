@@ -106,10 +106,20 @@ void encoder_write_to_vregs(void) {
  */
 uint16_t encoder_get_position(void) {
 	uint16_t counter_value;
-
 	counter_value = TIM3->CNT;
 	return (counter_value);
 }
+
+/**
+ * Returns the direction of the encoder counter
+ */
+uint8_t encoder_get_direction(void) {
+	uint16_t direction;
+	direction = TIM3->CR1;
+	direction = (uint8_t)((direction>>4)&0x0001);
+	return (direction);
+}
+
 
 /**
  * Sets the position counter back to 0x0000

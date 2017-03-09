@@ -24,9 +24,10 @@
 
 #define MOTION_MODE_IDLE 0
 #define MOTION_MODE_CALIBRATE 1
-#define MOTION_MODE_CONTINUOUS_ROTATION 2
-#define MOTION_MODE_STAND_UP 3
-#define MOTION_MODE_WALK_FORWARD 4
+#define MOTION_MODE_STAND_UP 2
+#define MOTION_MODE_WALK_FORWARD 3
+#define MOTION_MODE_CONTINUOUS_ROTATION 10
+
 
 //#define MOTION_DEBUG_COMMAND 5
 #define MOTION_DIRECTION_FORWARD 0
@@ -38,7 +39,9 @@
 /* This is not 8 because it is also a measure of how aggressive the speed up is when the leg is delayed. Lower is more aggressive. */
 #define DUTYCYCLE_PER_PULSE_PER_SECOND 5
 /* This determines how many pulses the encoder can pass a certain position and still say it reached the position. This is necessary especially when the loop is not fast enough. */
-#define MOTION_POSITION_HYSTERESIS 20
+#define MOTION_POSITION_HYSTERESIS 5
+/* Time in ms the leg gets to turn back the leg to the last known position. */
+#define STABALIZING_TIME 250
 
 #define ARRAY_SIZE 255
 #define TOUCH_DOWN_POSITION_L 340
