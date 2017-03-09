@@ -24,6 +24,7 @@ from picamera import PiCamera           # PiCamera liberary
 import time                             # For real time video (using openCV)
 import numpy as np                      # Optimized library for numerical operations
 import cv2                              # Include OpenCV library (Most important one)
+from PIL import Image
 
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -33,6 +34,8 @@ rawCapture = PiRGBArray(camera, size=(1280, 720))
 
 #Standard hsv color values. These are obtained through code converter.py
 green = [([40,33,40],[92,153,255])] #=green
+black = [([0,0,0],[180,10,50])] #=black
+white = [([0,0,205],[180,30,255])] #=black
 
 # allow the camera to warmup (So this is only during start up once).
 time.sleep(0.1)
@@ -90,7 +93,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     #adjusting Gamma level if highly needed
     Zebro_adjust_gamma = funct.adjust_gamma(Zebro_res, 1)
 
-    # starting here a cod ethat kind of works
+    # starting here a code that kind of works
     Zebro_gray = cv2.cvtColor(Zebro_adjust_gamma, cv2.COLOR_BGR2GRAY)
 
     Zebro_kernel= np.ones((3,3),np.uint8)
@@ -98,7 +101,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         
     Zebro_edges = cv2.Canny(Zebro_erosion, 100, 200, apertureSize = 3)
 
-    cv2.imshow("Zebro_edges", Zebro_edges)
+    #cv2.imshow("Zebro_edges", Zebro_edges)
 
     #Function for finding larges contour in image Zebro
     (_,contours2,hierarchy2) = cv2.findContours(Zebro_edges,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # Find contours with hierarchy
@@ -119,12 +122,38 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             appelkoek = Zebro_res[y:y+h, x:x+w]
             cv2.imshow("LargestContour", appelkoek)
             cv2.imwrite("Pico/fourdots.jpg", appelkoek)
-
     except IndexError:
         pass
 
+    # From here on out it is determing angle and with that direction
+    Orientation_image = cv2.imread("Pico/fourdots3.jpg", 1)
 
-    # From here on out it is determing angle and with that direction 
+    #adjusting Gamma level if highly needed
+    Orientation_adjust_gamma = funct.adjust_gamma(Orientation_image, 1)
+    # starting here a cod ethat kind of works
+
+    # color in cube is hsv values for easier detection of green.
+    Orientation_hsv = cv2.cvtColor(Orientation_adjust_gamma, cv2.COLOR_BGR2HSV)
+
+    #green the important color
+    for(lower,upper) in white:
+            lower = np.array(lower,dtype=np.uint8)
+            upper = np.array(upper,dtype=np.uint8) 
+    # the mask 
+    mask_Orientation = cv2.inRange(Orientation_hsv,lower,upper)
+    Orientation = cv2.countNonZero(mask_Orientation)
+    if Do_once ==1:
+        print(Orientation)
+        Do_once =2
+
+    #Show the green and the current view
+    Orientation_output = cv2.bitwise_and(Orientation_adjust_gamma, Orientation_adjust_gamma
+                                         , mask = mask_Orientation)
+    cv2.imshow("HSV black ", Orientation_output)
+    cv2.imshow("Orientation_edges", Orientation_adjust_gamma)
+
+    cv2.imwrite("Pico/BLACK.jpg", Orientation_output)
+    
     Testing = cv2.imread("Pico/tests1.jpg", 0)
 
     height, width = Testing.shape[:2]
@@ -205,6 +234,53 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             outlier = A
             median1 = B
             median2 = C
+        elif(slope > 0 and dist > 0): #Orientation - West
+            bottom = median1
+            right = median2
+            orientation = 3
+                        
+        #To ensure any unintended values do not sneak up when QR code is not present
+        areatop = 0.0
+        arearight = 0.0
+        areabottom = 0.0
+        if(top < len(contours) and right < len(contours) and bottom < len(contours) and cv2.contourArea(contours[top]) > 10 and cv2.contourArea(contours[right]) > 10 and cv2.contourArea(contours[bottom]) > 10):
+            tempL = []
+            tempM = []
+            tempO = []
+            # src - Source Points basically the 4 end co-ordinates of the overlay image
+            # dst - Destination Points to transform overlay image
+
+            src = []
+            N = (0,0)
+            tempL = orient.getVertices(contours,top,slope,tempL)
+            tempM = orient.getVertices(contours,right,slope,tempM)
+            tempO = orient.getVertices(contours,bottom,slope,tempO)
+            L = orient.updateCornerOr(orientation,tempL)
+            M = orient.updateCornerOr(orientation,tempM)
+            O = orient.updateCornerOr(orientation,tempO)
+
+            iflag,N = orient.getIntersection(M[1],M[2],O[3],O[2],N)
+
+            src.append(L[0])
+            src.append(M[1])
+            src.append(N)
+            src.append(O[3])
+
+            #Draw contours on the image
+            cv2.drawContours(qr_image,contours,top,(255,0,0),2)
+            cv2.drawContours(qr_image,contours,right,(0,255,0),2)
+            cv2.drawContours(qr_image,contours,bottom,(0,0,255),2)
+
+        # Show the Orientation of the QR Code wrt to 2D Image Space
+        if(orientation == 0):
+            cv2.putText(qr_image,'North',(20,30),0,0.3,(0,255,0))
+        elif(orientation == 1):
+            cv2.putText(qr_image,'East',(20,30),0,0.3,(0,255,0))
+        elif(orientation == 2):
+            cv2.putText(qr_image,'South',(20,30),0,0.3,(0,255,0))
+        elif(orientation == 3):
+            cv2.putText(qr_image,'West',(20,30),0,0.3,(0,255,0))
+
 
         top = outlier # The obvious choice
 

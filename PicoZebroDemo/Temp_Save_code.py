@@ -1,3 +1,92 @@
+"""
+    # computes the bounding box for the contour, and draws it on the frame,
+    for cnts, hier in zip(cnts, hierarchy):
+        (x,y,w,h) = cv2.boundingRect(cnts)
+        min_x, max_x = min(x, min_x), max(x+w, max_x)
+        min_y, max_y = min(y, min_y), max(y+h, max_y)
+        if w > 5 and h > 5:
+            cv2.rectangle(Orientation_image, (x,y), (x+w,y+h), (255, 0, 0), 2)
+
+    if max_x - min_x > 0 and max_y - min_y > 0:
+        cv2.rectangle(Orientation_image, (min_x, min_y), (max_x, max_y), (255, 0, 0), 2) """
+
+    mask_white = cv2.imread("Pico/White_MASK.jpg", 0)
+
+    white_edges = cv2.Canny(mask_white, 100, 200, apertureSize = 3)
+
+    cv2.imshow("TEs 2",white_edges)
+    
+    (_, cnts_white, hierarchy) = cv2.findContours(white_edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    for cnt in cnts_white:
+        cv2.drawContours(mask_white, cnts_white, -1, (255,255,255), 1)
+
+    cv2.imshow("contours white",mask_white)
+    
+#    areaArray_white = []
+    
+ #   for i, c_white in enumerate(cnts_white):
+  #      area_white = cv2.contourArea(c_white)
+   #     areaArray_white.append(area_white)
+        
+    #sorteddata_white = sorted(zip(areaArray_white, cnts_white), key=lambda x: x[0], reverse=True)
+
+
+
+        if np.all(white_pixel0 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 0")
+                print(white_pixel0)
+                Do_once = 2
+        elif np.all(white_pixel1 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 1")
+                print(white_pixel1)
+                Do_once = 2
+        elif np.all(white_pixel2 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 2")
+                print(white_pixel2)
+                Do_once = 2
+        elif np.all(white_pixel3 == ([[0],[255],[255]] or [[255],[0],[255]] or [[255],[255],[0]])):
+            if Do_once ==1:
+                print("Found White on pixel 3")
+                print(white_pixel3)
+                Do_once = 2    
+
+    if Do_once == 1:
+        sys.stdout = open("out.txt", "w")
+        np.set_printoptions(threshold=np.nan)
+        print(mask_QR_white)
+        Do_once = 2
+
+    for i2, c2 in enumerate(qrc):
+        area2 = cv2.contourArea(c2)
+        areaArray2.append(area2)
+    sorteddata2 = sorted(zip(areaArray2, qrc), key=lambda x: x[0], reverse=True)
+
+    try:
+        largestcontour2 = sorteddata2[0][1]
+        #rect = cv2.minAreaRect(largestcontour) # Colud be used for finding angle
+        #draw it
+        x1, y1, w1, h1 = cv2.boundingRect(largestcontour2)
+        QR_CODE = Orientation_image[y:y+h, x:x+w]
+        cv2.imshow("QR_CODE LargestContour", QR_CODE)
+    except IndexError:
+        pass
+
+        with open('outpu_file.txt', 'w+') as f:
+            f.write('B,G,R\n')
+            for x in range(width):
+                f.write('%d ' %x)
+                f.write('\n')
+                for y in range(height):
+                    b = pix[x,y][0]
+                    g = pix[x,y][1]
+                    r = pix[x,y][2]
+                    f.write(' %d' %y)
+                    f.write('[{0}, {1}, {2}] '.format(r,g,b))
+
     cv2.imshow("Zebro_s", Zebro_edges)
 
     #Function for finding larges contour in image Zebro
