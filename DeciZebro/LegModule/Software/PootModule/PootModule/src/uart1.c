@@ -7,7 +7,7 @@
  * Filename: uart1.h
  *
  * Description:
- * Code to drive UART1, used for debugging
+ * Code to drive UARTC0, used for debugging
  *
  * Authors:
  * Piet De Vaere -- Piet@DeVae.re
@@ -29,15 +29,15 @@ int8_t uart1_init(void){
 	uart1_pins_init();
 	
 	/* Enable USART transmitter */
-	USART_struct.CTRLB |= USART_TXEN_bm;
+	USARTC0_CTRLB |= USART_TXEN_bm;
 	/* Set communication mode to UART */
-	USART_struct.CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
+	USARTC0_CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
 	/* Set data frame length to 8-bit */
-	USART_struct.CTRLC |= USART_CHSIZE_8BIT_gc;
+	USARTC0_CTRLC |= USART_CHSIZE_8BIT_gc;
 	/* Set baud rate to 115.2 kbaud */
-		/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
-	USART_struct.BAUDCTRLA |= 0x83; /* 131 */
-	USART_struct.BAUDCTRLB |= (0b1101<<4) /* -3 */
+	/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
+	USARTC0_BAUDCTRLA |= 0x83; /* 131 */
+	USARTC0_BAUDCTRLB |= (0b1101<<4) /* -3 */
 	
 	return 0;
 }
@@ -53,45 +53,52 @@ int32_t uart1_init_dma(void){
 	 * */
 	uart1_pins_init();
 
-	__HAL_RCC_USART1_CLK_ENABLE();
-
-	/* keep many of the default settings, oversampling, word length ... */
-	/* set baud rate to 115.2 kbaud */
-	USART1->BRR = UART1_BAUD_RATE_DIVIDER;
-	/* set DMA transmitter mode */
-	USART1->CR3 |= USART_CR3_DMAT;
-
-	/* enable the UART transmitter*/
-	USART1->CR1 |= USART_CR1_TE | USART_CR1_UE;
+	/* Enable USART transmitter */
+	USARTC0_CTRLB |= USART_TXEN_bm;
+	/* Set communication mode to UART */
+	USARTC0_CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
+	/* Set data frame length to 8-bit */
+	USARTC0_CTRLC |= USART_CHSIZE_8BIT_gc;
+	/* Set baud rate to 115.2 kbaud */
+	/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
+	USARTC0_BAUDCTRLA |= 0x83; /* 131 */
+	USARTC0_BAUDCTRLB |= (0b1101<<4) /* -3 */
+	
 
 	/*
 	 * SECOND set up the DMA channel
-	 * DMA channel 4 is used for UART1
+	 * DMA channel 3 is used for UART
+	 * The block is the 256 bytes of the VREG, 
+	 * The block consists of bursts of 1 byte
 	 * */
-
-	__HAL_RCC_DMA1_CLK_ENABLE();
-
-	/* map the USART1_TX DMA request to the correct DMA channel */
-	SYSCFG->CFGR1 |=  SYSCFG_CFGR1_USART1TX_DMA_RMP;
-
-	/* channel has low priority, 8-bit memory size, 8 bit peripheral size */
-	DMA1_Channel4->CCR |= DMA_CCR_MINC;
-	/* set circular mode */
-	//DMA1_Channel4->CCR |= DMA_CCR_CIRC;
-	/* read data from memory, write to peripheral */
-	DMA1_Channel4->CCR |= DMA_CCR_DIR;
-	/* we want to transfer the entire vregs virtual register file */
-	DMA1_Channel4->CNDTR = VREGS_FILE_TOTAL_SIZE;
-	/* write the data to the USART.TDR register */
-	DMA1_Channel4->CPAR = (uint32_t) &(USART1->TDR);
-	/* and read from the vregs virtual register file */
-	DMA1_Channel4->CMAR = (uint32_t) vregs_get_buffer_address();
-
+	
+	/* Enable DMA controller, leave further settings at default*/
+	DMA_CTRL |= DMA_ENABLE_bm;
+	
+	/* Reload start address after each block transfer */
+	DMA_CH3_ADDRCTRL |= DMA_CH_SRCRELOAD_BLOCK_gc;
+	/* Increment address after each burst */
+	DMA_CH3_ADDRCTRL |= DMA_CH_SRCDIR_INC_gc;
+	/* Do not alter destination address, leave reload setting at default: none*/
+	DMA_CH3_ADDRCTRL |= DMA_CH_DESTDIR_FIXED_gc;
+	/* Set UART as a trigger for the DMA */
+	DMA_CH3_TRIGSRC = UART1_TRIGGER_ADDRESS;
+	/* Set transfer count in bytes to size of VREGS */
+	DMA_CH3_TRFCNT	= VREGS_FILE_TOTAL_SIZE;
+	/* Set repeat count to unlimited */
+	DMA_CH3_REPCNT = 0;
+	/* Read the data from the VREGS */
+	DMA_CH3_SRCADDR0 =  (uint8_t) vregs_get_buffer_address();
+	/* And write it to the UART */
+	DMA_CH3_DESTADDR0 = (uint8_t) &USARTC0_DATA;
+	/* Set single shot and repeat mode */
+	DMA_CH3_CTRLA |= DMA_CH_SINGLE_bm;
+	DMA_CH3_CTRLA |= DMA_CH_REPEAT_bm;
+		
 	/*
-	 * THIRD clear the TC flag, and enable the DMA channel
+	 * THIRD enable the DMA channel
 	 */
-	USART1->ICR |= USART_ICR_TCCF;
-	DMA1_Channel4->CCR |= DMA_CCR_EN;
+	DMA_CH3_CTRLA |= DMA_ENABLE_bm;
 
 	return 0;
 }

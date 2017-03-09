@@ -25,6 +25,9 @@
 
 #define UART1_BAUD_RATE_DIVIDER		0x18
 
+#define UART1_DATA_REGISTER_ADDRESS 0x4B
+#define UART1_TRIGGER_ADDRESS 0x4C
+
 
 int8_t uart1_init(void);
 int32_t uart1_send_raw(uint8_t tx_data);

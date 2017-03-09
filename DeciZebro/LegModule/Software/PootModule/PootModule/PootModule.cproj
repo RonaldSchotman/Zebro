@@ -5,7 +5,7 @@
     <ProjectVersion>7.0</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.C</ToolchainName>
     <ProjectGuid>dce6c7e3-ee26-4d79-826b-08594b9ad897</ProjectGuid>
-    <avrdevice>ATxmega32D4</avrdevice>
+    <avrdevice>ATxmega32A4U</avrdevice>
     <avrdeviceseries>xmegad</avrdeviceseries>
     <OutputType>Executable</OutputType>
     <Language>C</Language>
@@ -33,9 +33,10 @@
     <option id="common.services.basic.clock" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="common.services.basic.serial" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.utils.interrupt" value="Add" config="" content-id="Atmel.ASF" />
     <option id="xmega.drivers.pmic" value="Add" config="" content-id="Atmel.ASF" />
-    <option id="common.services.basic.serial" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="xmega.drivers.dma" value="Add" config="" content-id="Atmel.ASF" />
   </options>
   <configurations />
   <files>
@@ -85,6 +86,17 @@
     <file path="src/Config/conf_usart_serial.h" framework="" version="3.32.0" source="common\services\serial\xmega_usart\module_config\conf_usart_serial.h" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/xmega/drivers/usart/usart.c" framework="" version="3.32.0" source="xmega\drivers\usart\usart.c" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/xmega/drivers/usart/usart.h" framework="" version="3.32.0" source="xmega\drivers\usart\usart.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/hugemem/avr8/avr8_hugemem.c" framework="" version="3.32.0" source="common\services\hugemem\avr8\avr8_hugemem.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/hugemem/hugemem.h" framework="" version="3.32.0" source="common\services\hugemem\hugemem.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/hugemem/avr8/hugemem.h" framework="" version="3.32.0" source="common\services\hugemem\avr8\hugemem.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/hugemem/generic/hugemem.h" framework="" version="3.32.0" source="common\services\hugemem\generic\hugemem.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/xmega/drivers/dma/dma.c" framework="" version="3.32.0" source="xmega\drivers\dma\dma.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/xmega/drivers/dma/dma.h" framework="" version="3.32.0" source="xmega\drivers\dma\dma.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/xmega/drivers/sleep/sleep.h" framework="" version="3.32.0" source="xmega\drivers\sleep\sleep.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/sleepmgr/xmega/sleepmgr.c" framework="" version="3.32.0" source="common\services\sleepmgr\xmega\sleepmgr.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/sleepmgr/sleepmgr.h" framework="" version="3.32.0" source="common\services\sleepmgr\sleepmgr.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/sleepmgr/xmega/sleepmgr.h" framework="" version="3.32.0" source="common\services\sleepmgr\xmega\sleepmgr.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/Config/conf_sleepmgr.h" framework="" version="3.32.0" source="common\services\sleepmgr\xmega\module_config\conf_sleepmgr.h" changed="False" content-id="Atmel.ASF" />
   </files>
   <documentation help="http://asf.atmel.com/docs/3.32.0/common.applications.user_application.user_board.xmegad/html/index.html" />
   <offline-documentation help="" />
@@ -95,7 +107,8 @@
   <board id="board.user_board.xmegad" value="Add" config="" content-id="Atmel.ASF" />
 </framework-data>
     </AsfFrameworkConfig>
-    <avrtool>com.atmel.avrdbg.tool.avrdragon</avrtool>
+    <avrtool>
+    </avrtool>
     <avrtoolinterface>PDI</avrtoolinterface>
     <avrtoolserialnumber>00A200046515</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x1E9542</avrdeviceexpectedsignature>
@@ -113,7 +126,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <AvrGcc>
-  <avrgcc.common.Device>-mmcu=atxmega32d4 -B "%24(PackRepoDir)\atmel\XMEGAD_DFP\1.1.52\gcc\dev\atxmega32d4"</avrgcc.common.Device>
+  <avrgcc.common.Device>-mmcu=atxmega32a4u -B "%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.63\gcc\dev\atxmega32a4u"</avrgcc.common.Device>
   <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
   <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
   <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
@@ -128,7 +141,6 @@
   </avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
     <ListValues>
-      <Value>%24(PackRepoDir)\atmel\XMEGAD_DFP\1.1.52\include</Value>
       <Value>../src/ASF/common/boards/user_board</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/ASF/xmega/utils/preprocessor</Value>
@@ -145,6 +157,11 @@
       <Value>../src/ASF/common/services/serial/xmega_usart</Value>
       <Value>../src/ASF/common/services/serial</Value>
       <Value>../src/ASF/xmega/drivers/usart</Value>
+      <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.63\include</Value>
+      <Value>../src/ASF/common/services/hugemem</Value>
+      <Value>../src/ASF/xmega/drivers/dma</Value>
+      <Value>../src/ASF/xmega/drivers/sleep</Value>
+      <Value>../src/ASF/common/services/sleepmgr</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
@@ -162,7 +179,6 @@
   <avrgcc.assembler.general.AssemblerFlags>-mrelax -DBOARD=USER_BOARD</avrgcc.assembler.general.AssemblerFlags>
   <avrgcc.assembler.general.IncludePaths>
     <ListValues>
-      <Value>%24(PackRepoDir)\atmel\XMEGAD_DFP\1.1.52\include</Value>
       <Value>../src/ASF/common/boards/user_board</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/ASF/xmega/utils/preprocessor</Value>
@@ -179,6 +195,11 @@
       <Value>../src/ASF/common/services/serial/xmega_usart</Value>
       <Value>../src/ASF/common/services/serial</Value>
       <Value>../src/ASF/xmega/drivers/usart</Value>
+      <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.63\include</Value>
+      <Value>../src/ASF/common/services/hugemem</Value>
+      <Value>../src/ASF/xmega/drivers/dma</Value>
+      <Value>../src/ASF/xmega/drivers/sleep</Value>
+      <Value>../src/ASF/common/services/sleepmgr</Value>
     </ListValues>
   </avrgcc.assembler.general.IncludePaths>
 </AvrGcc>
@@ -187,7 +208,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <AvrGcc>
-  <avrgcc.common.Device>-mmcu=atxmega32d4 -B "%24(PackRepoDir)\atmel\XMEGAD_DFP\1.1.52\gcc\dev\atxmega32d4"</avrgcc.common.Device>
+  <avrgcc.common.Device>-mmcu=atxmega32a4u -B "%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.63\gcc\dev\atxmega32a4u"</avrgcc.common.Device>
   <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
   <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
   <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
@@ -202,7 +223,6 @@
   </avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
     <ListValues>
-      <Value>%24(PackRepoDir)\atmel\XMEGAD_DFP\1.1.52\include</Value>
       <Value>../src/ASF/common/boards/user_board</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/ASF/xmega/utils/preprocessor</Value>
@@ -219,6 +239,11 @@
       <Value>../src/ASF/common/services/serial/xmega_usart</Value>
       <Value>../src/ASF/common/services/serial</Value>
       <Value>../src/ASF/xmega/drivers/usart</Value>
+      <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.63\include</Value>
+      <Value>../src/ASF/common/services/hugemem</Value>
+      <Value>../src/ASF/xmega/drivers/dma</Value>
+      <Value>../src/ASF/xmega/drivers/sleep</Value>
+      <Value>../src/ASF/common/services/sleepmgr</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
@@ -237,7 +262,6 @@
   <avrgcc.assembler.general.AssemblerFlags>-mrelax -DBOARD=USER_BOARD</avrgcc.assembler.general.AssemblerFlags>
   <avrgcc.assembler.general.IncludePaths>
     <ListValues>
-      <Value>%24(PackRepoDir)\atmel\XMEGAD_DFP\1.1.52\include</Value>
       <Value>../src/ASF/common/boards/user_board</Value>
       <Value>../src/ASF/common/boards</Value>
       <Value>../src/ASF/xmega/utils/preprocessor</Value>
@@ -254,6 +278,11 @@
       <Value>../src/ASF/common/services/serial/xmega_usart</Value>
       <Value>../src/ASF/common/services/serial</Value>
       <Value>../src/ASF/xmega/drivers/usart</Value>
+      <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.63\include</Value>
+      <Value>../src/ASF/common/services/hugemem</Value>
+      <Value>../src/ASF/xmega/drivers/dma</Value>
+      <Value>../src/ASF/xmega/drivers/sleep</Value>
+      <Value>../src/ASF/common/services/sleepmgr</Value>
     </ListValues>
   </avrgcc.assembler.general.IncludePaths>
   <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
@@ -267,6 +296,18 @@
     <None Include="src\ASF\common\services\serial\serial.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\ASF\common\services\hugemem\avr8\avr8_hugemem.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\services\hugemem\hugemem.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\common\services\hugemem\avr8\hugemem.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\common\services\hugemem\generic\hugemem.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\common\services\serial\usart_serial.c">
       <SubType>compile</SubType>
     </Compile>
@@ -276,10 +317,31 @@
     <None Include="src\config\conf_usart_serial.h">
       <SubType>compile</SubType>
     </None>
+    <None Include="src\ASF\common\services\sleepmgr\sleepmgr.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\common\services\sleepmgr\xmega\sleepmgr.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\services\sleepmgr\xmega\sleepmgr.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\xmega\drivers\dma\dma.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\xmega\drivers\dma\dma.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\xmega\drivers\sleep\sleep.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\xmega\drivers\usart\usart.c">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\ASF\xmega\drivers\usart\usart.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\config\conf_sleepmgr.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\uart1.c">
@@ -444,17 +506,24 @@
     <Folder Include="src\ASF\common\services\delay\xmega\" />
     <Folder Include="src\ASF\common\services\gpio\" />
     <Folder Include="src\ASF\common\services\gpio\xmega_gpio\" />
+    <Folder Include="src\ASF\common\services\hugemem\" />
+    <Folder Include="src\ASF\common\services\hugemem\avr8\" />
+    <Folder Include="src\ASF\common\services\hugemem\generic\" />
     <Folder Include="src\ASF\common\services\ioport\" />
     <Folder Include="src\ASF\common\services\ioport\xmega\" />
     <Folder Include="src\ASF\common\services\serial\" />
     <Folder Include="src\ASF\common\services\serial\xmega_usart\" />
+    <Folder Include="src\ASF\common\services\sleepmgr\" />
+    <Folder Include="src\ASF\common\services\sleepmgr\xmega\" />
     <Folder Include="src\ASF\common\utils\" />
     <Folder Include="src\ASF\common\utils\interrupt\" />
     <Folder Include="src\ASF\common\utils\make\" />
     <Folder Include="src\ASF\xmega\" />
     <Folder Include="src\ASF\xmega\drivers\" />
     <Folder Include="src\ASF\xmega\drivers\cpu\" />
+    <Folder Include="src\ASF\xmega\drivers\dma\" />
     <Folder Include="src\ASF\xmega\drivers\pmic\" />
+    <Folder Include="src\ASF\xmega\drivers\sleep\" />
     <Folder Include="src\ASF\xmega\drivers\usart\" />
     <Folder Include="src\ASF\xmega\utils\" />
     <Folder Include="src\ASF\xmega\utils\assembler\" />
