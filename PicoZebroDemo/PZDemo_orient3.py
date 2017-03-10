@@ -63,9 +63,9 @@ import cv2                              # Include OpenCV library (Most important
 
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
-camera.resolution = (1920, 1088) #1920, 1088 #1280, 720 #1600, 912
-camera.framerate = 10
-rawCapture = PiRGBArray(camera, size=(1920, 1088))
+camera.resolution = (1648, 928) #1920, 1088 #1280, 720 #1600, 912 #1644x1232 #1648x928
+camera.framerate = 20
+rawCapture = PiRGBArray(camera, size=(1648, 928))
 
 #Standard hsv color values. These are obtained through code converter.py
 green = [([40,33,40],[92,153,255])] #=green
@@ -136,25 +136,49 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
         # Turn image into gray for finding contours.
         Zebro_gray = cv2.cvtColor(Zebro_adjust_gamma, cv2.COLOR_BGR2GRAY)
-
-        Zebro_kernel= np.ones((3,3),np.uint8)
-        Zebro_erosion = cv2.erode(Zebro_gray,Zebro_kernel, iterations=1) 
+        
+        Zebro_kernel= np.ones((2,2),np.uint8)
+        Zebro_erosion = cv2.erode(Zebro_gray,Zebro_kernel, iterations=1)
+        #cv2.imshow("Zebro_erosion",Zebro_erosion)
+        accumEdged = np.zeros(Zebro_res.shape[:2], dtype="uint8")
+ 
+        # loop over the blue, green, and red channels, respectively
+        for chan in cv2.split(Zebro_res):
+            # blur the channel, extract edges from it, and accumulate the set
+            # of edges for the image
+            chan = cv2.GaussianBlur(chan, (3,3),0)
+            edged = cv2.Canny(chan, 150, 250)
+            accumEdged = cv2.bitwise_or(accumEdged, edged)
             
-        Zebro_edges = cv2.Canny(Zebro_erosion, 100, 200, apertureSize = 3)
+        cv2.imshow("accum Zebro",accumEdged)
+        #
+        Zebro_kernel_d= np.ones((1,1),np.uint8)
+        Zebro_dilate = cv2.dilate(Zebro_erosion, Zebro_kernel_d, iterations=1)
+        cv2.imshow("Zebro_dilate",Zebro_dilate)
+            
+        Zebro_edges = cv2.Canny(Zebro_dilate, 150, 250, apertureSize = 3)
+        #Zebro_kernel_close = np.ones((2,2),np.uint8)
+        #Zebro_edges = cv2.morphologyEx(Zebro_edges, cv2.MORPH_CLOSE, None)
+        #Zebro_edges = cv2.morphologyEx(Zebro_edges, cv2.MORPH_GRADIENT, None)
+
 #Debugging
         cv2.imshow("edges Zebro",Zebro_edges)
 
         #Function for finding larges contour in image Zebro
-        (_,contours2,hierarchy2) = cv2.findContours(Zebro_edges,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # Find contours with hierarchy
+        (_,contours2,_) = cv2.findContours(Zebro_edges,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE) # Find contours with hierarchy
         areaArray = []
         
         for i, c in enumerate(contours2):
-            peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.01 * peri, True)
-            if len(approx) >= 2 and len(approx) <= 7:
-                area = cv2.contourArea(c)
-                areaArray.append(area)
+            #peri = cv2.arcLength(c, True)
+            #approx = cv2.approxPolyDP(c, 0.01 * peri, True)
+            #if len(approx) > 1 and len(approx) <= 7:
+            area = cv2.contourArea(c)
+            areaArray.append(area)
+            cv2.drawContours(Zebro_res, [c], -1, (255,0,255), -1)
+            
+                
         sorteddata = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
+        cv2.imshow("resolution 200 200",Zebro_res)
 
         try:
             largestcontour = sorteddata[0][1]
@@ -162,15 +186,18 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             # After random testing these where the values that kind of worked for area for QR
             # This still isn't perfect
             #if w > 33 and h >33 and w < 70 and h < 70:     For 1280, 720
-            if w > 20 and h > 20 and w < 65 and h < 75:
+            if w > 30 and h > 30:# and w < 65 and h < 75:
                 #print(w,h)
                 y = y-20
                 x = x-20
                 h=h+30
                 w=w+30
                 QR_CODE = Zebro_res[y:y+h, x:x+w]
-                cv2.imshow("QR_CODE LargestContour", QR_CODE)
-                cv2.imwrite("Pico/QR_CODE.jpg", QR_CODE)
+                try:
+                    cv2.imshow("QR_CODE LargestContour", QR_CODE)
+                    cv2.imwrite("Pico/QR_CODE.jpg", QR_CODE)
+                except cv2.error as e:
+                    pass
         except IndexError:
             pass
     except AttributeError:
@@ -426,14 +453,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         pass
     
 # debugging
-    cv2.imshow('outout QR code', QR_image)
+    #cv2.imshow('outout QR code', QR_image)
 
 #Show current vieuw of camera
 
     # Take current day
     Timetest = time.strftime("%d-%m-%Y")
     # Show the current view for debugging
-    #cv2.imshow("original %s" % Timetest,image)
+#    cv2.imshow("original %s" % Timetest,image)
 
     # show the frame
     key = cv2.waitKey(1) & 0xFF

@@ -1,3 +1,12 @@
+
+            hullArea = cv2.contourArea(cv2.convexHull(c))
+            keepSolidity = solidity > 0.8
+            try:
+                solidity = area / float(hullArea)
+            except ZeroDivisionError:
+                solidity = 0
+            #if len(approx) >= 2 and len(approx) <= 7:
+
 """
     # computes the bounding box for the contour, and draws it on the frame,
     for cnts, hier in zip(cnts, hierarchy):
