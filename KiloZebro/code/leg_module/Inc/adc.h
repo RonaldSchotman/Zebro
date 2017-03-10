@@ -23,7 +23,7 @@ void adc_write_data_to_vregs();
 void adc_request_conversion(void);
 void adc_wait_for_data(void);
 int32_t adc_get_temperature(void);
-int32_t adc_get_absolute_motor_current(void);
+int32_t adc_get_absolute_motor_current_ma(void);
 int32_t adc_check_motor_current(void);
 uint16_t adc_get_value(int32_t index);
 

@@ -163,7 +163,7 @@ int32_t time_calculate_delta(int32_t time_a, int32_t time_b){
 	return delta;
 }
 
-// Starts a timing measurement of max 255 seconds.
+// Starts a timing measurement.
 void start_timing_measurement(void){
 	if (start_flag) {
 		start_time = time_get_time_ms();

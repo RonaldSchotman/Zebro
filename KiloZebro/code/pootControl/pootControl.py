@@ -29,7 +29,7 @@ FORWARD = 0
 BACKWARD = 1
 
 class BusPirate:
-    def __init__(self, port = "/dev/ttyUSB0", baud = 115200):
+    def __init__(self, port = "/dev/ttyUSB2", baud = 115200):
         self.serial = serial.Serial(port, baud, timeout = 0)
         self.serial.write(b'#\n') # reset the BusPirate
         time.sleep(0.1) # wait a second
@@ -229,6 +229,12 @@ def main(stdscr):
                 touch_down_time_a = 0
                 touch_down_time_b = lift_off_time_b + 1
                 command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk')
+            if input_char == 'l':
+                lift_off_time_a = 0
+                lift_off_time_b = time_sync_counter + 1
+                touch_down_time_a = 0
+                touch_down_time_b = time_sync_counter + 1
+                command = Command("[0x00 30 11 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "l", 'move to lift off position')
             if command:
                 bus_pirate.transmit_command(command)
   

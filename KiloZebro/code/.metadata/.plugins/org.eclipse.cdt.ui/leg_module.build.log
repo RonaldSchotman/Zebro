@@ -1,17 +1,34 @@
-17:46:09 **** Incremental Build of configuration Debug for project leg_module ****
+15:23:04 **** Incremental Build of configuration Debug for project leg_module ****
 make all 
+Building file: ../Src/errors.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/errors.d" -MT"Src/errors.o" -o "Src/errors.o" "../Src/errors.c"
+Finished building: ../Src/errors.c
+ 
+Building file: ../Src/main.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/main.d" -MT"Src/main.o" -o "Src/main.o" "../Src/main.c"
+Finished building: ../Src/main.c
+ 
 Building file: ../Src/motion.c
 Invoking: MCU GCC Compiler
 /home/rob/zebro/KiloZebro/code/leg_module/Debug
 arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/motion.d" -MT"Src/motion.o" -o "Src/motion.o" "../Src/motion.c"
-../Src/motion.c: In function 'motion_drive_h_bridge':
-../Src/motion.c:167:2: warning: implicit declaration of function 'adc_get_absolute_motor_current_ma' [-Wimplicit-function-declaration]
-  motor_current = adc_get_absolute_motor_current_ma();
-  ^
-../Src/motion.c:162:18: warning: variable 'stabilizing_position' set but not used [-Wunused-but-set-variable]
-  static uint16_t stabilizing_position = 0;
-                  ^
 Finished building: ../Src/motion.c
+ 
+Building file: ../Src/peak.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/peak.d" -MT"Src/peak.o" -o "Src/peak.o" "../Src/peak.c"
+Finished building: ../Src/peak.c
+ 
+Building file: ../Src/zebrobus.c
+Invoking: MCU GCC Compiler
+/home/rob/zebro/KiloZebro/code/leg_module/Debug
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/zebrobus.d" -MT"Src/zebrobus.o" -o "Src/zebrobus.o" "../Src/zebrobus.c"
+Finished building: ../Src/zebrobus.c
  
 Building target: poot.elf
 Invoking: MCU GCC Linker
@@ -23,8 +40,8 @@ Generating binary and Printing size information:
 arm-none-eabi-objcopy -O binary "poot.elf" "poot.bin"
 arm-none-eabi-size "poot.elf"
    text	   data	    bss	    dec	    hex	filename
-  16152	     16	   3568	  19736	   4d18	poot.elf
+  16260	     16	   3568	  19844	   4d84	poot.elf
  
 
-17:46:09 Build Finished (took 427ms)
+15:23:05 Build Finished (took 919ms)
 

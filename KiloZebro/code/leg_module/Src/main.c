@@ -129,9 +129,10 @@ int main(void) {
 
 		/* waiting until the previous uart transfer is done can be very useful
 		 * during debugging. It ensures that you have information about
-		 * every iteration of the loop in the debug log. When I wrote this,
+		 * every iteration of the loop in the debug log. When I (Piet) wrote this,
 		 * this lowers the loop frequency by a factor 4 */
-		uart1_wait_until_done();
+//		uart1_wait_until_done();
+
 		/* send out the current state of the data over the UART,
 		 * In this function we also swap the vregs buffers. Thus,
 		 * the vregs buffer is only updated every time the data dump

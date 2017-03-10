@@ -43,6 +43,7 @@ static uint16_t stand_up_position = 0;
 static uint16_t lift_off_position = 0;
 static uint16_t last_known_position = 0;
 static uint8_t side_of_zebro = 0;
+static uint32_t increasing_delay = 0;
 
 /**
  * Process data send to any of the addresses in the motion control range.
@@ -147,7 +148,6 @@ int32_t motion_validate_state(struct motion_state motion_state) {
  */
 int32_t motion_drive_h_bridge() {
 	int32_t return_value = 0;
-	static uint32_t motor_current = 0;
 	static uint8_t over_current_counter = 0;
 	static uint16_t adc_data[ARRAY_SIZE];
 	static uint8_t fsm_flag = 0;
@@ -159,12 +159,9 @@ int32_t motion_drive_h_bridge() {
 	static uint8_t stabilize = 0;
 	static uint8_t flag = 0;
 	static uint8_t stabilizing_direction = 0;
-	static uint16_t stabilizing_position = 0;
 	static uint16_t difference_position = 0;
 	static uint16_t difference_position_complement = 0;
 	static uint16_t current_position = 0;
-
-	motor_current = adc_get_absolute_motor_current_ma();
 
 #ifdef DEBUG_VREGS
 	vregs_write(VREGS_MOTION_STD_DEV_A, (uint8_t) get_std_var());
@@ -178,247 +175,271 @@ int32_t motion_drive_h_bridge() {
 			(uint8_t) (stabilizing_direction));
 #endif
 
-	if (fsm_flag != 255) {
-		if (motor_current < 1500) {
-			if (over_current_counter > 0) {
-				over_current_counter--;
-			}
-		} else {
-			over_current_counter++;
-			if (over_current_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
-//					fsm_flag = 255;
-				errors_emergency_stop();
-				errors_report(ERRORS_MOTOR_OVERCURRENT);
-			}
+	if (adc_get_absolute_motor_current_ma() < 15000) {
+		if (over_current_counter > 0) {
+			over_current_counter--;
 		}
+	} else {
+		over_current_counter++;
+		if (over_current_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
+			motion_set_state(255, 0, 0, 0, 0, 0, 0);
+			fsm_flag = 255;
+		}
+	}
 
-		switch (state.mode) {
+	switch (state.mode) {
 
+	case MOTION_MODE_IDLE:
 		/* Function stabilizes the leg on the last known position
 		 * But: not more than a quarter of an entire circle.
 		 */
-		case MOTION_MODE_IDLE:
-			fsm_flag = 0;
-			h_bridge_disable();
-			/* Stabilizing on the last know position. */
-			current_position = encoder_get_position();
-			difference_position = abs(last_known_position - current_position);
-			difference_position_complement = ENCODER_PULSES_PER_ROTATION
-					- difference_position;
-			/* Only when wrapping around */
-			if (difference_position_complement < difference_position) {
-				difference_position = difference_position_complement;
-			}
-			/* if difference is larger than 1 quarter of a circle we don't want to correct anymore */
-			if (difference_position > (ENCODER_PULSES_PER_ROTATION >> 2)) {
-				difference_position = 0;
-			}
 
-			/* difference may never be negative */
-			/* establish the correct stabilization direction */
-			if ((difference_position > MOTION_POSITION_HYSTERESIS)) {
-				if (side_of_zebro) {
-					if (difference_position == difference_position_complement) {
-						if (current_position < last_known_position) {
-							stabilizing_direction = MOTION_DIRECTION_BACKWARD;
-							stabilizing_position = last_known_position
-									+ MOTION_POSITION_HYSTERESIS;
-						} else {
-							stabilizing_direction = MOTION_DIRECTION_FORWARD;
-						}
-					} else {
-						if (current_position < last_known_position) {
-							stabilizing_direction = MOTION_DIRECTION_FORWARD;
-						} else {
-							stabilizing_direction = MOTION_DIRECTION_BACKWARD;
-						}
-					}
-				}
-				if (!side_of_zebro) {
-					if (difference_position == difference_position_complement) {
-						if (current_position < last_known_position) {
-							stabilizing_direction = MOTION_DIRECTION_FORWARD;
-						} else {
-							stabilizing_direction = MOTION_DIRECTION_BACKWARD;
-						}
-					} else {
-						if (current_position < last_known_position) {
-							stabilizing_direction = MOTION_DIRECTION_BACKWARD;
-						} else {
-							stabilizing_direction = MOTION_DIRECTION_FORWARD;
-						}
-					}
-				}
-				stabilize = 1;
-			}
-			if (stabilize == 1) {
-				/* We only exit this loop because of move_to_point when we're back at the last_know_position. */
-				flag = motion_move_to_point(last_known_position,
-						stabilizing_direction,
-						(time_get_time_ms() + STABALIZING_TIME));
-			}
-			if (flag == 1) {
-				flag = 0;
-				stabilize = 0;
-			}
-			return 0;
+		fsm_flag = 0;
+		h_bridge_disable();
+		/* Stabilizing on the last know position. */
+		current_position = encoder_get_position();
+		difference_position = abs(last_known_position - current_position);
+		difference_position_complement = ENCODER_PULSES_PER_ROTATION
+				- difference_position;
+		/* Only when wrapping around */
+		if (difference_position_complement < difference_position) {
+			difference_position = difference_position_complement;
+		}
+		/* if difference is larger than 1 quarter of a circle we don't want to correct anymore */
+		if (difference_position > (ENCODER_PULSES_PER_ROTATION >> 2)) {
+			difference_position = 0;
+		}
 
-		case MOTION_MODE_CALIBRATE:
-			if (fsm_flag == 0) {
-				/* Set calibrate to 1 to enable reading adc-data of the hall-sensors */
-				set_calibrate(1);
-				/* Set the encoder value somewhere in the middle of its range to prevent wrapping around immediately. */
-				encoder_set_position_mid();
-				fsm_flag = 1;
-			}
-			if (fsm_flag == 1) {
-				h_bridge_drive_motor(25, !side_of_zebro,
-				H_BRIDGE_MODE_SIGN_MAGNITUDE);
-				/* If the legs current position is smaller of equal to the last position, we are touching the ground.
-				 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
-				if ((position[!side_of_zebro] <= position[side_of_zebro])) { /* We will always enter this loop the first time the calibrate-loop runs because positions are initialized equal.*/
-					start_timing_measurement();
-					/* wait for position data */
-					if (stop_and_return_timing_measurement(400)) {
-						h_bridge_disable();
-						fsm_flag = 2;
+		/* difference may never be negative */
+		/* establish the correct stabilization direction */
+		if ((difference_position > MOTION_POSITION_HYSTERESIS)) {
+			if (side_of_zebro) {
+				if (difference_position == difference_position_complement) {
+					if (current_position < last_known_position) {
+						stabilizing_direction = MOTION_DIRECTION_BACKWARD;
+					} else {
+						stabilizing_direction = MOTION_DIRECTION_FORWARD;
 					}
 				} else {
-					/* If the position condition was not satisfied, reset timer. */
-					reset_timing_measurement();
+					if (current_position < last_known_position) {
+						stabilizing_direction = MOTION_DIRECTION_FORWARD;
+					} else {
+						stabilizing_direction = MOTION_DIRECTION_BACKWARD;
+					}
 				}
 			}
-			if (fsm_flag == 2) {
-				static uint16_t n = 0;
-				h_bridge_drive_motor(25, side_of_zebro,
-				H_BRIDGE_MODE_SIGN_MAGNITUDE);
-				if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
-					adc_data[n] = adc_get_value(2); /* We're only interested in the value of the 3rd hall sensor */
-					n = n + 1;
-				}
-				if (n >= ARRAY_SIZE) {
-					n = ARRAY_SIZE - 1;
-				}
-				/* If the legs current position is larger or equal to the last position, we are touching the ground.
-				 * There is a problem when the encoder goes from 910 --> 0 or the other way around.
-				 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
-				if ((position[!side_of_zebro] >= position[side_of_zebro])) { /* Condition is different since we turn the other way */
-					start_timing_measurement();
-					/* wait for position data */
-					if (stop_and_return_timing_measurement(400)) {
-						h_bridge_disable();
-						/* Calculate the standard deviation of the collected samples. */
-						std_var = std_var_stable(adc_data, n);
-						fsm_flag = 3;
+			if (!side_of_zebro) {
+				if (difference_position == difference_position_complement) {
+					if (current_position < last_known_position) {
+						stabilizing_direction = MOTION_DIRECTION_FORWARD;
+					} else {
+						stabilizing_direction = MOTION_DIRECTION_BACKWARD;
 					}
 				} else {
-					/* If the position condition was not satisfied, reset timer. */
-					reset_timing_measurement();
+					if (current_position < last_known_position) {
+						stabilizing_direction = MOTION_DIRECTION_BACKWARD;
+					} else {
+						stabilizing_direction = MOTION_DIRECTION_FORWARD;
+					}
 				}
 			}
-			if (fsm_flag == 3) {
-				reset_peak_detected();
-				fsm_flag = 4;
-			}
-			if (fsm_flag == 4) {
-				h_bridge_drive_motor(25, !side_of_zebro,
-				H_BRIDGE_MODE_SIGN_MAGNITUDE);
-				if (get_peak_detected(2) == 1) {
+			stabilize = 1;
+		}
+		if (stabilize == 1) {
+			/* We only exit this loop because of move_to_point when we're back at the last_know_position. */
+			flag = motion_move_to_point(last_known_position,
+					stabilizing_direction,
+					(time_get_time_ms() + STABALIZING_TIME));
+		}
+		if (flag == 1) {
+			flag = 0;
+			stabilize = 0;
+		}
+		return 0;
+
+	case MOTION_MODE_CALIBRATE:
+		if (fsm_flag == 0) {
+			/* Set calibrate to 1 to enable reading adc-data of the hall-sensors */
+			set_calibrate(1);
+			/* Set the encoder value somewhere in the middle of its range to prevent wrapping around immediately. */
+			encoder_set_position_mid();
+			fsm_flag = 1;
+		}
+		if (fsm_flag == 1) {
+			h_bridge_drive_motor(25, !side_of_zebro,
+			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			/* If the legs current position is smaller of equal to the last position, we are touching the ground.
+			 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
+			if ((position[!side_of_zebro] <= position[side_of_zebro])) { /* We will always enter this loop the first time the calibrate-loop runs because positions are initialized equal.*/
+				start_timing_measurement();
+				/* wait for position data */
+				if (stop_and_return_timing_measurement(400)) {
 					h_bridge_disable();
-					encoder_reset_position();
-					last_known_position = encoder_get_position();
-					set_calibrate(0);
-					motion_stop();
-					/* Do we need to free the adc_data memory? We don't need this array after this. */
+					fsm_flag = 2;
+				}
+			} else {
+				/* If the position condition was not satisfied, reset timer. */
+				reset_timing_measurement();
+			}
+		}
+		if (fsm_flag == 2) {
+			static uint16_t n = 0;
+			h_bridge_drive_motor(25, side_of_zebro,
+			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
+				adc_data[n] = adc_get_value(2); /* We're only interested in the value of the 3rd hall sensor */
+				n = n + 1;
+			}
+			if (n >= ARRAY_SIZE) {
+				n = ARRAY_SIZE - 1;
+			}
+			/* If the legs current position is larger or equal to the last position, we are touching the ground.
+			 * There is a problem when the encoder goes from 910 --> 0 or the other way around.
+			 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
+			if ((position[!side_of_zebro] >= position[side_of_zebro])) { /* Condition is different since we turn the other way */
+				start_timing_measurement();
+				/* wait for position data */
+				if (stop_and_return_timing_measurement(400)) {
+					h_bridge_disable();
+					/* Calculate the standard deviation of the collected samples. */
+					std_var = std_var_stable(adc_data, n);
+					fsm_flag = 3;
+				}
+			} else {
+				/* If the position condition was not satisfied, reset timer. */
+				reset_timing_measurement();
+			}
+		}
+		if (fsm_flag == 3) {
+			reset_peak_detected();
+			fsm_flag = 4;
+		}
+		if (fsm_flag == 4) {
+			h_bridge_drive_motor(25, !side_of_zebro,
+			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			if (get_peak_detected(2) == 1) {
+				h_bridge_disable();
+				encoder_reset_position();
+				last_known_position = encoder_get_position();
+				set_calibrate(0);
+				motion_stop();
+				/* Do we need to free the adc_data memory? We don't need this array after this. */
 //				for (i = 0; i < (ARRAY_SIZE - 1); i++) {
 //					free(&adc_data[i]);
 //					adc_data[i] = 0;
 //				}
-				}
 			}
-
-			/* Last thing that should happen in this loop, get new encoder data. Slower is better since there is a higher chance of spotting the stopping of rotation. */
-			if (time_get_time_ms() % 200 == 0) {
-				position[0] = position[1];
-				position[1] = encoder_get_position();
-			}
-			break;
-
-		case MOTION_MODE_STAND_UP:
-			if (fsm_flag == 0) {
-				fsm_flag = 5;
-			}
-			stand_up_time = (state.lift_off_time_a * 4) /* We use lift off time because the state-machine is either at 0 or at 9 and thus it is allowed to touch the lift_off_time */
-			+ (state.lift_off_time_b * 1000);
-			if (fsm_flag == 5) {
-				fsm_flag = fsm_flag + motion_move_to_point(stand_up_position,
-				MOTION_DIRECTION_FORWARD, stand_up_time);
-			}
-			if (fsm_flag == 6) {
-				stand_up_time = 0;
-				motion_stop();
-			}
-			break;
-
-			/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
-		case MOTION_MODE_WALK_FORWARD:
-			lift_off_time = (state.lift_off_time_a * 4)
-					+ (state.lift_off_time_b * 1000);
-			touch_down_time = (state.touch_down_time_a * 4)
-					+ (state.touch_down_time_b * 1000);
-
-			if (fsm_flag == 0) {
-				fsm_flag = 8;
-			}
-
-			if (fsm_flag == 8) {
-				position_reached = motion_move_to_point(lift_off_position,
-				MOTION_DIRECTION_FORWARD, lift_off_time);
-				if ((position_reached == 1)) {
-					// state.new_data_flag = 0;
-					position_reached = 0;
-					fsm_flag = fsm_flag + 1;
-					/* We could insert a motion_stop to break out of the step, keep the fsm_flag at 9 and return to the stand-position. Just a thought. */
-				}
-			}
-			if (fsm_flag == 9) {
-				position_reached = motion_move_to_point(touch_down_position,
-				MOTION_DIRECTION_FORWARD, touch_down_time);
-				if ((position_reached == 1) && (state.new_data_flag == 1)) {
-					state.new_data_flag = 0;
-					position_reached = 0;
-					fsm_flag = fsm_flag + 1;
-				} else if ((position_reached == 1)
-						&& (state.new_data_flag == 0)) {
-					motion_stop(); /* now the fsm_flag is still 9 */
-				} /* else? assume leg didn't make it? */
-			}
-			if (fsm_flag == 10) {
-				fsm_flag = 0;
-				motion_stop(); /* if we use this, we only get into this loop when there actually is data. But then the leg stays at the touch down position. */
-			}
-			break;
-
-			/* This case is more a debug thing. */
-		case MOTION_MODE_CONTINUOUS_ROTATION:
-			/* Continuously rotate the leg forward at a 10th of the dutycycle */
-			h_bridge_drive_motor(25, side_of_zebro,
-			H_BRIDGE_MODE_SIGN_MAGNITUDE);
-			break;
-
-		default:
-			motion_stop();
-			return_value = 255;
 		}
+
+		/* Last thing that should happen in this loop, get new encoder data. Slower is better since there is a higher chance of spotting the stopping of rotation. */
+		if (time_get_time_ms() % 200 == 0) {
+			position[0] = position[1];
+			position[1] = encoder_get_position();
+		}
+		break;
+
+	case MOTION_MODE_STAND_UP:
+		if (fsm_flag == 0) {
+			fsm_flag = 5;
+		}
+		stand_up_time = (state.lift_off_time_a * 4) /* We use lift off time because the state-machine is either at 0 or at 9 and thus it is allowed to touch the lift_off_time */
+		+ (state.lift_off_time_b * 1000);
+		if (fsm_flag == 5) {
+			fsm_flag = fsm_flag + motion_move_to_point(stand_up_position,
+			MOTION_DIRECTION_FORWARD, stand_up_time);
+		}
+		if (fsm_flag == 6) {
+			stand_up_time = 0;
+			motion_stop();
+		}
+		break;
+
+		/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
+	case MOTION_MODE_WALK_FORWARD:
+		lift_off_time = (state.lift_off_time_a * 4)
+				+ (state.lift_off_time_b * 1000);
+		touch_down_time = (state.touch_down_time_a * 4)
+				+ (state.touch_down_time_b * 1000);
+
+		if (fsm_flag == 0) {
+			fsm_flag = 8;
+		}
+
+		if (fsm_flag == 8) {
+			position_reached = motion_move_to_point(lift_off_position,
+			MOTION_DIRECTION_FORWARD, lift_off_time);
+			if ((position_reached == 1)) {
+				// state.new_data_flag = 0;
+				position_reached = 0;
+				fsm_flag = fsm_flag + 1;
+				/* We could insert a motion_stop to break out of the step, keep the fsm_flag at 9 and return to the stand-position. Just a thought. */
+			}
+		}
+		if (fsm_flag == 9) {
+			position_reached = motion_move_to_point(touch_down_position,
+			MOTION_DIRECTION_FORWARD, touch_down_time);
+			if ((position_reached == 1) && (state.new_data_flag == 1)) {
+				state.new_data_flag = 0;
+				position_reached = 0;
+				fsm_flag = fsm_flag + 1;
+			} else if ((position_reached == 1) && (state.new_data_flag == 0)) {
+				motion_stop(); /* now the fsm_flag is still 9 */
+			} /* else? assume leg didn't make it? */
+		}
+		if (fsm_flag == 10) {
+			fsm_flag = 0;
+			/* if we use motion_stop(), we only get into this loop when there actually is data.
+			 * But then the leg stays at the touch down position instead of stand-position.
+			 */
+			motion_stop();
+		}
+		break;
+
+	case MOTION_MODE_CONTINUOUS_ROTATION:
+		/* This mode is more a debug thing. */
+		/* Continuously rotate the leg forward at a 10th of the dutycycle */
+		h_bridge_drive_motor(25, side_of_zebro,
+		H_BRIDGE_MODE_SIGN_MAGNITUDE);
+		break;
+
+	case MOTION_MODE_MOVE_TO_LIFT_OFF:
+		lift_off_time = (state.lift_off_time_a * 4)
+				+ (state.lift_off_time_b * 1000);
+		if (motion_move_to_point(lift_off_position,
+		MOTION_DIRECTION_FORWARD, lift_off_time)) {
+			motion_stop();
+		}
+		break;
+
+	case MOTION_MODE_PANIC_STOP:
+		/* Set fsm_flag to zero because this might not have happened and disable h-bridge for the same reason.
+		 * We will not pick up where we left off, but when going out of this state, we will just wait for the next instruction.
+		 */
+
+		/* If we got here due to overcurrent we are allowed to continue after a bit. */
+		if (fsm_flag == 255) {
+			increasing_delay = increasing_delay + 2500;
+			start_timing_measurement();
+			fsm_flag = 254;
+		}
+		if (stop_and_return_timing_measurement(increasing_delay)
+				&& fsm_flag == 254) {
+			over_current_counter = 0;
+			last_known_position = encoder_get_position();
+			motion_stop();
+		}
+		h_bridge_disable();
+		fsm_flag = 0;
+		last_known_position = encoder_get_position();
+		break;
+
+	default:
+		motion_stop();
+		return_value = 255;
 	}
 	motion_write_state_to_vregs(state);
 	return return_value;
 }
-
-//void set_next_walk_instruction(uint8_t value) {
-//	next_walk_instruction = value;
-//	return;
-//}
 
 /* Function to move the leg to a certain position (touch down, stand, or lift) with a certain direction (forward or backward).
  * dir should be 0 for forward and 1 for backward. Arrival time should be in absolute milliseconds.
@@ -439,9 +460,6 @@ uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
 	uint32_t difference_time = 0;
 	uint16_t current_position = encoder_get_position();
 
-	/* TODO: build in safety. If the leg needs to produce to much power, cut the movement. Maybe after # many tries the robot can conclude the leg is stuck forever. Or try with increasing periods.
-	 * TODO: the difference calculator does not yet take an encoder wrap around into account.
-	 */
 	if (dir == 1) {
 		/* Later on we will check if the time difference is large than zero. */
 		difference_time = time_calculate_delta(arrival_time,
@@ -471,14 +489,17 @@ uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
 			dutycycle = 0; /* We are not actually sending this value to the h-bridge, because that would be bad. */
 		}
 		/* Check if the leg arrived. */
-		if (((current_position >= position - MOTION_POSITION_HYSTERESIS)
-				&& (current_position <= (position + MOTION_POSITION_HYSTERESIS))
-				&& (!side_of_zebro))
-				|| ((current_position <= position + MOTION_POSITION_HYSTERESIS)
-						&& (current_position
-								>= (position - MOTION_POSITION_HYSTERESIS))
-						&& (side_of_zebro))) {
-//		if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
+//		if (((current_position >= position - MOTION_POSITION_HYSTERESIS)
+//				&& (current_position <= (position + MOTION_POSITION_HYSTERESIS))
+//				&& (!side_of_zebro))
+//				|| ((current_position <= position + MOTION_POSITION_HYSTERESIS)
+//						&& (current_position
+//								>= (position - MOTION_POSITION_HYSTERESIS))
+//						&& (side_of_zebro))) {
+		if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
+			if (increasing_delay > 2500) {
+				increasing_delay = increasing_delay - 2500;
+			}
 			last_known_position = position;
 			arrival_time = 0;
 			status = 1;
@@ -523,14 +544,17 @@ uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
 			dutycycle = 0;
 		}
 		/* Check if the leg arrived. */
-		if (((current_position <= position + MOTION_POSITION_HYSTERESIS)
-				&& (current_position >= (position - MOTION_POSITION_HYSTERESIS))
-				&& (!side_of_zebro))
-				|| ((current_position >= position + MOTION_POSITION_HYSTERESIS)
-						&& (current_position
-								<= (position + MOTION_POSITION_HYSTERESIS))
-						&& (side_of_zebro))) {
-//		if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
+//		if (((current_position <= position + MOTION_POSITION_HYSTERESIS)
+//				&& (current_position >= (position - MOTION_POSITION_HYSTERESIS))
+//				&& (!side_of_zebro))
+//				|| ((current_position >= position - MOTION_POSITION_HYSTERESIS)
+//						&& (current_position
+//								<= (position + MOTION_POSITION_HYSTERESIS))
+//						&& (side_of_zebro))) {
+		if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
+			if (increasing_delay > 2500) {
+				increasing_delay = increasing_delay - 2500;
+			}
 			last_known_position = position;
 			arrival_time = 0;
 			status = 1;
@@ -615,13 +639,13 @@ uint32_t isqrt(uint32_t x) {
 void motion_set_state(uint8_t mode, uint8_t lift_off_time_a,
 		uint8_t lift_off_time_b, uint8_t touch_down_time_a,
 		uint8_t touch_down_time_b, uint8_t new_data_flag, uint8_t crc) {
-	new_state.mode = mode;
-	new_state.lift_off_time_a = lift_off_time_a;
-	new_state.lift_off_time_b = lift_off_time_b;
-	new_state.touch_down_time_a = touch_down_time_a;
-	new_state.touch_down_time_b = touch_down_time_b;
-	new_state.new_data_flag = new_data_flag;
-	new_state.crc = crc;
+	state.mode = mode;
+	state.lift_off_time_a = lift_off_time_a;
+	state.lift_off_time_b = lift_off_time_b;
+	state.touch_down_time_a = touch_down_time_a;
+	state.touch_down_time_b = touch_down_time_b;
+	state.new_data_flag = new_data_flag;
+	state.crc = crc;
 	motion_write_state_to_vregs(state);
 }
 
