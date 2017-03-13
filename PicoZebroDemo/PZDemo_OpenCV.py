@@ -15,8 +15,10 @@ except NameError:
 
 # import detection functions
 from Functions.detection import detection_functions
+from Functions.calibration import calibration_functions
 
 Detect = detection_functions()
+Calib = calibration_functions()
 
 # import the necessary packages
 from picamera.array import PiRGBArray   # Pi camera Libary capture BGR video
