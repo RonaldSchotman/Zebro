@@ -17,7 +17,7 @@ class detection_functions:
 
         mask_green = cv2.morphologyEx(image_green, cv2.MORPH_CLOSE, kernel)
         mask_green = cv2.dilate(mask_green, None, iterations=1)
-        cv2.imshow("mask_green",mask_green)
+        #cv2.imshow("mask_green",mask_green)
 
         gray_green = cv2.cvtColor(mask_green, cv2.COLOR_BGR2GRAY)
 
@@ -26,6 +26,7 @@ class detection_functions:
         Pico_Zebro_Found = 0
         
         Pico_Zebro_0 = 0
+        green_area = image[0:0+0, 0:0+0]
         Pico_Zebro_1 = 0
         Pico_Zebro_2 = 0
         Pico_Zebro_3 = 0
@@ -41,8 +42,8 @@ class detection_functions:
             if (w1 > 35) and (h1 > 35):
                 Pico_Zebro_Found  = Pico_Zebro_Found + 1
                 try:
-                    cv2.rectangle(image,(x1-20,y1-20),(x1+w1+20,y1+h1+20),(0,255,0),2)
-                    cv2.putText(image,'green Detected',(x1+w1+30,y1+h1+20),0,0.3,(0,255,0))
+                    cv2.rectangle(image,(x1-40,y1-40),(x1+w1+40,y1+h1+40),(0,255,0),2)
+                    cv2.putText(image,'green Detected',(x1+w1+50,y1+h1+40),0,0.3,(0,255,0))
 
                     #green_area = image[y1-10:y1+h1+10, x1-10:x1+w1+10]
                     #cv2.imwrite("Pico_Zebro/Pico_Zebro_%d.jpg" % Pico_Zebro_Found, green_area)
@@ -63,7 +64,7 @@ class detection_functions:
                 Pico_Zebro_8 = 0
                 Pico_Zebro_9 = 0
             elif Pico_Zebro_Found == 1:
-                green_area = image[y1-10:y1+h1+10, x1-10:x1+w1+10]
+                green_area = image[y1-20:y1+h1+20, x1-20:x1+w1+20]
                 Pico_Zebro_0 = 1
             elif Pico_Zebro_Found == 2:
                 Pico_Zebro_1 = 1

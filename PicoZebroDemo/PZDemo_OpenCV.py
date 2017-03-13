@@ -89,11 +89,58 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image_green = cv2.bitwise_and(image_blurred, image_blurred, mask = mask_green)
 
     Pico_Zebro = []
-    Total = Detect.Green(image, image_green)
-    Pico_Zebro.append(Total)    #HERE is in a array how many Zebro's are found (MAX 10)
-    print(Pico_Zebro)
+    Found_Zebro = Detect.Green(image, image_green)
+    Pico_Zebro.append(Found_Zebro)    #HERE is in a array how many Zebro's are found (MAX 10)
+    #print(Pico_Zebro)
 
 #Step 2 Find QR code in detected green area
+    try:
+        #cv2.imshow("Pico_Zebro",Found_Zebro)
+        Zebro_height, Zebro_width = Found_Zebro.shape[:2]
+        
+        Zebro_res = cv2.resize(Found_Zebro, (200, 200),interpolation = cv2.INTER_CUBIC)
+        
+        #adjusting Gamma level if highly needed
+        Zebro_adjust_gamma = Calib.adjust_gamma(Zebro_res, 1)
+
+        # Turn image into gray for finding contours.
+        Zebro_gray = cv2.cvtColor(Zebro_adjust_gamma, cv2.COLOR_BGR2GRAY)
+        cv2.imshow("Zebro_gray",Zebro_gray)
+
+        Zebro_edges = cv2.Canny(Zebro_gray, 150, 250, apertureSize = 3)
+        cv2.imshow("edges Zebro",Zebro_edges)
+
+        #Function for finding larges contour in image Zebro
+        (_,contours2,_) = cv2.findContours(Zebro_edges,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE) # Find contours with hierarchy
+        areaArray = []
+        
+        for i, c in enumerate(contours2):
+            area = cv2.contourArea(c)
+            areaArray.append(area)
+            #cv2.drawContours(Zebro_res, [c], -1, (255,0,255), -1)
+
+        sorteddata = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
+        cv2.imshow("resolution 200 200",Zebro_res)
+
+        try:
+            largestcontour = sorteddata[0][1]
+            x, y, w, h = cv2.boundingRect(largestcontour)
+            if w > 20 and h > 20:# and w < 100 and h < 100:
+                print(w,h)
+                y = y-20
+                x = x-20
+                h=h+30
+                w=w+30
+                QR_CODE = Zebro_res[y:y+h, x:x+w]
+                try:
+                    cv2.imshow("QR_CODE LargestContour", QR_CODE)
+                    cv2.imwrite("Pico/QR_CODE.jpg", QR_CODE)
+                except cv2.error as e:
+                    pass
+        except IndexError:
+            pass        
+    except (AttributeError, TypeError, cv2.error) as e:
+        pass
     
     #DEBUG CV2.IMSHOW
     #cv2.imshow("image_light" ,image_light)
