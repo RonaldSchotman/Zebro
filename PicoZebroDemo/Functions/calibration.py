@@ -26,5 +26,5 @@ class calibration_functions:
         clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(2,2))
         cl = clahe.apply(l)
         limg = cv2.merge((cl,a,b))
-        #final = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-        return cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+        final = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+        return final

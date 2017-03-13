@@ -99,6 +99,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     cl = clahe.apply(l)
     limg = cv2.merge((cl,a,b))
     final = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+    cv2.imshow("final",final)
 
     # Adjusting Gamma level if highly needed 1 means nothing changes
     adjusted = funct.adjust_gamma(final, 0.75)
