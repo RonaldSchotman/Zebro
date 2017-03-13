@@ -63,6 +63,7 @@ class detection_functions:
                 Pico_Zebro_8 = 0
                 Pico_Zebro_9 = 0
             elif Pico_Zebro_Found == 1:
+                green_area = image[y1-10:y1+h1+10, x1-10:x1+w1+10]
                 Pico_Zebro_0 = 1
             elif Pico_Zebro_Found == 2:
                 Pico_Zebro_1 = 1
@@ -86,4 +87,5 @@ class detection_functions:
                 print("TO MANY ZEBROS")
         PZ = [Pico_Zebro_0, Pico_Zebro_1, Pico_Zebro_2, Pico_Zebro_3, Pico_Zebro_4,
               Pico_Zebro_5, Pico_Zebro_6, Pico_Zebro_7, Pico_Zebro_8, Pico_Zebro_9]
-        return PZ
+        
+        return green_area

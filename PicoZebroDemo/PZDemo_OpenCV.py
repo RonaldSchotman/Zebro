@@ -76,6 +76,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image_blurred = cv2.GaussianBlur(image_gamma, (11, 11), 0)
 
 #Step 1 Detect Green (right now I am quite happy with how well this works, not perfect but good enough)
+    #should  still return coordinates 
     image_hsv = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2HSV)
 
     #green the important color
@@ -90,7 +91,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     Pico_Zebro = []
     Total = Detect.Green(image, image_green)
     Pico_Zebro.append(Total)    #HERE is in a array how many Zebro's are found (MAX 10)
-    #print(Pico_Zebro)
+    print(Pico_Zebro)
+
+#Step 2 Find QR code in detected green area
     
     #DEBUG CV2.IMSHOW
     #cv2.imshow("image_light" ,image_light)
