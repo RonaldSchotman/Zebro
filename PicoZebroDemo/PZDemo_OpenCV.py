@@ -86,11 +86,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     #should  still return coordinates
 
     #USeless functions
-    #image_gray = cv2.cvtColor(image_blur, cv2.COLOR_BGR2GRAY)
+    image_gray = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2GRAY)
 
     #image_test = cv2.adaptiveThreshold(image_gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                   #                     cv2.THRESH_BINARY,111,31)
-    #cv2.imwrite("Pico/image_test.jpg", image_test)
+    cv2.imwrite("Pico/image_test2.jpg", image_gray)
     #cv2.imshow("image_test", image_test)
     
     image_hsv = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2HSV)
