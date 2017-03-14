@@ -454,17 +454,22 @@ int32_t motion_drive_h_bridge() {
 uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
 		uint32_t arrival_time) {
 	uint8_t status = 0; /* Turns 1 when the point was reached. */
-	int32_t direction = side_of_zebro ^ dir; /* Bitwise xor makes direction correct for any dir on any leg. */
-	uint8_t dutycycle = 0;
+	uint8_t direction = side_of_zebro ^ dir; /* Bitwise xor makes direction correct for any dir on any leg. */
+	int16_t dutycycle = 0;
 	uint16_t difference_position = 0;
 	uint32_t difference_time = 0;
 	uint16_t current_position = encoder_get_position();
+	static int32_t time_old_fast_loop = 0, time_old_slow_loop = 0,
+			time_old_position = 0, current_speed = 0;
+	static int16_t error_i = 0;
+	static int16_t error_old, error_d, error, pid_output = 0; /* doesn't need to be static. For debug it is */
+	int32_t delta_time;
+	static uint32_t desired_speed = 0;
+	static uint16_t Kp = 400, Ki = 240, Kd = 14, position_old = 0;
+
+	difference_position = abs(position - current_position);
 
 	if (dir == 1) {
-		/* Later on we will check if the time difference is large than zero. */
-		difference_time = time_calculate_delta(arrival_time,
-				time_get_time_ms());
-		difference_position = abs(position - current_position);
 		/* Calculate the number of pulses before we reach the correct position. */
 		if (!side_of_zebro) {
 			if (position < current_position) {
@@ -481,44 +486,8 @@ uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
 			difference_position = 0; /* This is safe since dutycycle will be zero because of this. */
 		}
 
-		/* Calculate the dutycycle necessary to get the leg at the right position at the right time. */
-		if ((difference_time > 0) && (difference_position > 0)) {
-			dutycycle = (uint8_t) ((difference_position * 1000)
-					/ (DUTYCYCLE_PER_PULSE_PER_SECOND * difference_time));
-		} else {
-			dutycycle = 0; /* We are not actually sending this value to the h-bridge, because that would be bad. */
-		}
-		/* Check if the leg arrived. */
-//		if (((current_position >= position - MOTION_POSITION_HYSTERESIS)
-//				&& (current_position <= (position + MOTION_POSITION_HYSTERESIS))
-//				&& (!side_of_zebro))
-//				|| ((current_position <= position + MOTION_POSITION_HYSTERESIS)
-//						&& (current_position
-//								>= (position - MOTION_POSITION_HYSTERESIS))
-//						&& (side_of_zebro))) {
-		if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
-			if (increasing_delay > 2500) {
-				increasing_delay = increasing_delay - 2500;
-			}
-			last_known_position = position;
-			arrival_time = 0;
-			status = 1;
-		} else {
-			if (dutycycle != 0) {
-				h_bridge_drive_motor(dutycycle, direction,
-				H_BRIDGE_MODE_SIGN_MAGNITUDE);
-			} else {
-				/* just keep turning. Don't really know if this is nice. We'll see. */
-				h_bridge_drive_motor(25, direction,
-				H_BRIDGE_MODE_SIGN_MAGNITUDE);
-			}
-		}
 		/* Forward */
 	} else if (dir == 0) {
-		difference_time = time_calculate_delta(arrival_time,
-				time_get_time_ms());
-		difference_position = abs(position - current_position);
-
 		/* Calculate the number of pulses before we reach the correct position. */
 		if (!side_of_zebro) {
 			if (position > current_position) {
@@ -534,16 +503,11 @@ uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
 			/* should never happen */
 			difference_position = 0; /* This is safe since dutycycle will be zero because of this. */
 		}
+	} else {
+		// do nothing
+	}
 
-		/* Calculate the dutycycle necessary to get the leg at the right position at the right time. */
-		if (difference_time > 0) {
-			dutycycle = (uint8_t) ((difference_position * 1000)
-					/ (DUTYCYCLE_PER_PULSE_PER_SECOND * difference_time));
-		} else {
-			difference_time = 0;
-			dutycycle = 0;
-		}
-		/* Check if the leg arrived. */
+	/* Check if the leg arrived. OLD STATEMENT FOR DIR=0 */
 //		if (((current_position <= position + MOTION_POSITION_HYSTERESIS)
 //				&& (current_position >= (position - MOTION_POSITION_HYSTERESIS))
 //				&& (!side_of_zebro))
@@ -551,26 +515,106 @@ uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
 //						&& (current_position
 //								<= (position + MOTION_POSITION_HYSTERESIS))
 //						&& (side_of_zebro))) {
-		if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
-			if (increasing_delay > 2500) {
-				increasing_delay = increasing_delay - 2500;
-			}
-			last_known_position = position;
-			arrival_time = 0;
-			status = 1;
+	/* Later on we will check if the time difference is large than zero. */
+	difference_time = time_calculate_delta(arrival_time, time_get_time_ms());
+
+	/* Calculate the dutycycle necessary to get the leg at the right position at the right time. */
+	if ((difference_time > 0) && (difference_position > 0)) {
+//		if (time_calculate_delta(time_get_time_ms(), time_old_fast_loop) >= 1) {
+//			time_old_fast_loop = time_get_time_ms();
+		delta_time = time_calculate_delta(time_get_time_ms(), time_old_fast_loop);
+		time_old_fast_loop = time_get_time_ms();
+		if (delta_time < 1) {
+			delta_time = 1;
+		}
+		if (time_calculate_delta(time_get_time_ms(), time_old_slow_loop)
+				>= 10) {
+			time_old_slow_loop = time_get_time_ms();
+			desired_speed = ((((difference_position) * 1000) << 12)
+					/ difference_time) >> 12;
+			vregs_write(VREGS_MOTION_DESIRED_SPEED, (uint8_t) (desired_speed >> 3));
+		}
+		if ((abs(position_old - current_position)) >= 2) {
+			current_speed = (((abs(position_old - current_position)) * 1000)
+					/ (time_calculate_delta(time_get_time_ms(),
+							time_old_position)));
+			time_old_position = time_get_time_ms();
+			position_old = current_position;
+		}
+		vregs_write(VREGS_DEBUG_FLAG_1, ((current_speed)>>3));
+		error = desired_speed - current_speed;
+		vregs_write(VREGS_DEBUG_FLAG_2, ((error)>>3));
+		error_d = ((error - error_old)*1000) / delta_time;
+
+		/* error is a number between 0 and 1820. Max is 1820 - 0; error_d max 1820-0/1 = 1820.; error_i max is 1820*2, so gets large really fast.
+		 * Say we want all K-values between 0 and 100. Then pid_output has a max of: 100*1820 + 150*1820 + 100*1820 = 350*1820
+		 */
+		pid_output = ((Kp * error) + (Ki * error_i) + (Kd * error_d));
+
+		vregs_write(VREGS_MOTION_PID_OUTPUT, (uint8_t) (pid_output >> 11));
+
+		/* If motor is at max torque we want to stop the integrating error. Max torque is defined as: 2^19. */
+		if (abs(pid_output) >= 524287
+				&& (((error >= 0) && (error_i >= 0))
+						|| ((error < 0) && (error_i < 0)))) {
+			/* Leave error_i as it was. */
 		} else {
-			if (dutycycle != 0) {
-				h_bridge_drive_motor(dutycycle, direction,
-				H_BRIDGE_MODE_SIGN_MAGNITUDE);
-			} else {
-				/* just keep turning. Don't really know if this is nice. We'll see. */
-				h_bridge_drive_motor(25, direction,
-				H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			error_i = error_i + ((((error<<8) * delta_time)/1000)>>8);
+		}
+
+		error_old = error;
+		/* this should be between -250 and 250! */
+		dutycycle = (desired_speed >> 3) + (pid_output >> 11);
+
+		if (dutycycle > 250 || dutycycle < -250) {
+			if (dutycycle > 0) {
+				dutycycle = 250;
+			}
+			if (dutycycle < 0) {
+				dutycycle = -250;
 			}
 		}
+		if (dutycycle < 0) {
+			direction = !direction;
+			dutycycle = (uint8_t)(-dutycycle);
+		} else {
+			dutycycle = (uint8_t) dutycycle;
+		}
 	} else {
-		// do nothing
+		difference_time = 0;
+		dutycycle = 0; /* We are not actually sending this value to the h-bridge, because that would be bad. */
 	}
+	/* Check if the leg arrived. OLD STATEMENT FOR DIR=1 */
+//		if (((current_position >= position - MOTION_POSITION_HYSTERESIS)
+//				&& (current_position <= (position + MOTION_POSITION_HYSTERESIS))
+//				&& (!side_of_zebro))
+//				|| ((current_position <= position + MOTION_POSITION_HYSTERESIS)
+//						&& (current_position
+//								>= (position - MOTION_POSITION_HYSTERESIS))
+//						&& (side_of_zebro))) {
+	if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
+		if (increasing_delay > 2500) {
+			increasing_delay = increasing_delay - 2500;
+		}
+		last_known_position = position;
+		arrival_time = 0;
+		/* Null things when step is done, otherwise it influences the next step. */
+		error_i = 0;
+		desired_speed = 0;
+		current_speed = 0;
+		position_old = 0;
+		status = 1;
+	} else {
+		if (dutycycle > 0) {
+			h_bridge_drive_motor(dutycycle, direction,
+			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+		} else {
+			/* just keep turning. Don't really know if this is nice. We'll see. */
+			h_bridge_drive_motor(25, direction,
+			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+		}
+	}
+
 #ifdef DEBUG_VREGS
 	vregs_write(VREGS_MOTION_ARRIVAL_TIME, (arrival_time >> 10));
 	vregs_write(VREGS_MOTION_DUTYCYCLE, dutycycle);

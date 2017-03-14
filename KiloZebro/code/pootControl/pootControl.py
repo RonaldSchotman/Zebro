@@ -29,7 +29,7 @@ FORWARD = 0
 BACKWARD = 1
 
 class BusPirate:
-    def __init__(self, port = "/dev/ttyUSB2", baud = 115200):
+    def __init__(self, port = "/dev/ttyUSB1", baud = 115200):
         self.serial = serial.Serial(port, baud, timeout = 0)
         self.serial.write(b'#\n') # reset the BusPirate
         time.sleep(0.1) # wait a second
