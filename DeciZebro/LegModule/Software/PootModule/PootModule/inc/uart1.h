@@ -18,15 +18,16 @@
 #define __UART1_H__
 
 #define UART1_BAUD_RATE
-#define UART1_TX_PIN		GPIO_PIN_6
-#define UART1_TX_BANK		GPIOB
-#define UART1_RX_PIN		GPIO_PIN_10
-#define UART1_RX_BANK		GPIOA
+#define UART1_TX_PIN		PIN3_bm
+#define UART1_TX_PORT		PORTD
+#define UART1_RX_PIN		PIN2_bm
+#define UART1_RX_PORT		PORTD
 
 #define UART1_BAUD_RATE_DIVIDER		0x18
 
 #define UART1_DATA_REGISTER_ADDRESS 0x4B
-#define UART1_TRIGGER_ADDRESS 0x4C
+#define UART1_TRIGGER_ADDRESS		0x4C
+
 
 
 int8_t uart1_init(void);

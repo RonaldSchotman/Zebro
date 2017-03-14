@@ -7,7 +7,7 @@
  * Filename: uart1.h
  *
  * Description:
- * Code to drive UARTC0, used for debugging
+ * Code to drive UARTD0, used for debugging
  *
  * Authors:
  * Piet De Vaere -- Piet@DeVae.re
@@ -29,15 +29,15 @@ int8_t uart1_init(void){
 	uart1_pins_init();
 	
 	/* Enable USART transmitter */
-	USARTC0_CTRLB |= USART_TXEN_bm;
+	USARTD0_CTRLB |= USART_TXEN_bm;
 	/* Set communication mode to UART */
-	USARTC0_CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
+	USARTD0_CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
 	/* Set data frame length to 8-bit */
-	USARTC0_CTRLC |= USART_CHSIZE_8BIT_gc;
+	USARTD0_CTRLC |= USART_CHSIZE_8BIT_gc;
 	/* Set baud rate to 115.2 kbaud */
 	/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
-	USARTC0_BAUDCTRLA |= 0x83; /* 131 */
-	USARTC0_BAUDCTRLB |= (0b1101<<4) /* -3 */
+	USARTD0_BAUDCTRLA |= 0x83; /* 131 */
+	USARTD0_BAUDCTRLB |= (0b1101<<4) /* -3 */
 	
 	return 0;
 }
@@ -46,7 +46,7 @@ int8_t uart1_init(void){
  * Initialise the UART, and set it up for continuously transferring information
  * from the vregs over DMA.
  */
-int32_t uart1_init_dma(void){
+int8_t uart1_init_dma(void){
 
 	/*
 	 * FIRST set up the UART
@@ -54,15 +54,15 @@ int32_t uart1_init_dma(void){
 	uart1_pins_init();
 
 	/* Enable USART transmitter */
-	USARTC0_CTRLB |= USART_TXEN_bm;
+	USARTD0_CTRLB |= USART_TXEN_bm;
 	/* Set communication mode to UART */
-	USARTC0_CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
+	USARTD0_CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
 	/* Set data frame length to 8-bit */
-	USARTC0_CTRLC |= USART_CHSIZE_8BIT_gc;
+	USARTD0_CTRLC |= USART_CHSIZE_8BIT_gc;
 	/* Set baud rate to 115.2 kbaud */
 	/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
-	USARTC0_BAUDCTRLA |= 0x83; /* 131 */
-	USARTC0_BAUDCTRLB |= (0b1101<<4) /* -3 */
+	USARTD0_BAUDCTRLA |= 0x83; /* 131 */
+	USARTD0_BAUDCTRLB |= (0b1101<<4) /* -3 */
 	
 
 	/*
@@ -81,8 +81,10 @@ int32_t uart1_init_dma(void){
 	DMA_CH3_ADDRCTRL |= DMA_CH_SRCDIR_INC_gc;
 	/* Do not alter destination address, leave reload setting at default: none*/
 	DMA_CH3_ADDRCTRL |= DMA_CH_DESTDIR_FIXED_gc;
-	/* Set UART as a trigger for the DMA */
-	DMA_CH3_TRIGSRC = UART1_TRIGGER_ADDRESS;
+	/* Turn trigger for DMA off, use only software triggers*/
+	/* Set UART as trigger for DMA to run continuously*/
+	DMA_CH3_TRIGSRC = 0x00;
+	//DMA_CH3_TRIGSRC = UART1_TRIGGER_ADDRESS;
 	/* Set transfer count in bytes to size of VREGS */
 	DMA_CH3_TRFCNT	= VREGS_FILE_TOTAL_SIZE;
 	/* Set repeat count to unlimited */
@@ -90,9 +92,10 @@ int32_t uart1_init_dma(void){
 	/* Read the data from the VREGS */
 	DMA_CH3_SRCADDR0 =  (uint8_t) vregs_get_buffer_address();
 	/* And write it to the UART */
-	DMA_CH3_DESTADDR0 = (uint8_t) &USARTC0_DATA;
-	/* Set single shot and repeat mode */
-	DMA_CH3_CTRLA |= DMA_CH_SINGLE_bm;
+	DMA_CH3_DESTADDR0 = (uint8_t) &USARTD0_DATA;
+	/* Set repeat mode, do not set singe shot mode if you want to trigger in software
+	 * Do set singe shot mode when you want to continuously tranfer*/
+	//DMA_CH3_CTRLA |= DMA_CH_SINGLE_bm;
 	DMA_CH3_CTRLA |= DMA_CH_REPEAT_bm;
 		
 	/*
@@ -106,9 +109,9 @@ int32_t uart1_init_dma(void){
 /**
  * Wait for the last UART data dump to be finished
  */
-int32_t uart1_wait_until_done(void){
+int8_t uart1_wait_until_done(void){
 	/* wait until the DMA says the transfer is done */
-	while(!(DMA1->ISR & DMA_ISR_TCIF4));
+	while(!(DMA_CH3_CTRLB & DMA_CH_CHBUSY_bm);
 	/* we don't reset the flag here, because that is done in
 	 * uart1_trigger_dma_once() */
 
@@ -120,66 +123,44 @@ int32_t uart1_wait_until_done(void){
 /**
  * Write the correct data to the vregs, and transmit it over the UART
  */
-int32_t uart1_trigger_dma_once(void){
+int8_t uart1_trigger_dma_once(void){
 	/* if the transfer is done */
-	if(DMA1->ISR & DMA_ISR_TCIF4){
+	if(DMA_CH3_CTRLB & DMA_CH_CHBUSY_bm){
 		/* copy the right data in to the vreg data buffer */
 		vregs_writeout();
 		/* clear the flag */
-		DMA1->IFCR |= DMA_IFCR_CTCIF4;
-		/* disable the channel */
-		DMA1_Channel4->CCR &= ~DMA_CCR_EN;
-		/* set the origin of the data */
-		DMA1_Channel4->CMAR = (uint32_t) vregs_get_buffer_address();
-		/* set the number of bytes to be transfered */
-		DMA1_Channel4->CNDTR = VREGS_FILE_TOTAL_SIZE;
-		/* enable the channel: send the data */
-		DMA1_Channel4->CCR |= DMA_CCR_EN;
+		DMA_CH3_CTRLB |= DMA_CH_TRNIF_bm;
+		/* enable the channel */
+		DMA_CH3_CTRLA |= DMA_ENABLE_bm;
+		/* Request transfer */
+		DMA_CH3_CTRLA |= DMA_CH_TRFREQ_bm;
 	}
 
 	return 0;
 }
 
 /**
- * Configures the pins corresponding to UART1
+ * Configures the pins corresponding to USARTD0
  */
-int32_t uart1_pins_init(void){
-	GPIO_InitTypeDef  GPIO_InitStruct;
-
-	/* enable UART1 GPIO clocks */
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-
-	/* set the GPIO pins */
-	GPIO_InitStruct.Mode  = GPIO_MODE_AF_PP;
-	GPIO_InitStruct.Pull  = GPIO_PULLUP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-
-	GPIO_InitStruct.Alternate = GPIO_AF0_USART1;
-	GPIO_InitStruct.Pin = UART1_TX_PIN;
-	HAL_GPIO_Init(UART1_TX_BANK, &GPIO_InitStruct);
-
-	GPIO_InitStruct.Alternate = GPIO_AF0_USART1;
-	GPIO_InitStruct.Pin = GPIO_PIN_6;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
-	GPIO_InitStruct.Pin = UART1_RX_PIN;
-	HAL_GPIO_Init(UART1_RX_BANK, &GPIO_InitStruct);
+int8_t uart1_pins_init(void){
+	/* Configure pins as output, write '1' to direction register */
+	LEDS_LD1_PORT.DIR |= LEDS_LD1_PIN;
+	LEDS_LD2_PORT.DIR |= LEDS_LD2_PIN;
 
 	return 0;
 }
 
 /**
- * Send out a raw byte over UART1
+ * Send out a raw byte over USART
  * This function uses busy waits
+ * This function is used for debug purposes
  */
-int32_t uart1_send_raw(uint8_t tx_data){
+int8_t uart1_send_raw(uint8_t tx_data){
 	/* wait for transmit data register to be empty */
-	while(!(USART1->ISR & USART_ISR_TXE));
+	while(!(USARTD0_STATUS & USART_TXCIF_bm));
 
 	/* place new data in transmit data register */
-	USART1->TDR = tx_data;
+	USARTD0_DATA = tx_data;
 
 	return 0;
 }
