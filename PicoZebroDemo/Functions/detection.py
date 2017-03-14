@@ -17,7 +17,7 @@ class detection_functions:
 
         mask_green = cv2.morphologyEx(image_green, cv2.MORPH_CLOSE, kernel)
         mask_green = cv2.dilate(mask_green, None, iterations=1)
-        #cv2.imshow("mask_green",mask_green)
+        cv2.imshow("mask_green",mask_green)
 
         gray_green = cv2.cvtColor(mask_green, cv2.COLOR_BGR2GRAY)
 
