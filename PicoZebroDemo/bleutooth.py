@@ -22,18 +22,6 @@ except NameError:
 
 import time
 import bluetooth
-#from wakeonlan import *
-
-
-#phone = "ff:ff:ff:ff:ff:ff"
-
-#def search():         
-#  devices = bluetooth.discover_devices(duration = 5, lookup_names = True)
-#  return devices
-
-#while True:
-#    results = search()
-#    print(results)
 
 print("performing inquiry...")
 

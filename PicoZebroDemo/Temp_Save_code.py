@@ -1,3 +1,16 @@
+#from wakeonlan import *
+
+
+#phone = "ff:ff:ff:ff:ff:ff"
+
+#def search():         
+#  devices = bluetooth.discover_devices(duration = 5, lookup_names = True)
+#  return devices
+
+#while True:
+#    results = search()
+#    print(results)
+
 
             hullArea = cv2.contourArea(cv2.convexHull(c))
             keepSolidity = solidity > 0.8
