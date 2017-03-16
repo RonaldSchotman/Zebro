@@ -18,6 +18,7 @@ class detection_functions:
         mask_green = cv2.morphologyEx(image_green, cv2.MORPH_CLOSE, kernel)
         mask_green = cv2.dilate(mask_green, None, iterations=1)
         cv2.imshow("mask_green",mask_green)
+        cv2.imwrite("image_GReen.jpg", mask_green)
 
         gray_green = cv2.cvtColor(mask_green, cv2.COLOR_BGR2GRAY)
 
@@ -84,9 +85,39 @@ class detection_functions:
                 Pico_Zebro_8 = 1
             elif Pico_Zebro_Found == 10:
                 Pico_Zebro_9 = 1
-            elif Pico_Zebro_Found == 11:
-                print("TO MANY ZEBROS")
+            #elif Pico_Zebro_Found == 11:
+                #print("TO MANY ZEBROS")
         PZ = [Pico_Zebro_0, Pico_Zebro_1, Pico_Zebro_2, Pico_Zebro_3, Pico_Zebro_4,
               Pico_Zebro_5, Pico_Zebro_6, Pico_Zebro_7, Pico_Zebro_8, Pico_Zebro_9]
         
         return green_area
+
+
+    def Filter_Green(self, image, image_filter, image_green_gray):
+        #image_filter = cv2.addWeighted(image_filter,1,image_green_gray,1,0)
+        #cv2.imshow("filter 2", image_filter)
+        image_filter = cv2.Canny(image_filter, 30, 200)
+        cv2.imshow("filter", image_filter)
+        cv2.imwrite("image_Filter.jpg", image_filter)
+        (_, cnts2, _) = cv2.findContours(image_filter.copy(), cv2.RETR_TREE,
+                                    cv2.CHAIN_APPROX_SIMPLE)
+        cnts2 = sorted(cnts2, key = cv2.contourArea, reverse = True)[:50]
+        screenCnt = None
+        # loop over our contours
+        for c in cnts2:
+            # approximate the contour
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.02 * peri, True)
+            cv2.drawContours(image, [c], -1, (255, 0, 255), 3)
+             
+            # if our approximated contour has four points, then
+            # we can assume that we have found our screen
+            if len(approx) == 4:
+                screenCnt = approx
+                break
+        cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 3)
+        cv2.imshow("Rectangles?", image)
+        #cv2.imwrite("Found_Zebro_Filter_green.jpg", image)
+
+        return 0#PZ#green_area
+
