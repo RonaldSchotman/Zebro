@@ -40,8 +40,8 @@ time.sleep(0.1)
 
 #Standard hsv color values. 
 green = [([40,33,40],[92,153,255])] #=green
-black = [([0,30,0],[179,230,50])] #=black
-white = [([0,0,240],[179,255,255])] #=white
+
+firstFrame = None
 
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -56,40 +56,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image_gamma = Calib.adjust_gamma(image_light, 1)
 
     #Blur image for better detection
+    image_blur = cv2.blur(image_gamma,(1,1))
     image_blurred = cv2.GaussianBlur(image_gamma, (11, 11), 0)
     
     #USeless functions
-    image_gray = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2GRAY)
-
-    image_Filter = cv2.bilateralFilter(image_gray, 11, 17, 17)
-
-
-    kernel_erode = np.ones((3,3),np.uint8)
-    kernel_dilate = np.ones((3,3),np.uint8)
-    kernel_closing = np.ones((3,3),np.uint8)
+    image_gray = cv2.cvtColor(image_blur, cv2.COLOR_BGR2GRAY)
 
     image_hsv = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2HSV)
-    Zebro_hsv = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2HSV)
-            # Detecting Black in Zebro image
-    for(lower,upper) in black:
-            lower = np.array(lower,dtype=np.uint8)
-            upper = np.array(upper,dtype=np.uint8)
-    Zebro_Black_Mask = cv2.inRange(Zebro_hsv,lower,upper)
-    Zebro_Black_Mask = cv2.dilate(Zebro_Black_Mask, kernel_dilate, iterations=1)
 
-    #cv2.imshow("Zebro_Black_Mask",Zebro_Black_Mask)
-
-    # Detecting White in Zebro image
-    for(lower,upper) in white:
-            lower = np.array(lower,dtype=np.uint8)
-            upper = np.array(upper,dtype=np.uint8)
-    Zebro_White_Mask = cv2.inRange(Zebro_hsv,lower,upper)
-    #Zebro_White_Mask = cv2.dilate(Zebro_White_Mask, kernel_dilate, iterations=1)
-
-    #cv2.imshow("Zebro_White_Mask",Zebro_White_Mask)
-
-    Zebro_QR_Mask = cv2.addWeighted(Zebro_Black_Mask,1,Zebro_White_Mask,1,0)
-    
     #green the important color
     for(lower,upper) in green:
             lower = np.array(lower,dtype=np.uint8)
@@ -105,11 +79,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     #Found_Zebro = Detect.Green(image, image_green)
     #Pico_Zebro.append(Found_Zebro)
    # Found_BW = Detect.Green(image, image_green)
-    #Found_zebro = Detect.Filter_Green(image, image_gray, image_green_gray)
+    Found_zebro = Detect.Filter_Green(image, image_gray, mask_green)
 
     Timetest = time.strftime("%d-%m-%Y")
     # Show the current view for debugging
-    cv2.imshow("original %s" % Timetest,image)
+    #cv2.imshow("original %s" % Timetest,image)
     #cv2.imwrite("Found_Zebro_Filter.jpg", image_Filter)
 
     # show the frame

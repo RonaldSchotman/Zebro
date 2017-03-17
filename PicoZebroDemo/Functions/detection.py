@@ -18,7 +18,7 @@ class detection_functions:
         mask_green = cv2.morphologyEx(image_green, cv2.MORPH_CLOSE, kernel)
         mask_green = cv2.dilate(mask_green, None, iterations=1)
         cv2.imshow("mask_green",mask_green)
-
+        cv2.imwrite("image_Green.jpg", mask_green)
         gray_green = cv2.cvtColor(mask_green, cv2.COLOR_BGR2GRAY)
 
         (_, cnts2, _) = cv2.findContours(gray_green.copy(), cv2.RETR_EXTERNAL,
@@ -91,32 +91,50 @@ class detection_functions:
         
         return green_area
 
+    def auto_canny(self, image, sigma=0.33):
+            # compute the median of the single channel pixel intensities
+            v = np.median(image)
+     
+            # apply automatic Canny edge detection using the computed median
+            lower = int(max(0, (1.0 - sigma) * v))
+            upper = int(min(255, (1.0 + sigma) * v))
+            edged = cv2.Canny(image, lower, upper)
+     
+            # return the edged image
+            return edged
 
-    def Filter_Green(self, image, image_filter, image_green_gray):
-        #image_filter = cv2.addWeighted(image_filter,1,image_green_gray,1,0)
-        #cv2.imshow("filter 2", image_filter)
-        image_filter = cv2.Canny(image_filter, 30, 200)
+    def Filter_Green(self, image, image_filter, mask_green):
+        
+        image_filter = cv2.bilateralFilter(image_filter, 11, 50, 50)
+        #image_green = cv2.bitwise_and(image_filter, image_filter, mask = mask_green)
+        #image_filter2 = cv2.addWeighted(image_green,0.8,image_filter,0.2,0)
+
+        #image_filter = self.auto_canny(image_green)
+
+        image_filter = cv2.Canny(image_filter, 15, 210)
+
         cv2.imshow("filter", image_filter)
         cv2.imwrite("image_Filter.jpg", image_filter)
+        
         (_, cnts2, _) = cv2.findContours(image_filter.copy(), cv2.RETR_TREE,
-                                    cv2.CHAIN_APPROX_SIMPLE)
-        cnts2 = sorted(cnts2, key = cv2.contourArea, reverse = True)[:50]
+                                    cv2.CHAIN_APPROX_NONE)
+        cnts2 = sorted(cnts2, key = cv2.contourArea, reverse = True)#[:100]
         screenCnt = None
         # loop over our contours
         for c in cnts2:
             # approximate the contour
             peri = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, 0.02 * peri, True)
-            cv2.drawContours(image, [c], -1, (255, 0, 255), 3)
+            #cv2.drawContours(image, [c], -1, (255, 0, 255), -1)
              
             # if our approximated contour has four points, then
             # we can assume that we have found our screen
             if len(approx) == 4:
                 screenCnt = approx
                 break
-        cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 3)
+        cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 5)
         cv2.imshow("Rectangles?", image)
-        #cv2.imwrite("Found_Zebro_Filter_green.jpg", image)
+        cv2.imwrite("Found_Zebro_Filter_green.jpg", image)
 
         return 0#PZ#green_area
 
