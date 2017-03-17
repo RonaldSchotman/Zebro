@@ -44,34 +44,34 @@ green = [([40,33,35],[92,153,255])] #=green
 import os
 
 ## Prepare images files
-rootpath = 'Classifier_Pictures/'
-files = []
-for filedir, dirs, filess in os.walk(rootpath):
-    for filename in filess:
-        pathfile = os.path.join(filedir, filename)
-        files.append(pathfile) 
+#rootpath = 'Classifier_Pictures/'
+#files = []
+#for filedir, dirs, filess in os.walk(rootpath):
+#    for filename in filess:
+#        pathfile = os.path.join(filedir, filename)
+#        files.append(pathfile) 
 
-print (files)
+#print (files)
 
 ## Detect keypoints and compute descriptors for train images
-kp_train = []
-dsc_train = []
-sift = cv2.xfeatures2d.SIFT_create()
-for file in files:
-    ima = cv2.imread(file)
-    print (file)
-    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-    kpts, des = sift.detectAndCompute(gray, None) #sift = cv2.xfeatures2d.SIFT_create()
-    kp_train.append(kpts)
-    dsc_train.append(des)
+#kp_train = []
+#dsc_train = []
+#sift = cv2.xfeatures2d.SIFT_create()
+#for file in files:
+#    ima = cv2.imread(file)
+#    print (file)
+#    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
+#    kpts, des = sift.detectAndCompute(gray, None) #sift = cv2.xfeatures2d.SIFT_create()
+#    kp_train.append(kpts)
+#    dsc_train.append(des)
 
 ## Train knn
-dsc_train = np.array(dsc_train)
-responses = np.arange(len(kp_train),dtype = np.float32)
-knn = cv2.ml.KNearest_create()
+#dsc_train = np.array(dsc_train)
+#responses = np.arange(len(kp_train),dtype = np.float32)
+#knn = cv2.ml.KNearest_create()
 
 #Next line does not work:
-knn.train(dsc_train, cv2.ml.ROW_SAMPLE, responses)
+#knn.train(dsc_train, cv2.ml.ROW_SAMPLE, responses)
 #ret,result,neighbours,dist = knn.findNearest(test,k=5)
 
 # capture frames from the camera
@@ -81,9 +81,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image = frame.array
     
     image = cv2.imread("Picture.jpg")
- 
-    
-    # Calibrate on light level
+     # Calibrate on light level
     image_light = Calib.calibrate_light(image)
 
     # Adjusting Gamma level if highly needed 1 means nothing changes
@@ -91,7 +89,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
     gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
-    cv2.imwrite('13_Background_OpenCV.jpg',fgmask)
+    cv2.imwrite('14_Denoise_OpenCV.jpg',dst)
     
     #Blur image for better detection
     image_blur = cv2.blur(image_gamma,(5,5))
