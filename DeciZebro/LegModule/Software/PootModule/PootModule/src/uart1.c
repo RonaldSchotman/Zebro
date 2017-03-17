@@ -27,17 +27,16 @@ uint8_t vregs_buffer[VREGS_NUM_OF_BUFFERS][VREGS_FILE_TOTAL_SIZE];
 
 int8_t uart1_init(void){
 	uart1_pins_init();
-	
-	/* Enable USART transmitter */
-	USARTD0_CTRLB |= USART_TXEN_bm;
-	/* Set communication mode to UART */
-	USARTD0_CTRLC |= USART_CMODE_ASYNCHRONOUS_gc;
-	/* Set data frame length to 8-bit */
-	USARTD0_CTRLC |= USART_CHSIZE_8BIT_gc;
 	/* Set baud rate to 115.2 kbaud */
 	/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
-	USARTD0_BAUDCTRLA |= 0x83; /* 131 */
-	USARTD0_BAUDCTRLB |= (0b1101<<4) /* -3 */
+	USARTD0.BAUDCTRLA = 0x83; /* 131 */
+	USARTD0.BAUDCTRLB = 0xD0; /* -3, upper 4 bits */	
+	/* Set communication mode to UART */
+	/* Set data frame length to 8-bit */
+	/* Turn of Parity checks */
+	USARTD0.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_PMODE_DISABLED_gc | USART_CHSIZE_8BIT_gc;
+	/* Enable USART transmitter */
+	USARTD0.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
 	
 	return 0;
 }
@@ -62,7 +61,7 @@ int8_t uart1_init_dma(void){
 	/* Set baud rate to 115.2 kbaud */
 	/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
 	USARTD0_BAUDCTRLA |= 0x83; /* 131 */
-	USARTD0_BAUDCTRLB |= (0b1101<<4) /* -3 */
+	USARTD0_BAUDCTRLB |= (0b1101<<4); /* -3 */
 	
 
 	/*
@@ -111,7 +110,7 @@ int8_t uart1_init_dma(void){
  */
 int8_t uart1_wait_until_done(void){
 	/* wait until the DMA says the transfer is done */
-	while(!(DMA_CH3_CTRLB & DMA_CH_CHBUSY_bm);
+	while(!(DMA_CH3_CTRLB & DMA_CH_CHBUSY_bm));
 	/* we don't reset the flag here, because that is done in
 	 * uart1_trigger_dma_once() */
 
@@ -143,9 +142,13 @@ int8_t uart1_trigger_dma_once(void){
  * Configures the pins corresponding to USARTD0
  */
 int8_t uart1_pins_init(void){
-	/* Configure pins as output, write '1' to direction register */
-	LEDS_LD1_PORT.DIR |= LEDS_LD1_PIN;
-	LEDS_LD2_PORT.DIR |= LEDS_LD2_PIN;
+	/* Configure TX pin as output, RX as input*/
+	UART1_TX_PORT.DIRCLR = UART1_TX_PIN;
+	UART1_TX_PORT.OUTSET = UART1_TX_PIN;
+	UART1_TX_PORT.DIRSET = UART1_TX_PIN;
+	UART1_RX_PORT.DIRCLR = UART1_RX_PIN;
+	UART1_RX_PORT.PIN2CTRL = PORT_OPC_PULLUP_gc;
+
 
 	return 0;
 }
@@ -157,10 +160,14 @@ int8_t uart1_pins_init(void){
  */
 int8_t uart1_send_raw(uint8_t tx_data){
 	/* wait for transmit data register to be empty */
-	while(!(USARTD0_STATUS & USART_TXCIF_bm));
-
+	leds_set_LD1();
+	while(!(USARTD0.STATUS & USART_DREIF_bm)){}
+	leds_clear_LD1();
+	/* clear flag */
+	USARTD0.STATUS |= USART_TXCIF_bm;
 	/* place new data in transmit data register */
-	USARTD0_DATA = tx_data;
+	USARTD0.DATA = tx_data;
+	//USARTD0.CTRLB |= USART_TXEN_bm;
 
 	return 0;
 }

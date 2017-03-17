@@ -31,11 +31,11 @@
 
 
 int8_t uart1_init(void);
-int32_t uart1_send_raw(uint8_t tx_data);
-int32_t uart1_init_dma(void);
-int32_t uart1_trigger_dma_once(void);
-int32_t uart1_wait_until_done(void);
-int32_t uart1_pins_init(void);
+int8_t uart1_send_raw(uint8_t tx_data);
+int8_t uart1_init_dma(void);
+int8_t uart1_trigger_dma_once(void);
+int8_t uart1_wait_until_done(void);
+int8_t uart1_pins_init(void);
 
 
 #endif /* __UART1_H__ */

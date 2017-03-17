@@ -14,11 +14,14 @@
  *  
  */
 #include <asf.h>
+#include <avr/io.h>
 #include "../inc/leds.h"
 #include "../inc/interrupts.h"
 #include "../inc/globals.h"
 #include "../inc/vregs.h"
-
+#include "../inc/uart1.h"
+#include "UART_portD.h"
+#include "LightweightRingBuff.h"
 
 int main (void)
 {
@@ -36,12 +39,15 @@ int main (void)
 		leds_init();
 		interrupts_enable();
 		vregs_init();
-		
-		leds_set_LD2();
-		leds_blink_LD1_blocking();
-	
+		uart_init();
+		//UART1_TX_PORT.DIR |= UART1_TX_PIN;
+		leds_set_LD1();
+			
 	
 	while (1){
+		UART_Transmit(0xAA);
+		//UART1_TX_PORT.OUTTGL |= UART1_TX_PIN;
+		delay_ms(1);
 		
 	}
 }

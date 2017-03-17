@@ -81,10 +81,7 @@
 #include <interrupt.h>
 
 // From module: NVM - Non Volatile Memory
-//#include <nvm.h>
-
-// From module: NVM - Non volatile memory access
-#include <common_nvm.h>
+#include <nvm.h>
 
 // From module: PMIC - Programmable Multi-level Interrupt Controller
 #include <pmic.h>
@@ -101,9 +98,6 @@
 
 // From module: System Clock Control - XMEGA A1U/A3U/A3BU/A4U/B/C implementation
 #include <sysclk.h>
-
-// From module: USART - Serial interface - XMEGA implementation
-#include <serial.h>
 
 // From module: USART - Universal Synchronous/Asynchronous Receiver/Transmitter
 #include <usart.h>
