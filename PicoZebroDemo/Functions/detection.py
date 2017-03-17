@@ -17,12 +17,14 @@ class detection_functions:
 
         mask_green = cv2.morphologyEx(image_green, cv2.MORPH_CLOSE, kernel)
         mask_green = cv2.dilate(mask_green, None, iterations=1)
+
         cv2.imshow("mask_green",mask_green)
-        cv2.imwrite("image_Green.jpg", mask_green)
+        #cv2.imwrite("image_Green.jpg", mask_green)
+
         gray_green = cv2.cvtColor(mask_green, cv2.COLOR_BGR2GRAY)
 
         (_, cnts2, _) = cv2.findContours(gray_green.copy(), cv2.RETR_EXTERNAL,
-                                    cv2.CHAIN_APPROX_SIMPLE)
+                                    cv2.CHAIN_APPROX_NONE)
         Pico_Zebro_Found = 0
         
         Pico_Zebro_0 = 0
@@ -84,12 +86,12 @@ class detection_functions:
                 Pico_Zebro_8 = 1
             elif Pico_Zebro_Found == 10:
                 Pico_Zebro_9 = 1
-            elif Pico_Zebro_Found == 11:
-                print("TO MANY ZEBROS")
+            #elif Pico_Zebro_Found == 11:
+                #print("TO MANY ZEBROS")
         PZ = [Pico_Zebro_0, Pico_Zebro_1, Pico_Zebro_2, Pico_Zebro_3, Pico_Zebro_4,
               Pico_Zebro_5, Pico_Zebro_6, Pico_Zebro_7, Pico_Zebro_8, Pico_Zebro_9]
         
-        return green_area
+        return PZ
 
     def auto_canny(self, image, sigma=0.33):
             # compute the median of the single channel pixel intensities
