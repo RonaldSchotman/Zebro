@@ -21,7 +21,7 @@ import os
 
 #import numpy as np
 #import cv2
-Pico_zebro_cascade = cv2.CascadeClassifier('cascade.xml')
+Pico_zebro_cascade = cv2.CascadeClassifier('data/cascade.xml')
 #eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 img = cv2.imread('Picture.jpg')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

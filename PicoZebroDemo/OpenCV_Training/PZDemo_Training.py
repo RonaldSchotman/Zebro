@@ -43,4 +43,15 @@ dsc_train = np.array(dsc_train)
 responses = np.arange(len(kp_train),dtype = np.float32)
 knn = cv2.ml.KNearest_create()
 
+knn.train(dsc_train, cv2.ml.ROW_SAMPLE, responses)
+
+# save the data
+np.savez('knn_data.npz',train=dsc_train, train_labels=responses)
+
+# Now load the data
+#with np.load('knn_data.npz') as data:
+#    print (data.files)
+#    train = data['train']
+#    train_labels = data['train_labels']
+
 
