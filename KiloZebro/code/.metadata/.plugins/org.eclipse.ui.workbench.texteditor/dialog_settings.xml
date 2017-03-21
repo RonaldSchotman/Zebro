@@ -2,17 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="VREGS_MOTION_CURRENT_SPEED" key="selection"/>
+		<item value="" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="VREGS_MOTION_CURRENT_SPEED"/>
-			<item value="address_get_side"/>
-			<item value="address"/>
-			<item value="vregs_write"/>
-			<item value="vregs_write."/>
+			<item value="ENCODER_PULSES_PER_ROTATION"/>
+			<item value="&lt;&lt;"/>
+			<item value="falling edge"/>
+			<item value="adc"/>
+			<item value="h_bridge_calc_and_set_ch4"/>
+			<item value="prescaler"/>
+			<item value="pulses"/>
+			<item value="arr"/>
 		</list>
 		<list key="replacehistory">
 		</list>

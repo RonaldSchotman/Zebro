@@ -33,7 +33,7 @@ void encoder_init(void) {
 	TIM_HandleTypeDef timer;
 
 	timer.Instance = TIM3;
-	timer.Init.Period = ENCODER_PULSES_PER_ROTATION;
+	timer.Init.Period = 0xFFFF; /* Count up to max int16 and so on */
 	timer.Init.CounterMode = TIM_COUNTERMODE_UP; // Counter increments and decrements according to DIR bit.
 //	timer.Init.Prescaler = 1;
 //	timer.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -104,8 +104,8 @@ void encoder_write_to_vregs(void) {
 /**
  * Returns the value of the encoder counter
  */
-uint16_t encoder_get_position(void) {
-	uint16_t counter_value;
+int16_t encoder_get_position(void) {
+	int16_t counter_value;
 	counter_value = TIM3->CNT;
 	return (counter_value);
 }
@@ -129,10 +129,10 @@ void encoder_reset_position(void) {
 	TIM3->CNT &= 0xFFFF0000;
 }
 
-/**
- * Sets the position counter back to 0x0000
- */
-void encoder_set_position_mid(void) {
-	/* Set the encoder position to 455 */
-	TIM3->CNT = 0x1C7;
-}
+///**
+// * Sets the position counter back to 0x0000
+// */
+//void encoder_set_position_mid(void) {
+//	/* Set the encoder position to 455 */
+//	TIM3->CNT = 0x1C7;
+//}

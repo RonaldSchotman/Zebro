@@ -190,6 +190,7 @@ def main(stdscr):
     display = SerialDisplay(stdscr)
     commands = CommandCollection()
     commands.add_new_command("[0x00 30 1 0 0 0 0 0 0 1]", "c", 'Calibrate Encoders')
+    commands.add_new_command("[0x00 30 10 0 0 0 0 0 0 1]", "v", 'Continuous Rotation')
     commands.add_new_command("[0x00 30 0 0 0 0 0 0 0 1]", " ", 'Stop all')
     commands.add_new_command("[0x00 22 0x12]", 'e', "Reset emergency_stop")
     # commands.add_new_command("[0x00 30 7 0 120 1 0 0]", "d", "Debug Command")
@@ -216,7 +217,9 @@ def main(stdscr):
             if input_char == 'c':
                 command = commands.find_command_by_key(input_char)
             if input_char == 'e':
-                command = commands.find_command_by_key(input_char)                
+                command = commands.find_command_by_key(input_char)  
+            if input_char == 'v':
+                command = commands.find_command_by_key(input_char)                                
             if input_char == 'z':
                 stand_up_time = time_sync_counter + 2
                 command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')

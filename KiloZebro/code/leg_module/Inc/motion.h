@@ -35,6 +35,8 @@
 #define MOTION_DIRECTION_FORWARD 0
 #define MOTION_DIRECTION_BACKWARD 1
 
+#define MOTION_PROBE_SPEED 100
+
 /* At a very maximum a leg should be able to spin 2 rounds in 1 second (120 RPM). This is 1820 pulses per second.
  * The motor is measured to do 140 RPM at full dutycycle. So our max dutycycle is 223 for 120 RPM. Now we have (1820/1)/223 ~= 8.
  */
@@ -68,8 +70,8 @@ struct motion_state{
 int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data);
 int32_t motion_write_state_to_vregs(struct motion_state motion_state);
 int32_t motion_validate_state(struct motion_state motion_state);
-int32_t motion_drive_h_bridge();
-uint8_t motion_move_to_point(uint16_t point, uint8_t dir, uint32_t arrival_time);
+int32_t motion_drive_h_bridge(void);
+//uint8_t motion_move_to_point(uint16_t point, uint8_t dir, uint32_t arrival_time);
 //void set_next_walk_instruction(uint8_t value);
 uint32_t get_std_var (void);
 uint16_t std_var_stable(uint16_t *a, uint16_t n);

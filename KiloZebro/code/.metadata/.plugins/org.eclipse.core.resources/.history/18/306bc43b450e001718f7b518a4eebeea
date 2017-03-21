@@ -1,0 +1,255 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: adc.c
+ *
+ * Description:
+ * Code to drive the ADC
+ *
+ * Authors:
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+
+#include "stm32f0xx_hal.h"
+#include "stdlib.h"
+
+#include "adc.h"
+#include "vregs.h"
+#include "errors.h"
+
+volatile static uint16_t adc_data_dump[ADC_NUM_OF_CHANNELS];
+
+/**
+ * Enables the ADC. This function should only be called when it is
+ * certain that the ADC is disabled!
+ *
+ * This function uses busy loops, but this should not be
+ * a problem during when only using it during initialisation
+ *
+ * The ADC in triggered on the output of TIM1 CC4. Because the ADC
+ * is configured in discontinious mode, it has to trigger for the
+ * conversion of every channel. Converted data is automagicaly moved
+ * to adc_data_dump register via DMA.
+ */
+int32_t adc_init(){
+
+	/**
+	 * FIRST we enable the ADC
+	 * */
+
+	/* Enable the clock to the ADC */
+	__HAL_RCC_ADC1_CLK_ENABLE();
+	/* Select SYSCLK / 4 as clock source */
+	ADC1->CFGR2 = ADC_CFGR2_CKMODE_1;
+
+	/* Do a calibration */
+	ADC1->CR |= ADC_CR_ADCAL;
+	while(ADC1->CR & ADC_CR_ADCAL);
+
+	/* Now we enable the ADC */
+	ADC1->CR |= ADC_CR_ADEN;
+	/* Wait for the ADC to be ready */
+	while(!(ADC1->ISR & ADC_ISR_ADRDY));
+	/* enable used channels */
+	ADC1->CHSELR = (1 << ADC_HAL_1_CH) | (1 << ADC_HAL_2_CH)
+			| (1 << ADC_HAL_3_CH) | (1 << ADC_ID_RESISTOR_CH)
+			| (1 << ADC_BATTERY_CH) | (1 << ADC_MOTOR_CURRENT_CH)
+			| (1 << ADC_TEMP_CH);
+	/* set discontinuous mode */
+	ADC1->CFGR1 |= ADC_CFGR1_DISCEN;
+	/* set resolution to 10 bit */
+	ADC1->CFGR1 |= ADC_CFGR1_RES_0;
+	/* set left alignment of data */
+	ADC1->CFGR1 |= ADC_CFGR1_ALIGN;
+	/* set oversampling to 110 */
+	ADC1->SMPR = ADC_SMPR_SMP_2 | ADC_SMPR_SMP_1 | ADC_SMPR_SMP_0;
+	/* enable temperature sensor */
+	ADC->CCR |= ADC_CCR_TSEN;
+	/* enable the DMA request generation */
+	ADC1->CFGR1 |= ADC_CFGR1_DMAEN;
+
+	/**
+	 * SECOND set up the GPIO pins
+	 * */
+	GPIO_InitTypeDef  GPIO_InitStruct;
+
+    GPIO_InitStruct.Pin = ADC_HAL_1_PIN | ADC_HAL_2_PIN | ADC_HAL_3_PIN |
+    		ADC_ID_RESISTOR_PIN | ADC_BATTERY_PIN | ADC_MOTOR_CURRENT_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+	/**
+	 * THIRD set up the DMA channel
+	 * */
+
+	__HAL_RCC_DMA1_CLK_ENABLE();
+
+	/* channel has high priority */
+	DMA1_Channel1->CCR = DMA_CCR_PL_1;
+	/* 16 bit data transfers */
+	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0 | DMA_CCR_PSIZE_0;
+	/* Auto increment in memory, and circular*/
+	DMA1_Channel1->CCR |= DMA_CCR_MINC | DMA_CCR_CIRC;
+	/* set size of transfer */
+	DMA1_Channel1->CNDTR = ADC_NUM_OF_CHANNELS;
+	/* set source to ADC data register */
+	DMA1_Channel1->CPAR = (uint32_t) &(ADC1->DR);
+	/* set the destination to the data array */
+	DMA1_Channel1->CMAR = (uint32_t) adc_data_dump;
+	/* enable the DMA channel */
+	DMA1_Channel1->CCR |= DMA_CCR_EN;
+
+	/**
+	 * FOURTH set up ADC to trigger based on TIM1
+	 * */
+	/* select TIM1 TRG0 as external trigger */
+//	ADC1->CFGR1 |= ADC_CFGR1_EXTSEL_0;
+	/* trigger on falling edges */
+	ADC1->CFGR1 |= ADC_CFGR1_EXTEN_1 | ADC_CFGR1_EXTEN_0;
+
+	return 0;
+}
+
+/**
+ * Write the data read by the ADC to the vregs, for debug and status purposes
+ */
+void adc_write_data_to_vregs(void){
+	vregs_write(VREGS_ADC_DATA0A, adc_data_dump[0] >> 8); //hall1a
+	vregs_write(VREGS_ADC_DATA1A, adc_data_dump[1] >> 8); //hall2a
+	vregs_write(VREGS_ADC_DATA2A, adc_data_dump[2] >> 8); //hall3a
+	vregs_write(VREGS_ADC_DATA3A, adc_data_dump[3] >> 8);
+	vregs_write(VREGS_ADC_DATA4A, adc_data_dump[4] >> 8);
+	vregs_write(VREGS_ADC_DATA5A, adc_data_dump[5] >> 8);
+	vregs_write(VREGS_ADC_DATA6A, adc_data_dump[6] >> 8);
+
+	vregs_write(VREGS_ADC_DATA0B, adc_data_dump[0]); //hall1b
+	vregs_write(VREGS_ADC_DATA1B, adc_data_dump[1]); //hall2b
+	vregs_write(VREGS_ADC_DATA2B, adc_data_dump[2]); //hall3b
+	vregs_write(VREGS_ADC_DATA3B, adc_data_dump[3]);
+	vregs_write(VREGS_ADC_DATA4B, adc_data_dump[4]);
+	vregs_write(VREGS_ADC_DATA5B, adc_data_dump[5]);
+	vregs_write(VREGS_ADC_DATA6B, adc_data_dump[6]);
+}
+
+/**
+ * Request a conversion from the ADC
+ */
+void adc_request_conversion(void){
+	ADC1->CR |= ADC_CR_ADSTART;
+}
+
+/**
+ * Wait for the end of sequence flag to come high, and clear it.
+ */
+void adc_wait_for_data(void){
+	// TODO check for overrun and report error
+	while((!(ADC1->ISR)) & ADC_ISR_EOSEQ);
+	ADC1->ISR |= ADC_ISR_EOSEQ;
+	while(!(DMA1->ISR & DMA_ISR_TCIF1));
+	DMA1->IFCR |= DMA_IFCR_CTCIF1;
+}
+
+/**
+ * Return a value from the ADC raw data register.
+ * Should not be called during ADC operation.
+ */
+uint16_t adc_get_value(int32_t index){
+	return adc_data_dump[index];
+}
+
+/**
+ * Return the internal ADC temperature sensor
+ * TODO does not work yet, AAAAARCHGGGGG
+ */
+int32_t adc_get_temperature(void){
+	  volatile int32_t temperature;
+	  int32_t temp_30 = (int32_t)((*TEMP30_CAL_ADDR)<<4);
+
+	  temperature = (((int32_t) adc_data_dump[6] * VDD_APPLI / VDD_CALIB)
+	  - temp_30);
+	  temperature = temperature * (int32_t)(110 - 30);
+	  temperature = temperature / (TEMP110_CAL_ADDR - temp_30);
+	  temperature = temperature + 15; // +30-15. 15 celcius offset measured with external thermometer
+
+//	  temperature = ((int32_t) *ADC_TEMP30_CAL_ADDR);
+//	  temperature = temperature - ((int32_t) adc_data_dump[6]);
+//	  temperature = (temperature * 3300) / 4095;
+//	  temperature = temperature / 4;
+//	  temperature = temperature + 30;
+
+	//  temperature = (int32_t) *(ADC_TEMP30_CAL_ADDR) - adc_data_dump[ADC_TEMP_INDEX];
+	//  temperature = temperature * (ADC_VDD_FP3 / 4096);
+	//  temperature = temperature / ADC_TEMP_AVG_SLOPE_FP3;
+	//  temperature *= ADC_VDD_FP3 / 4095;
+	//  temperature /= ADC_TEMP_AVG_SLOPE_FP3;
+	//  temperature += 30;
+
+	  vregs_write(VREGS_ADC_INTERNAL_TEMP_A, (uint8_t) temperature);
+	  vregs_write(VREGS_ADC_INTERNAL_TEMP_A + 1, (uint8_t) temperature >> 8);
+//	  vregs_write(VREGS_ADC_INTERNAL_TEMP, (uint8_t) temperature);
+//	  vregs_write(VREGS_ADC_INTERNAL_TEMP + 1, (uint8_t) temperature >> 8);
+//	  vregs_write(VREGS_ADC_INTERNAL_TEMP + 2, (uint8_t) temperature >> 16);
+//	  vregs_write(VREGS_ADC_INTERNAL_TEMP + 3, (uint8_t) temperature >> 24);
+
+	  return (int32_t) temperature;
+}
+
+/**
+ * Returns the motor current, in mA.
+ */
+int32_t adc_get_motor_current_ma(void){
+	int32_t current;
+
+	current = adc_get_value(ADC_MOTOR_CURRENT_INDEX);
+	/* remove offset */
+	current = current - ADC_MID_RANGE_COUNT;
+	/* convert to mV */
+	current = (current * ADC_MID_RANGE_MILLIVOLT) / ADC_MID_RANGE_COUNT;
+	/* convert to mA */
+	current = (current * 1000) / ADC_CURRENT_SENSITIVITY;
+
+	return current;
+}
+
+/**
+ * Returns the absolute value of the motor current, in mA.
+ */
+int32_t adc_get_absolute_motor_current_ma(void){
+	int32_t current;
+
+	current = adc_get_motor_current_ma();
+	if (current < 0) current = -current;
+
+	return current;
+}
+
+/**
+ * Check and process the motor current
+ */
+int32_t adc_check_motor_current(void){
+	static int32_t over_current_counter = 0;
+	int32_t current;
+
+	current = adc_get_absolute_motor_current_ma();
+
+	/* check for overcurrent */
+	if (current >= ADC_CURRENT_EMERGENCY_VALUE){
+		over_current_counter++;
+		if (over_current_counter > ADC_CURRENT_EMERGENCY_SAMPLES){
+			errors_emergency_stop();
+			errors_report(ERRORS_MOTOR_OVERCURRENT);
+		}
+	}
+	else if (over_current_counter > 0) over_current_counter--;
+
+
+	vregs_write(VREGS_MOTOR_CURRENT,
+			(uint8_t)(current/ 100));
+
+	return current;
+}
+

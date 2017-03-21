@@ -27,6 +27,7 @@ int32_t adc_get_absolute_motor_current_ma(void);
 int32_t adc_check_motor_current(void);
 uint16_t adc_get_value(int32_t index);
 
+#define ADC_SHIFT_AMOUNT 2 /*bits to shift to get to a uint8_t. ADC now gives 10 bit accuracy, so 2 shifts. */
 
 /* Temperature sensor calibration value address */
 //#define ADC_TEMP_AVG_SLOPE_FP3 ((int32_t) 4)
@@ -36,17 +37,17 @@ uint16_t adc_get_value(int32_t index);
 
 /* Temperature sensor calibration value address */
 //#define TEMP110_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7C2))
-#define TEMP110_CAL_ADDR 557 // calculated using TEMP30 (printed on screen: 213) and an average slope of 4.3 and rounded. (4.3*80+213 = 557)
+#define TEMP110_CAL_ADDR (557<<4) // calculated using TEMP30 (printed on screen: 213) and an average slope of 4.3 and rounded. (4.3*80+213 = 557)
 #define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
-#define VDD_CALIB ((uint16_t) (330))
-#define VDD_APPLI ((uint16_t) (300))
+#define VDD_CALIB ((uint16_t) (330<<4))
+#define VDD_APPLI ((uint16_t) (300<<4))
 
-#define ADC_FULL_RANGE_COUNT 4096
-#define ADC_MID_RANGE_COUNT 2048
-#define ADC_FULL_RANGE_MILLIVOLT 3300
-#define ADC_MID_RANGE_MILLIVOLT 1650
+#define ADC_FULL_RANGE_COUNT (4096<<4)
+#define ADC_MID_RANGE_COUNT (2048<<4)
+#define ADC_FULL_RANGE_MILLIVOLT (3300<<4)
+#define ADC_MID_RANGE_MILLIVOLT (1650<<4)
 
-#define ADC_CURRENT_SENSITIVITY 55 // mV/A
+#define ADC_CURRENT_SENSITIVITY (55<<4) // mV/A
 #define ADC_CURRENT_EMERGENCY_VALUE 24000 // mA
 #define ADC_CURRENT_EMERGENCY_SAMPLES 100
 

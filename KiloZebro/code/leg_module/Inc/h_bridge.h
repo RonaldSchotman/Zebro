@@ -19,14 +19,15 @@
 #include "stdint.h"
 
 #define H_BRIDGE_PRESCALER 0
-#define H_BRDIGE_ARR 2400
-#define H_BRIDGE_MAX_DUTYCYCLE 255
-#define H_BRIDGE_MAX_MOTOR_SPEED 255
+#define H_BRDIGE_ARR 1023
+#define H_BRIDGE_MAX_DUTYCYCLE (H_BRDIGE_ARR)
+#define H_BRIDGE_MAX_MOTOR_SPEED (H_BRDIGE_ARR)
 #define H_BRIDGE_FORWARD 1
 #define H_BRIDGE_BACKWARD 0
 #define H_BRIDGE_DEMO_DELAY 5000
-#define H_BRIDGE_EARLY_TRIGGER 240
-#define H_BRIDGE_LATE_TRIGGER 1440
+#define H_BRIDGE_ADC_TRIGGER (H_BRDIGE_ARR)
+//#define H_BRIDGE_EARLY_TRIGGER 240
+//#define H_BRIDGE_LATE_TRIGGER 1440
 
 #define H_BRIDGE_MODE_IDLE 0
 #define H_BRIDGE_MODE_LOCKED_ANTI_PHASE 1
@@ -36,13 +37,12 @@
 
 
 void h_bridge_init(void);
-void h_bridge_lock_anti_phase(int32_t dutycycle);
-void h_bridge_sign_magnitude(int32_t direction, int32_t dutycycle);
+uint8_t h_bridge_drive_motor(uint16_t, uint8_t, uint8_t);
 void h_bridge_disable(void);
-void h_bridge_demo(void);
+void h_bridge_lock_anti_phase(uint16_t);
+void h_bridge_sign_magnitude(uint8_t, uint16_t);
 void h_bridge_set_ch4(uint16_t);
-int32_t h_bridge_remove_extreme_dutycycles(int32_t original);
-int32_t h_bridge_calc_and_set_ch4(int32_t dutycycle);
-int32_t h_bridge_drive_motor(int32_t speed, int32_t direction, int32_t mode);
-
+int16_t h_bridge_remove_extreme_dutycycles(uint16_t);
+//void h_bridge_demo(void);
+//int32_t h_bridge_calc_and_set_ch4(int32_t dutycycle);
 #endif /* H_BRIDGE_H */
