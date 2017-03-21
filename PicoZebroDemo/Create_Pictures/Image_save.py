@@ -39,15 +39,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
     # Show the current view
     cv2.imshow("original",image)
-
     # Save the last frame show.
     # The code was made this way to decide which picture
     # I want to make and with easy framrate and resolution choice
     # %H:%M:%S
-    Timetest = time.strftime("%Y-%m-%d %H:%M:")
+    Timetest = time.strftime("%Y_%m_%d_%H_%M")
     
-    cv2.imwrite("/home/pi/Documents/Pictures_for_classifier/single_save/Picture %s.jpg" % Timetest, image) 
-
+    cv2.imwrite("/home/pi/Documents/zebro/PicoZebroDemo/Create_Pictures/Single_image/Picture %s.jpg" % Timetest, image) 
+    
     # show the frame
     key = cv2.waitKey(1) & 0xFF
 

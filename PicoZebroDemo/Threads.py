@@ -76,12 +76,12 @@ class myClassA(threading.Thread):
             #if self.names:
             names = self.names
             names  = [val for sublist in names for val in sublist]
-            print("mario")
+            #print("mario")
             print (names)
             #print ('condition release by %s' % self.name)
             self.condition.release()
             #print('thread %s' % (self.getName()))
-            print ('A')
+            #print ('A')
             time.sleep(5)
 
 class myClassB(threading.Thread):

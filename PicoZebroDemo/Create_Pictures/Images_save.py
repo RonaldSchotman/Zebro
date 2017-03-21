@@ -27,6 +27,8 @@ rawCapture = PiRGBArray(camera, size=(1648, 928))
 # allow the camera to warmup (So this is oly during start up.
 time.sleep(0.1)
 
+import os                               # Include easy file multi file reader
+
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     # grab the NumPy array representing the image, the initialize the timestamp
@@ -40,10 +42,12 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # The code was made this way to decide which picture
     # I want to make and with easy framrate and resolution choice
     # %H:%M:%S
-    Timetest = time.strftime("%Y-%m-%d %H:%M:%S")
-    
-    cv2.imwrite("/home/pi/Documents/Pictures_for_classifier/multi_img_save/Picture %s.jpg" % Timetest, image) 
+    Timetest = time.strftime("%Y_%m_%d_%H_%M_%S")
 
+    #image_gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    #resized_image = cv2.resize(image_gray, (100, 100))
+    cv2.imwrite("/home/pi/Documents/zebro/PicoZebroDemo/Create_Pictures/Mulit_image/Negatives%s.jpg" % Timetest, image) 
+            
     # show the frame
     key = cv2.waitKey(1) & 0xFF
 
