@@ -1,3 +1,35 @@
+    cv2.imwrite("See_Difference.jpg",New_image)
+    lowValY = 200
+    highValY = 100
+    array_np = np.asarray(New_image)
+    low_values_indices = array_np > lowValY  # Where values are low
+    high_values_indices = array_np < highValY
+    array_np[low_values_indices] = 0  # All low values set to 0
+    array_np[high_values_indices] = 0
+
+    cv2.imshow("Testing 2 image", array_np)
+    cv2.imwrite("new_image.jpg", array_np)
+
+    Finding = cv2.imread("new_image_2.jpg")
+    Finding_Canny = cv2.Canny(Finding, 15, 200)
+    kernel = np.ones((8,8),np.uint8)
+    Finding_Canny = cv2.morphologyEx(Finding_Canny, cv2.MORPH_CLOSE, kernel)
+    Finding_Canny = cv2.Canny(Finding_Canny, 100, 200)
+    cv2.imshow("Edge detection", Finding_Canny)
+    Finding_Gray = cv2.cvtColor(Finding, cv2.COLOR_BGR2GRAY)
+
+    (_, contours, _) = cv2.findContours(Finding_Canny.copy(), cv2.RETR_EXTERNAL,
+                                     cv2.CHAIN_APPROX_NONE)    
+    for c in contours:
+        try:
+            [x,y,w,h] = cv2.boundingRect(c)
+            #cv2.drawContours(Finding, [c], -1, (255, 0, 255), -1)
+            cv2.rectangle(Finding,(x,y),(x+w,y+h),(0,255,0),2)
+            cv2.putText(Finding,'Found led 1',(x+w+10,y+h),0,0.3,(0,255,0))
+        except AttributeError:
+            pass
+    cv2.imshow("Found Objects", Finding)
+
 #from wakeonlan import *
 
 
