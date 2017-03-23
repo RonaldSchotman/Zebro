@@ -51,5 +51,6 @@
 
 // #define LIVING_ON_THE_EDGE
 
+#define GLOBALS_CLOCK_FREQUENCY 32000000 //Hz
 
 #endif /* __GLOBALS_H__ */

@@ -26,6 +26,7 @@ uint8_t vregs_buffer[VREGS_NUM_OF_BUFFERS][VREGS_FILE_TOTAL_SIZE];
 
 
 int8_t uart1_init(void){
+	sysclk_enable_module(SYSCLK_PORT_D, SYSCLK_USART0);
 	uart1_pins_init();
 	/* Set baud rate to 115.2 kbaud */
 	/*BSEL = 131, BSCALE = -3, see page 213 of the reference manual */
@@ -71,6 +72,8 @@ int8_t uart1_init_dma(void){
 	 * The block consists of bursts of 1 byte
 	 * */
 	
+	/* Send clk to DMA controller */
+	sysclk_enable_module(SYSCLK_PORT_D, SYSCLK_DMA);
 	/* Enable DMA controller, leave further settings at default*/
 	DMA_CTRL |= DMA_ENABLE_bm;
 	

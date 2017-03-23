@@ -1,4 +1,4 @@
-src/main.d src/main.o: ../src/main.c \
+src/hbridge.d src/hbridge.o: ../src/hbridge.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\4.9.2\include\stdint.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdint.h \
  ../src/asf.h ../src/ASF/xmega/drivers/ac/ac.h \
@@ -60,9 +60,7 @@ src/main.d src/main.o: ../src/main.c \
  ../src/ASF/common/services/ioport/xmega/ioport_compat.h \
  ../src/ASF/common/services/ioport/xmega/../ioport.h \
  ../src/ASF/common/services/sleepmgr/xmega/sleepmgr.h \
- ../src/ASF/xmega/drivers/usart/usart.h ../src/../inc/clock.h \
- ../src/../inc/leds.h ../src/../inc/interrupts.h ../src/../inc/globals.h \
- ../src/../inc/vregs.h ../src/../inc/uart1.h ../src/../inc/hbridge.h
+ ../src/ASF/xmega/drivers/usart/usart.h ../src/../inc/hbridge.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\4.9.2\include\stdint.h:
 
@@ -201,17 +199,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 ../src/ASF/common/services/sleepmgr/xmega/sleepmgr.h:
 
 ../src/ASF/xmega/drivers/usart/usart.h:
-
-../src/../inc/clock.h:
-
-../src/../inc/leds.h:
-
-../src/../inc/interrupts.h:
-
-../src/../inc/globals.h:
-
-../src/../inc/vregs.h:
-
-../src/../inc/uart1.h:
 
 ../src/../inc/hbridge.h:

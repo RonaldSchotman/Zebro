@@ -2,15 +2,25 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
+src\ASF\xmega\drivers\ac\ac.c
+
+src\ASF\xmega\drivers\adc\adc.c
+
+src\ASF\xmega\drivers\adc\xmega_aau\adc_aau.c
+
 src\ASF\xmega\drivers\usart\usart.c
+
+src\clock.c
+
+src\encoder.c
+
+src\hbridge.c
 
 src\interrupts.c
 
 src\leds.c
 
 src\uart1.c
-
-src\UART_portD.c
 
 src\vregs.c
 
