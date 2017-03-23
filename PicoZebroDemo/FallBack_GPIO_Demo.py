@@ -21,6 +21,9 @@ from Functions.calibration import calibration_functions
 Detect = detection_functions()
 Calib = calibration_functions()
 
+from imutils.video.pivideostream import PiVideoStream
+from imutils.video import FPS
+
 # import the necessary packages
 from picamera.array import PiRGBArray   # Pi camera Libary capture BGR video
 from picamera import PiCamera           # PiCamera liberary
@@ -32,33 +35,43 @@ import random
 import threading
 import bluetooth
 
+
+import imutils
+
 # initialize the camera and grab a reference to the raw camera capture
-camera = PiCamera()
-camera.resolution = (1664, 928)
+#camera = PiCamera()
+#camera.resolution = (1664, 928)
+#camera.resolution = (320, 240)
 #camera.resolution = (1280, 720)
-#camera.framerate = 5
-rawCapture = PiRGBArray(camera)
-#size=(1648, 928)
+#camera.framerate_range.low
+#camera.framerate = 30
+#rawCapture = PiRGBArray(camera)
+#stream = camera.capture_continuous(rawCapture, format="bgr",
+#	use_video_port=True)
+#
+
 # allow the camera to warmup (So this is only during start up once).
 time.sleep(0.1)
 
 def Picture(Number):
     # grab an image from the camera
-    time.sleep(0.1)
-
+    time.sleep(0.01)
+    
     camera.capture(rawCapture, format="bgr")
     image = rawCapture.array
-
-    # Take picture
+    # write picture
     cv2.imwrite("Image%s.jpg"%Number, image)
+    
+    #Empty Stream (making it possible to take another picture
     rawCapture.truncate(0)
+    return 0
 
 def Image_Difference(Image):
     # making sure light doesn't matter
     lowValY = 180
     highValY = 100
     New_image = np.asarray(Image)
-    low_values_indices = New_image > lowValY  # Where values are low
+    low_values_indices = New_image > lowValY # Where values are low
     high_values_indices = New_image < highValY #Where values are high
     New_image[low_values_indices] = 0  # All low values set to 0
     New_image[high_values_indices] = 0 # All high values set to 0
@@ -76,11 +89,11 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
     # So x = ? * Factor = 90  for max between max and min
     
     #No points Found
-    if(x_Led_1 or x_Led_3 or y_Led_1 or y_Led_3) == 0:
+    if(x_Led_1 == 0) or (x_Led_3 ==0) or (y_Led_1 == 0) or (y_Led_3 == 0):
         return x_middle, y_middle, Direction
     
     #Facing North (dermine middle point)
-    elif (x_Led_1 < x_Led_3) and (y_Led_1 < y_Led_3):
+    elif (x_Led_1 <= x_Led_3) and (y_Led_1 < y_Led_3):
         # Pico Zebro is facing North
         # Middle Point Zebro is:
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)
@@ -88,7 +101,7 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
         Direction = "North"
         return x_middle, y_middle, Direction
     
-    elif (x_Led_1 < x_Led_3) and (y_Led_1 > y_Led_3):
+    elif (x_Led_1 < x_Led_3) and (y_Led_1 >= y_Led_3):
         # Pico Zebro is facing East
         # Middle Point Zebro is:
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)
@@ -96,7 +109,7 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
         Direction = "East"
         return x_middle, y_middle, Direction
     
-    elif (x_Led_1 > x_Led_3) and (y_Led_1 > y_Led_3):
+    elif (x_Led_1 >= x_Led_3) and (y_Led_1 > y_Led_3):
         # Pico Zebro is facing South
         # Middle Point Zebro is:
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
@@ -104,22 +117,26 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
         Direction = "South"
         return x_middle, y_middle, Direction
     
-    elif (x_Led_1 > x_Led_3) and (y_Led_1 < y_Led_3):
+    elif (x_Led_1 > x_Led_3) and (y_Led_1 <= y_Led_3):
         # Pico Zebro is facing West
         # Middle Point Zebro is:
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
         y_middle = ((y_Led_3 - y_Led_1) + y_Led_1)
         Direction = "West"
         return x_middle, y_middle, Direction
+    
+    return x_middle, y_middle, Direction
 
 class FindZebroThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.daemon = True
+        
         self.start()
 
     def run(self):
         while True:
+            start_time = time.time()
             #time.sleep(60) #Because of at startup nothing is connected yet
             #Try to find every Pico Zebro every 60 Seconds
 
@@ -129,31 +146,73 @@ class FindZebroThread(threading.Thread):
             #Also Turn all leds off.
             #if within Time not every one has stopped Try sending global
             #command again.
-            start_time = time.time()
-            #First Take original Picture
-            Picture(1)  #With 1 Vor image1 being original image where nothing has moved
-
-            Original = cv2.imread("Image1.jpg") 
+            #Picture(1) 
             
+            time1=0
+            t_start = time.time()  # start
+            e1 = cv2.getTickCount()
+            #First Take original Picture
+            vs = PiVideoStream().start()
+            #time.sleep(2.0)
+            fps = FPS().start()
+            while fps._numFrames < 10:
+                # grab the frame from the threaded video stream and resize it
+                # to have a maximum width of 400 pixels
+                frame = vs.read()
+             
+                # check to see if the frame should be displayed to our screen
+ #               cv2.imshow("Frame", frame)
+                cv2.imwrite("image25.jpg",frame)
+                key = cv2.waitKey(1) & 0xFF
+             
+                # update the FPS counter
+                fps.update()
+             
+            # stop the timer and display FPS information
+            fps.stop()
+            print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+            print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+             
+            # do a bit of cleanup
+            cv2.destroyWindow("Frame")
+            vs.stop()
+
+            
+            Original = cv2.imread("Image1.jpg")
+            e2 = cv2.getTickCount()
+            
+            #With 1 Vor image1 being original image where nothing has moved
+
+            
+            time1 = (e2 - e1) / cv2.getTickFrequency() + time1
+            elapsedTime = time.time()-t_start
+            print (time1, elapsedTime)
             #for Devices in 16:
                 #print(Devices)
                 #if Devices == 1: # This has to be done for every Zebro
                 # Also if Devices is 1 give a value the address of Pico Zebro 1.
                 #Say Pico Zebro 1 Turn led 1 on.
                 #Wait until said back in register it is turned on for certain time
-            Picture(2) #led 1 on picture 2
+
+            #Picture(2) #led 1 on picture 2
+          
                 #Say Pico Zebro 1 Turn led 1 off and 3 on.
                 #wait until Pico Zebro Says Yeah have done that
-            Picture(3) #led 3 on in picture 3
-                # Turn All leds of again. # Till here other things needs to be coded for every possible 
+
+            #Picture(3) #led 3 on in picture 3
+                # Turn All leds of again. # Till here other things needs to be coded for every possible
+                
             Led_1 = cv2.imread("Image2.jpg")
             Led_3 = cv2.imread("Image3.jpg")
-
-            New_image_Led_1 = abs(Original - Led_1)
+            picture_test = 0
+            
+            New_image_Led_1 = abs(Original - Led_1)    #Taking away improved time with 0.05 seconds which is fo 20 zebros: 1 second
             New_image_Led_3 = abs(Original - Led_3)
+            
+            
             Difference_led_1 = Image_Difference(New_image_Led_1)
             Difference_led_3 = Image_Difference(New_image_Led_3)
-
+            
             Finding_Canny_Led_1 = cv2.Canny(Difference_led_1, 15, 200)
             Finding_Canny_Led_3 = cv2.Canny(Difference_led_3, 15, 200)
             
@@ -191,13 +250,22 @@ class FindZebroThread(threading.Thread):
                 except AttributeError:
                     print("Nothing Found")
                     pass
+            #For some reason this debug functions gives errors that kille
+            #everything which is anoying
+                
             #Add led 1 and 3 together for Testing purposes
-            LEDS_Image = cv2.addWeighted(Difference_led_1,1,Difference_led_3,1,0)
-            cv2.imshow("LEds together", LEDS_Image)
+            #LEDS_Image = cv2.addWeighted(Difference_led_1,1,Difference_led_3,1,0)
+            #cv2.imwrite("Leds_image.jpg", LEDS_Image)
+            #cv2.imshow("LEds together", LEDS_Image)
+                
+            try:
+                (Zebro_Middle_x,Zebro_Middle_y,Direction) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
+                #print(Zebro_Middle_x,Zebro_Middle_y,Direction)
+            except TypeError as e:
+                print(e)
+                pass
 
-            (Zebro_Middle_x,Zebro_Middle_y,Direction) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
-            print(Zebro_Middle_x,Zebro_Middle_y,Direction)
-
+           
             #if Devices == 0: in here it is multiple times aquire
                 #set data from PZ 1
                 #Zebro_1_Middle_x = Zebro_Middle_x
@@ -212,9 +280,10 @@ class FindZebroThread(threading.Thread):
             # if x == 0 or x == 1600 or y = 0 or y == 920 
             #So a gigantic multiple if statement. which becomes smaller and smaller
             # 
+            
+            #time.sleep(0.1)
             print ("My program took", time.time() - start_time, "to run")
-            #time.sleep(10)
-
+            
 
 class FindingBTDevices(threading.Thread):
     def __init__(self, names, condition):
@@ -357,13 +426,16 @@ class Control_Zebro_Thread(threading.Thread):
                         # Movement = Don't Move
                     # send movement
                     # previous_movement = Movement
-                    
-            
-if __name__ == '__main__':
-
+        
+def main():
+    
     names = []
-    Value = 0
     condition = threading.Condition()
+
+    print(cv2.useOptimized())
+    
+    Picture_number = 0
+    condition2 = threading.Condition()
     
     #Starting Sub threads
     Bluetooth_devices = FindingBTDevices(names, condition)
@@ -381,7 +453,11 @@ if __name__ == '__main__':
 
     New_image = abs(Original - Led1)
     cv2.imshow("Testing image", New_image)
-
+    
     # show the frame
     cv2.waitKey(0)
-    #key = cv2.waitKey(1) & 0xFF
+
+if __name__ == '__main__':
+    main()
+
+

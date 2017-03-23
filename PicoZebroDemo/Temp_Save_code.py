@@ -1,3 +1,52 @@
+
+    CameraThread= Camera_Thread()
+    CameraThread.setName("Camera_Thread")
+
+class Camera_Thread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.daemon = True
+        
+        self.start()
+
+    def run(self):
+        global picture_test
+        #Picture_number = 0
+        # capture frames from the camera
+        for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+            # grab the NumPy array representing the image, the initialize the timestamp
+            # and occupied/unoccupied text
+            start_time = time.time()
+            image = frame.array
+
+            Timetest = time.strftime("%d-%m-%Y")
+            # Show the current view for debugging
+            cv2.imshow("original %s" % Timetest,image)
+
+            if (picture_test == 1) or (picture_test == 2) or (picture_test == 3):
+                cv2.imwrite("Image%s.jpg"%picture_test, image)
+                print(picture_test)
+                    #self.condition2.acquire()
+                    #print ('lock acquire by %s' % self.name)
+                    #Picture_number = 0
+                    #self.Picture_number = Picture_number
+                    #self.condition2.notify()
+                    #time.sleep(0.01)
+                    #print ('lock released by %s' % self.name)
+                    #self.condition2.release()
+
+            # show the frame
+            key = cv2.waitKey(1) & 0xFF
+
+            #clear the stream in preparation of the next frame
+            rawCapture.truncate(0)
+                
+            # if the 'q' key was pressed, break from the loop
+            if key == ord("q"):
+                # cleanup the camera and close any open windows
+                cv2.destroyAllWindows()
+                break
+
     cv2.imwrite("See_Difference.jpg",New_image)
     lowValY = 200
     highValY = 100
@@ -32,6 +81,48 @@
 
 #from wakeonlan import *
 
+
+class Camera_Thread(threading.Thread):
+    def __init__(self, Picture_number):
+        ''' Constructor. of Control Thread '''
+        threading.Thread.__init__(self)
+
+        self.daemon = True
+
+        self.Picture_number = Picture_number
+        
+        self.start()
+ 
+    def run(self):
+        while True:
+            # capture frames from the camera
+            for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+                # grab the NumPy array representing the image, the initialize the timestamp
+                # and occupied/unoccupied text
+                image = frame.array
+                
+                Timetest = time.strftime("%d-%m-%Y")
+                # Show the current view for debugging
+                cv2.imshow("original %s" % Timetest,image)
+                if (self.Picture_number == 1) or (self.Picture_number == 2) or (self.Picture_number == 3):
+                    cv2.imwrite("image%s.jpg"%self.Picture_number, image)
+
+                # show the frame
+                key = cv2.waitKey(1) & 0xFF
+
+                #clear the stream in preparation of the next frame
+                rawCapture.truncate(0)
+
+                self.Picture_number = 0
+
+                # if the 'q' key was pressed, break from the loop
+                if key == ord("q"):
+                    # cleanup the camera and close any open windows
+                    cv2.destroyAllWindows()
+                    # Wait for the threads to finish...
+                    print('Main Terminating...')
+                    break
+            time.sleep(15) 
 
 #phone = "ff:ff:ff:ff:ff:ff"
 
