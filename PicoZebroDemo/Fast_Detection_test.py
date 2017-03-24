@@ -91,19 +91,22 @@ class Control_Zebro_Thread(threading.Thread):
                     # then the next direction can be determind.
                     # if high enough do the following
                     # Movement = Don't Move
+                    # Current Direction = self.Direction
+                    # Moving = [Current Direction, Movement]
                     
                     # if previous movement == Dont Move:
                         # Testing =  random.randrange(1,100)
                         # print(Testing)
-                        # if Testing =< 60:
-                        # Movement = Go Forwar
+                        # if Testing =< 60: 
+                        # Movement = Go Forward
                         # if Testing > 60 or Testing =< 70:
                         # Movement = Don't move
                         # if Testing > 70 or Testing =< 85:
                         # Movement = Go right
                         # if Testing > 85 or Testing =< 100:
                         # Movement = Go left
-                        
+                    #if Moving[0] == Blocked Direction and 
+                         #Dont Move   
                     # if previous movement == Forward:
                         # Testing =  random.randrange(1,100)
                         # if Testing =< 80:
@@ -138,8 +141,15 @@ class Control_Zebro_Thread(threading.Thread):
                         # if Testing > 40 or Testing =< 100:
                         # Movement = Go left
 
-                    # if movement == Blocked Movements:
-                        # Movement = Don't Move
+                    # while movement == None:
+                    #while result is None:
+                    #    try:
+                    #        # connect
+                    # if Direction == North
+                    #   Movement == right
+                    #        result = get_data(...)
+                    #    except:
+                    #         pass
                     # send movement
                     # previous_movement = Movement
 
@@ -185,7 +195,7 @@ class FindingBTDevices(threading.Thread):
 
 def Image_Difference(Image):
     # making sure light doesn't matter
-    lowValY = 180
+    lowValY = 150
     highValY = 100
     New_image = np.asarray(Image)
     low_values_indices = New_image > lowValY  # Where values are low
@@ -241,6 +251,7 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
         y_middle = ((y_Led_3 - y_Led_1) + y_Led_1)
         Direction = "West"
         return x_middle, y_middle, Direction
+    return x_middle, y_middle, Direction
 
 def main():
     # capture frames from the camera
@@ -257,19 +268,34 @@ def main():
         start_time = time.time()
         if Picture == 1:
             cv2.imwrite("Image%s.jpg"%Picture, image)
-        Original = cv2.imread("Image1.jpg") 
+        #Original = cv2.imread("Image1.jpg")
+        Original = cv2.imread("Leds_off.jpg")
         # Do some other stuff
-        
+        for Devices in range(20):
+            pass
+            #Picture = 2
+            #print(Devices)
+            #if Devices == 1: # This has to be done for every Zebro
+            # Also if Devices is 1 give a value the address of Pico Zebro 1.
+            #Say Pico Zebro 1 Turn led 1 on.
+            #Wait until said back in register it is turned on for certain time
         if Picture == 2:
             cv2.imwrite("Image%s.jpg"%Picture, image)            
+            # Say Pico Zebro 1 Turn led 1 off and 3 on.
+            # Wait until Pico Zebro Says Yeah have done that
 
         #Again do some other stuff
         if Picture == 3:
             cv2.imwrite("Image%s.jpg"%Picture, image)
+
+            # Turn All leds of again. # Till here other things needs to be coded for every possible 
         
         if Picture == 4:
-            Led_1 = cv2.imread("Image2.jpg")
-            Led_3 = cv2.imread("Image3.jpg")
+            Led_1 = cv2.imread("Led1_on.jpg")
+            Led_3 = cv2.imread("Led3_on.jpg")
+            
+            #Led_1 = cv2.imread("Image2.jpg")
+            #Led_3 = cv2.imread("Image3.jpg")
             print ("My program took", time.time() - start_time, "to run")
 
             New_image_Led_1 = abs(Original - Led_1)
@@ -317,9 +343,41 @@ def main():
             #Add led 1 and 3 together for Testing purposes
             LEDS_Image = cv2.addWeighted(Difference_led_1,1,Difference_led_3,1,0)
             cv2.imshow("LEds together", LEDS_Image)
+            cv2.imwrite("Leds_Tog1.jpg", LEDS_Image)
 
             (Zebro_Middle_x,Zebro_Middle_y,Direction) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
             print(Zebro_Middle_x,Zebro_Middle_y,Direction)
+
+            #if Devices == 0: in here it is multiple times aquire
+                #set data from PZ 1
+                #Zebro_1_Middle_x = Zebro_Middle_x
+                #Zebro_1_Middle_y,
+                #Direction_Zebro_1 = Direction
+                #etc every value
+                #Now Add To a Value 1- (amount of Robots) These 3 Values and Send it to the thread which
+                #Has the control of the Robots
+            #once every value for every possible Zebro is determind then
+            #Check if any of the x and y values are close to each other.
+            #or if any of the x or y values are to close to the edge which is
+            # if x == 0 or x == 1600 or y = 0 or y == 920 
+            #So a gigantic multiple if statement. which becomes smaller and smaller
+            # Or if possible like this:
+            #For Zebros_1 in range(20):
+            #   For Zebros_2 in range(20):
+            #      Blocking_x = abs(Zebro_%s_Middle_x %Zebros_1 - Zebro_%s_Middle_x %Zebros_2)
+            #      Blocking_y = abs(Zebro_%s_Middle_y %Zebros_1 - Zebro_%s_Middle_y %Zebros_2)
+            #      if 0 < Blocking_x < 80:
+            #          if (Zebro_1_Middle_x < Zebro_%s_Middle_x %Zebros)
+            #              Block East, Zebros_1
+            #              Blocking_%s.append(Block), Zebros_1
+            #          if (Zebro_1_Middle_x > Zebro_%s_Middle_x %Zebros)
+            #              Block_%s West, Zebros_1
+            #      if 0 < Blocking_y < 80:
+            #          if (Zebro_1_Middle_y < Zebro_%s_Middle_y %Zebros)
+            #              Bloc_%sk South
+            #          if (Zebro_1_Middle_y > Zebro_%s_Middle_y %Zebros)
+            #              Block_%s North, Zebros_1
+            #   Set(Zebro_1_Middle_x , Zebro_1_Middle_y, Direction, Blocked_Direction%s) 
             
             Picture = 0
             #time.sleep(60)
@@ -335,6 +393,7 @@ def main():
         # if the 'q' key was pressed, break from the loop
         if key == ord("q"):
             # cleanup the camera and close any open windows
+            print("Ending program")
             cv2.destroyAllWindows()
             break
 
@@ -348,5 +407,8 @@ if __name__ == '__main__':
     
     Pico_Zebro_1 = Control_Zebro_Thread(names, condition, 1)
     Pico_Zebro_1.setName('Pico_Zebro_1')
+
+    Pico_Zebro_2 = Control_Zebro_Thread(names, condition, 2)
+    Pico_Zebro_2.setName('Pico_Zebro_2')
     
     main()

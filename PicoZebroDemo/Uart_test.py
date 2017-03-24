@@ -11,15 +11,17 @@ ser = serial.Serial(
   timeout=1
 )
 
-#print (("Serial is open: " + (ser.isOpen())))
+print (("Serial is open: {0}".format(ser.isOpen())))
 
 print ("Now Writing")
-ser.write(b"This is a test")
+Test = "This is a test"
 
-print ("Did write, now read")
+Test = Test.encode('utf-8')
+ser.write(Test)
 x = ser.readline()
-#x.decode('utf-8')
+print ("Did write, now read")
+x = x.decode('utf-8')
 print(x)
-#print ("got '" + x + "'")
+print ("got '{0}'  Test".format(x))
 
 ser.close()
