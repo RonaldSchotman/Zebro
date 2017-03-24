@@ -15,21 +15,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .debug_aranges 00000378  00000000  00000000  00000a60  2**3
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00007e27  00000000  00000000  00000dd8  2**0
+  6 .debug_info   00007e26  00000000  00000000  00000dd8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00003ee9  00000000  00000000  00008bff  2**0
+  7 .debug_abbrev 00003ee9  00000000  00000000  00008bfe  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00007394  00000000  00000000  0000cae8  2**0
+  8 .debug_line   000073a0  00000000  00000000  0000cae7  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000a88  00000000  00000000  00013e7c  2**2
+  9 .debug_frame  00000a88  00000000  00000000  00013e88  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    0002c3fe  00000000  00000000  00014904  2**0
+ 10 .debug_str    0002c560  00000000  00000000  00014910  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00001f2b  00000000  00000000  00040d02  2**0
+ 11 .debug_loc    00001f2b  00000000  00000000  00040e70  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000288  00000000  00000000  00042c2d  2**0
+ 12 .debug_ranges 00000288  00000000  00000000  00042d9b  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_macro  0000afff  00000000  00000000  00042eb5  2**0
+ 13 .debug_macro  0000ad06  00000000  00000000  00043023  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -1623,9 +1623,9 @@ static inline void sysclk_set_prescalers(uint8_t psadiv, uint8_t psbcdiv)
  956:	4e de       	rcall	.-868    	; 0x5f4 <leds_set_LD1>
 		hbridge_init();
  958:	d2 dd       	rcall	.-1116   	; 0x4fe <hbridge_init>
-		hbridge_sign_magnitude(1, (1<<15));
- 95a:	60 e0       	ldi	r22, 0x00	; 0
- 95c:	70 e8       	ldi	r23, 0x80	; 128
+		hbridge_sign_magnitude(1, (0xFE));
+ 95a:	6e ef       	ldi	r22, 0xFE	; 254
+ 95c:	70 e0       	ldi	r23, 0x00	; 0
  95e:	81 e0       	ldi	r24, 0x01	; 1
  960:	04 de       	rcall	.-1016   	; 0x56a <hbridge_sign_magnitude>
 			

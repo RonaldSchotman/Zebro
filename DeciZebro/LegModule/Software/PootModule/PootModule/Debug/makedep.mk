@@ -4,6 +4,8 @@
 
 src\ASF\xmega\drivers\ac\ac.c
 
+src\zebrobus.c
+
 src\ASF\xmega\drivers\adc\adc.c
 
 src\ASF\xmega\drivers\adc\xmega_aau\adc_aau.c
@@ -13,6 +15,8 @@ src\ASF\xmega\drivers\usart\usart.c
 src\clock.c
 
 src\encoder.c
+
+src\errors.c
 
 src\hbridge.c
 

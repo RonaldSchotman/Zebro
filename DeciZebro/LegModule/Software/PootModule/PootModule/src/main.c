@@ -17,12 +17,13 @@
 #include <asf.h>
 #include <avr/io.h>
 #include "../inc/clock.h"
-#include "../inc/leds.h"
-#include "../inc/interrupts.h"
 #include "../inc/globals.h"
+#include "../inc/interrupts.h"
+#include "../inc/leds.h"
 #include "../inc/vregs.h"
 #include "../inc/uart1.h"
 #include "../inc/hbridge.h"
+#include "../inc/errors.h"
 
 int main (void)
 {

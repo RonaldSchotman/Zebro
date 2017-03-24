@@ -79,6 +79,19 @@ Discarded input sections
                 0x00000000       0x10 src/ASF/xmega/drivers/ac/ac.o
  .bss.ac_aca_opened
                 0x00000000        0x1 src/ASF/xmega/drivers/ac/ac.o
+ .group         0x00000000        0x8 src/zebrobus.o
+ .text          0x00000000        0x0 src/zebrobus.o
+ .data          0x00000000        0x0 src/zebrobus.o
+ .bss           0x00000000        0x0 src/zebrobus.o
+ .debug_info    0x00000000       0x21 src/zebrobus.o
+ .debug_abbrev  0x00000000       0x13 src/zebrobus.o
+ .debug_aranges
+                0x00000000       0x18 src/zebrobus.o
+ .debug_macro   0x00000000       0x11 src/zebrobus.o
+ .debug_macro   0x00000000      0xa60 src/zebrobus.o
+ .debug_line    0x00000000       0x2f src/zebrobus.o
+ .debug_str     0x00000000     0x2b64 src/zebrobus.o
+ .comment       0x00000000       0x31 src/zebrobus.o
  .group         0x00000000        0x8 src/ASF/xmega/drivers/adc/adc.o
  .group         0x00000000        0x8 src/ASF/xmega/drivers/adc/adc.o
  .group         0x00000000        0x8 src/ASF/xmega/drivers/adc/adc.o
@@ -523,6 +536,146 @@ Discarded input sections
  .debug_str     0x00000000    0x287fc src/encoder.o
  .comment       0x00000000       0x31 src/encoder.o
  .debug_frame   0x00000000       0x24 src/encoder.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .group         0x00000000        0x8 src/errors.o
+ .text          0x00000000        0x0 src/errors.o
+ .data          0x00000000        0x0 src/errors.o
+ .bss           0x00000000        0x0 src/errors.o
+ .text.errors_init
+                0x00000000       0x18 src/errors.o
+ .text.errors_reset_errors
+                0x00000000       0x70 src/errors.o
+ .text.errors_emergency_stop
+                0x00000000       0x32 src/errors.o
+ .text.errors_check_for_emergency_stop
+                0x00000000       0x12 src/errors.o
+ .text.errors_report
+                0x00000000       0x80 src/errors.o
+ .text.errors_reset_emergency_stop
+                0x00000000       0x44 src/errors.o
+ .bss.emergency_stop
+                0x00000000        0x4 src/errors.o
+ .bss.errors_array
+                0x00000000       0x24 src/errors.o
+ .bss.last_error
+                0x00000000        0x1 src/errors.o
+ .bss.error_counter
+                0x00000000        0x1 src/errors.o
+ .debug_info    0x00000000      0x41a src/errors.o
+ .debug_abbrev  0x00000000      0x198 src/errors.o
+ .debug_loc     0x00000000      0x116 src/errors.o
+ .debug_aranges
+                0x00000000       0x48 src/errors.o
+ .debug_ranges  0x00000000       0x38 src/errors.o
+ .debug_macro   0x00000000      0x342 src/errors.o
+ .debug_macro   0x00000000      0xa60 src/errors.o
+ .debug_macro   0x00000000      0x1c9 src/errors.o
+ .debug_macro   0x00000000       0x52 src/errors.o
+ .debug_macro   0x00000000       0x10 src/errors.o
+ .debug_macro   0x00000000      0x302 src/errors.o
+ .debug_macro   0x00000000       0x9e src/errors.o
+ .debug_macro   0x00000000     0x58d8 src/errors.o
+ .debug_macro   0x00000000       0x9a src/errors.o
+ .debug_macro   0x00000000       0xf1 src/errors.o
+ .debug_macro   0x00000000       0x34 src/errors.o
+ .debug_macro   0x00000000       0x10 src/errors.o
+ .debug_macro   0x00000000       0x18 src/errors.o
+ .debug_macro   0x00000000       0x5e src/errors.o
+ .debug_macro   0x00000000       0x10 src/errors.o
+ .debug_macro   0x00000000       0x22 src/errors.o
+ .debug_macro   0x00000000      0x166 src/errors.o
+ .debug_macro   0x00000000       0x1c src/errors.o
+ .debug_macro   0x00000000       0x35 src/errors.o
+ .debug_macro   0x00000000       0x66 src/errors.o
+ .debug_macro   0x00000000      0x652 src/errors.o
+ .debug_macro   0x00000000       0x97 src/errors.o
+ .debug_macro   0x00000000       0x17 src/errors.o
+ .debug_macro   0x00000000      0x250 src/errors.o
+ .debug_macro   0x00000000       0x76 src/errors.o
+ .debug_macro   0x00000000       0x16 src/errors.o
+ .debug_macro   0x00000000      0x6e3 src/errors.o
+ .debug_macro   0x00000000       0x10 src/errors.o
+ .debug_macro   0x00000000      0x175 src/errors.o
+ .debug_macro   0x00000000       0x40 src/errors.o
+ .debug_macro   0x00000000       0x69 src/errors.o
+ .debug_macro   0x00000000       0x32 src/errors.o
+ .debug_macro   0x00000000       0xe4 src/errors.o
+ .debug_macro   0x00000000       0x10 src/errors.o
+ .debug_macro   0x00000000       0x26 src/errors.o
+ .debug_macro   0x00000000       0x10 src/errors.o
+ .debug_macro   0x00000000       0x42 src/errors.o
+ .debug_macro   0x00000000       0x22 src/errors.o
+ .debug_macro   0x00000000      0x2bf src/errors.o
+ .debug_macro   0x00000000       0x68 src/errors.o
+ .debug_macro   0x00000000       0x2f src/errors.o
+ .debug_macro   0x00000000      0x154 src/errors.o
+ .debug_macro   0x00000000       0xe3 src/errors.o
+ .debug_macro   0x00000000       0x34 src/errors.o
+ .debug_macro   0x00000000       0x16 src/errors.o
+ .debug_macro   0x00000000       0x10 src/errors.o
+ .debug_macro   0x00000000       0x28 src/errors.o
+ .debug_macro   0x00000000       0x23 src/errors.o
+ .debug_macro   0x00000000       0x7c src/errors.o
+ .debug_macro   0x00000000      0x109 src/errors.o
+ .debug_macro   0x00000000       0x40 src/errors.o
+ .debug_macro   0x00000000       0x3a src/errors.o
+ .debug_macro   0x00000000      0x2da src/errors.o
+ .debug_macro   0x00000000       0x28 src/errors.o
+ .debug_line    0x00000000      0xa64 src/errors.o
+ .debug_str     0x00000000    0x2941c src/errors.o
+ .comment       0x00000000       0x31 src/errors.o
+ .debug_frame   0x00000000       0x7c src/errors.o
  .group         0x00000000        0x8 src/hbridge.o
  .group         0x00000000        0x8 src/hbridge.o
  .group         0x00000000        0x8 src/hbridge.o
@@ -631,6 +784,7 @@ Discarded input sections
  .debug_macro   0x00000000      0x109 src/hbridge.o
  .debug_macro   0x00000000       0x40 src/hbridge.o
  .debug_macro   0x00000000       0x3a src/hbridge.o
+ .debug_macro   0x00000000       0x28 src/hbridge.o
  .group         0x00000000        0x8 src/interrupts.o
  .group         0x00000000        0x8 src/interrupts.o
  .group         0x00000000        0x8 src/interrupts.o
@@ -963,6 +1117,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x40 src/uart1.o
  .debug_macro   0x00000000       0x3a src/uart1.o
  .debug_macro   0x00000000       0x28 src/uart1.o
+ .debug_macro   0x00000000      0x2da src/uart1.o
  .group         0x00000000        0x8 src/vregs.o
  .group         0x00000000        0x8 src/vregs.o
  .group         0x00000000        0x8 src/vregs.o
@@ -1789,6 +1944,7 @@ Discarded input sections
  .group         0x00000000        0x8 src/main.o
  .group         0x00000000        0x8 src/main.o
  .group         0x00000000        0x8 src/main.o
+ .group         0x00000000        0x8 src/main.o
  .text          0x00000000        0x0 src/main.o
  .data          0x00000000        0x0 src/main.o
  .bss           0x00000000        0x0 src/main.o
@@ -1842,11 +1998,12 @@ Discarded input sections
  .debug_macro   0x00000000      0x109 src/main.o
  .debug_macro   0x00000000       0x40 src/main.o
  .debug_macro   0x00000000       0x3a src/main.o
- .debug_macro   0x00000000       0x28 src/main.o
  .debug_macro   0x00000000       0x2e src/main.o
+ .debug_macro   0x00000000       0x28 src/main.o
  .debug_macro   0x00000000      0x2da src/main.o
  .debug_macro   0x00000000       0x3a src/main.o
  .debug_macro   0x00000000       0x28 src/main.o
+ .debug_macro   0x00000000       0x52 src/main.o
  .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.9.2/avrxmega2\libgcc.a(_udivmodsi4.o)
  .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.9.2/avrxmega2\libgcc.a(_udivmodsi4.o)
  .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.9.2/avrxmega2\libgcc.a(_udivmodsi4.o)
@@ -1933,11 +2090,13 @@ Linker script and memory map
 
 LOAD C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/XMEGAA_DFP/1.1.63/gcc/dev/atxmega32a4u/avrxmega2/crtatxmega32a4u.o
 LOAD src/ASF/xmega/drivers/ac/ac.o
+LOAD src/zebrobus.o
 LOAD src/ASF/xmega/drivers/adc/adc.o
 LOAD src/ASF/xmega/drivers/adc/xmega_aau/adc_aau.o
 LOAD src/ASF/xmega/drivers/usart/usart.o
 LOAD src/clock.o
 LOAD src/encoder.o
+LOAD src/errors.o
 LOAD src/hbridge.o
 LOAD src/interrupts.o
 LOAD src/leds.o
@@ -2501,7 +2660,7 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x7e27
+.debug_info     0x00000000     0x7e26
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000     0x284f C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/XMEGAA_DFP/1.1.63/gcc/dev/atxmega32a4u/avrxmega2/crtatxmega32a4u.o
  .debug_info    0x0000284f      0x945 src/ASF/xmega/drivers/ac/ac.o
@@ -2517,7 +2676,7 @@ END GROUP
  .debug_info    0x00006cfb      0xa4e src/ASF/xmega/drivers/dma/dma.o
  .debug_info    0x00007749       0x8b src/ASF/xmega/drivers/cpu/ccp.o
  .debug_info    0x000077d4      0x158 src/ASF/common/boards/user_board/init.o
- .debug_info    0x0000792c      0x4fb src/main.o
+ .debug_info    0x0000792c      0x4fa src/main.o
 
 .debug_abbrev   0x00000000     0x3ee9
  *(.debug_abbrev)
@@ -2537,7 +2696,7 @@ END GROUP
  .debug_abbrev  0x00003c2a       0xaa src/ASF/common/boards/user_board/init.o
  .debug_abbrev  0x00003cd4      0x215 src/main.o
 
-.debug_line     0x00000000     0x7394
+.debug_line     0x00000000     0x73a0
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x391 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/XMEGAA_DFP/1.1.63/gcc/dev/atxmega32a4u/avrxmega2/crtatxmega32a4u.o
  .debug_line    0x00000391      0x935 src/ASF/xmega/drivers/ac/ac.o
@@ -2553,7 +2712,7 @@ END GROUP
  .debug_line    0x00005765      0x954 src/ASF/xmega/drivers/dma/dma.o
  .debug_line    0x000060b9       0x6e src/ASF/xmega/drivers/cpu/ccp.o
  .debug_line    0x00006127      0x8d2 src/ASF/common/boards/user_board/init.o
- .debug_line    0x000069f9      0x99b src/main.o
+ .debug_line    0x000069f9      0x9a7 src/main.o
 
 .debug_frame    0x00000000      0xa88
  *(.debug_frame)
@@ -2571,7 +2730,7 @@ END GROUP
  .debug_frame   0x00000a40       0x24 src/ASF/common/boards/user_board/init.o
  .debug_frame   0x00000a64       0x24 src/main.o
 
-.debug_str      0x00000000    0x2c3fe
+.debug_str      0x00000000    0x2c560
  *(.debug_str)
  .debug_str     0x00000000     0x1aa8 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/XMEGAA_DFP/1.1.63/gcc/dev/atxmega32a4u/avrxmega2/crtatxmega32a4u.o
  .debug_str     0x00001aa8    0x26df1 src/ASF/xmega/drivers/ac/ac.o
@@ -2598,8 +2757,8 @@ END GROUP
                               0x277ce (size before relaxing)
  .debug_str     0x0002c37e       0x36 src/ASF/common/boards/user_board/init.o
                               0x28638 (size before relaxing)
- .debug_str     0x0002c3b4       0x4a src/main.o
-                              0x296bf (size before relaxing)
+ .debug_str     0x0002c3b4      0x1ac src/main.o
+                              0x29821 (size before relaxing)
 
 .debug_loc      0x00000000     0x1f2b
  *(.debug_loc)
@@ -2648,7 +2807,7 @@ END GROUP
  .debug_ranges  0x00000268       0x10 src/ASF/common/boards/user_board/init.o
  .debug_ranges  0x00000278       0x10 src/main.o
 
-.debug_macro    0x00000000     0xafff
+.debug_macro    0x00000000     0xad06
  *(.debug_macro)
  .debug_macro   0x00000000      0x22b src/ASF/xmega/drivers/ac/ac.o
  .debug_macro   0x0000022b      0xa60 src/ASF/xmega/drivers/ac/ac.o
@@ -2697,18 +2856,16 @@ END GROUP
  .debug_macro   0x00008eda      0x23a src/ASF/xmega/drivers/adc/xmega_aau/adc_aau.o
  .debug_macro   0x00009114       0x95 src/clock.o
  .debug_macro   0x000091a9      0x326 src/hbridge.o
- .debug_macro   0x000094cf       0x28 src/hbridge.o
- .debug_macro   0x000094f7      0x32b src/interrupts.o
- .debug_macro   0x00009822      0x326 src/leds.o
- .debug_macro   0x00009b48       0x28 src/leds.o
- .debug_macro   0x00009b70      0x338 src/uart1.o
- .debug_macro   0x00009ea8       0x3a src/uart1.o
- .debug_macro   0x00009ee2      0x2da src/uart1.o
- .debug_macro   0x0000a1bc      0x33d src/vregs.o
- .debug_macro   0x0000a4f9       0x2e src/vregs.o
- .debug_macro   0x0000a527      0x1e6 src/ASF/common/services/clock/xmega/sysclk.o
- .debug_macro   0x0000a70d      0x277 src/ASF/xmega/drivers/dma/dma.o
- .debug_macro   0x0000a984      0x31d src/ASF/common/boards/user_board/init.o
- .debug_macro   0x0000aca1      0x35e src/main.o
+ .debug_macro   0x000094cf      0x32b src/interrupts.o
+ .debug_macro   0x000097fa      0x326 src/leds.o
+ .debug_macro   0x00009b20       0x28 src/leds.o
+ .debug_macro   0x00009b48      0x338 src/uart1.o
+ .debug_macro   0x00009e80       0x3a src/uart1.o
+ .debug_macro   0x00009eba      0x33d src/vregs.o
+ .debug_macro   0x0000a1f7       0x2e src/vregs.o
+ .debug_macro   0x0000a225      0x1e6 src/ASF/common/services/clock/xmega/sysclk.o
+ .debug_macro   0x0000a40b      0x277 src/ASF/xmega/drivers/dma/dma.o
+ .debug_macro   0x0000a682      0x31d src/ASF/common/boards/user_board/init.o
+ .debug_macro   0x0000a99f      0x367 src/main.o
 OUTPUT(Pootmodule.elf elf32-avr)
 LOAD linker stubs
