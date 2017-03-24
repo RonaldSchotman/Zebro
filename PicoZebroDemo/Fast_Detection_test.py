@@ -35,7 +35,7 @@ import bluetooth
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (1648, 928)
-camera.framerate = 5
+camera.framerate = 25
 rawCapture = PiRGBArray(camera, size=(1648, 928))
 
 # allow the camera to warmup (So this is only during start up once).
