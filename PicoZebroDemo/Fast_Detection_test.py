@@ -92,8 +92,21 @@ class Control_Zebro_Thread(threading.Thread):
                     # if high enough do the following
                     # Movement = Don't Move
                     # Current Direction = self.Direction
-                    # Moving = [Current Direction, Movement]
-                    
+                    #
+                    # if Current Direction == Blocked_Direction:
+                    #   Next_Movement != Previous_Movement
+                    #   if previous Movement == Forward:
+                    #        previous Movement = Right
+                    #
+                    #   elif previous Movement == Right:
+                    #        previous Movement = Forward
+                    #
+                    #   elif previous Movement == Left:
+                    #        previous Movement = Forward
+                    #
+                    #   elif Previous Movement == Don't Move
+                    #        Previous Movement = Don't Move
+                   
                     # if previous movement == Dont Move:
                         # Testing =  random.randrange(1,100)
                         # print(Testing)
@@ -105,8 +118,7 @@ class Control_Zebro_Thread(threading.Thread):
                         # Movement = Go right
                         # if Testing > 85 or Testing =< 100:
                         # Movement = Go left
-                    #if Moving[0] == Blocked Direction and 
-                         #Dont Move   
+   
                     # if previous movement == Forward:
                         # Testing =  random.randrange(1,100)
                         # if Testing =< 80:
@@ -141,17 +153,37 @@ class Control_Zebro_Thread(threading.Thread):
                         # if Testing > 40 or Testing =< 100:
                         # Movement = Go left
 
-                    # while movement == None:
-                    #while result is None:
-                    #    try:
-                    #        # connect
-                    # if Direction == North
-                    #   Movement == right
-                    #        result = get_data(...)
-                    #    except:
-                    #         pass
-                    # send movement
+                    #if Movement == Forward:
+                        #Direction = Direction
+                    #if Movement == Don't Move:
+                        #Direction == Direction
+                    #if Movement == Rigth:
+                        #if Direction == North:
+                        #   Direction = East
+                        #elif Direction == East
+                        #   Direction = South
+                        #elif Direction == South
+                        #   Direction = West
+                        #elif Direction == West
+                        #   Direction = North
+                     #if Movement == Left:
+                        #if Direction == North:
+                        #   Direction = West
+                        #elif Direction == West
+                        #   Direction = South
+                        #elif Direction == South
+                        #   Direction = East
+                        #elif Direction == East
+                        #   Direction = North
+                    #for Names in Blocked_Direction
+                         #if Direction == Blocked_Direction:    (THis needs to be in a for loop for every value in Blocked_direction
+                            #Movement is Blocked               #With Blocked Direction Cleard at the end (Which Doesn't matter anymore)
+                            #Send Movement == Don't Move (don't assign it)
+                        #if Movement == Blocked_Movement:
+                        #   Don't send Movement
+                        
                     # previous_movement = Movement
+                    # Block_direction == empty
 
 class FindingBTDevices(threading.Thread):
     def __init__(self, names, condition):
@@ -211,9 +243,9 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
 
     #Once known what the max and minimum Distance is between two points
     # The following calculation can be done for saying that angle is the
-    # Pico Zebro Turned:
+    # Pico Zebro Turned: (This only needs to be done if just north, south east and west work.
     # 90 - atan(x) with x from 0 -90 and being the difference between Max and Min
-    # So x = ? * Factor = 90  for max between max and min
+    # So x = ? * Factor = 90  for max between max and min 
     
     #No points Found
     if(x_Led_1 or x_Led_3 or y_Led_1 or y_Led_3) == 0:
@@ -356,12 +388,13 @@ def main():
                 #etc every value
                 #Now Add To a Value 1- (amount of Robots) These 3 Values and Send it to the thread which
                 #Has the control of the Robots
+            
             #once every value for every possible Zebro is determind then
             #Check if any of the x and y values are close to each other.
             #or if any of the x or y values are to close to the edge which is
             # if x == 0 or x == 1600 or y = 0 or y == 920 
             #So a gigantic multiple if statement. which becomes smaller and smaller
-            # Or if possible like this:
+            # Or if possible like this: (other wise multiple giant for loops if this is not possible
             #For Zebros_1 in range(20):
             #   For Zebros_2 in range(20):
             #      Blocking_x = abs(Zebro_%s_Middle_x %Zebros_1 - Zebro_%s_Middle_x %Zebros_2)
