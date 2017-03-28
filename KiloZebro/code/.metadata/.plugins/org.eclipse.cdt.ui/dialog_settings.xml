@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
+	<section name="org.eclipse.cdt.ui.OPEN_ACTION_SELECTION_DIALOG_SECTION">
+		<item value="799" key="DIALOG_WIDTH"/>
+		<item value="1|Sans|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+		<item value="428" key="DIALOG_HEIGHT"/>
+		<item value="387" key="DIALOG_X_ORIGIN"/>
+		<item value="321" key="DIALOG_Y_ORIGIN"/>
+	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
-		<item value="168" key="size.height"/>
-		<item value="451" key="size.width"/>
+		<item value="164" key="size.height"/>
+		<item value="800" key="size.width"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
 	</section>
@@ -10,6 +17,15 @@
 		<item value="false" key="caseSensitive"/>
 		<item value="227191" key="searchFlags"/>
 		<list key="previousPatterns">
+			<item value="errors_emergency_stop"/>
+			<item value="interrupts_disable"/>
+			<item value="interrupts"/>
+			<item value="adc_wait_for_data"/>
+			<item value="adc_request_conversion"/>
+			<item value="*IRQHandler*"/>
+			<item value="irqhandler"/>
+			<item value="disable"/>
+			<item value="startup_stm32f0"/>
 			<item value="ENCODER_PULSES_PER_ROTATION"/>
 			<item value="mean"/>
 		</list>

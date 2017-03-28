@@ -96,7 +96,7 @@ int32_t time_counter_reset(void){
 /**
  * Write the value of the counter to the vregs
  */
-int32_t time_check_time(void){
+uint16_t time_check_time(void){
 	uint16_t counter_value;
 
 	counter_value = TIM16->CNT;
@@ -104,7 +104,7 @@ int32_t time_check_time(void){
 	vregs_write(VREGS_CLOCK_B, (uint8_t) counter_value);
 	vregs_write(VREGS_SYNC_COUNTER, (uint8_t) current_seconds);
 
-	return 0;
+	return counter_value;
 }
 
 uint8_t get_current_seconds(void) {
@@ -127,7 +127,7 @@ uint32_t time_get_time_ms(void){
  * Set the current time, to a certain amount of seconds.
  * Fractional seconds are set to 0.
  */
-int32_t time_set_time(uint8_t seconds){
+uint8_t time_set_time(uint8_t seconds){
 	current_seconds = seconds;
 	TIM16->CNT = 0;
 
@@ -138,7 +138,7 @@ int32_t time_set_time(uint8_t seconds){
  * Demo thingy to make the clock count up, when no locomotive controller is
  * present.
  */
-int32_t time_dumy_locmotive_controller(void){
+uint8_t time_dumy_locmotive_controller(void){
 	if (TIM16->CNT >= TIME_ONE_SECOND_COUNTER_VALUE){
 		time_counter_reset();
 		current_seconds = (current_seconds + 1) % TIME_MAX_SECONDS;

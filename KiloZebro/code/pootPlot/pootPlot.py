@@ -164,8 +164,8 @@ class UdpPlotter:
             title_text = "{} --- {}".format(field, self.legend[field])
             plot = self.window.addPlot(row, column, title = title_text)
             self.plots[field] = plot
-            if column == self.columns - 1:
-                row = row + 1
+            # if column == self.columns - 1:
+            #     row = row + 1
             column = (column + 1) % self.columns
     """
     Draw the plots in the plotting window
@@ -224,7 +224,7 @@ if __name__ == "__main__":
             help = "ip receive UDP packages from",
             dest = "udp_ip")
     parser.add_argument("-c", "--columns",
-            default = 2,
+            default = None,
             type = int,
             help = "Number of columns in plotting window",
             dest = "columns")
@@ -238,7 +238,7 @@ if __name__ == "__main__":
             help = "Path the the vregs.h header file",
             dest = "legend_file")     
     parser.add_argument("-s", "--plot-size",
-            default = 3000,
+            default = 30,
             type = int,
             help = "number of samples to show on the plot",
             dest = "length")

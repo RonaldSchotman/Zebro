@@ -17,11 +17,14 @@
 #include "vregs.h"
 #include "globals.h"
 #include "errors.h"
+#include "adc.h"
+#include "motion.h"
+#include "interrupts.h"
 
 /**
  * Initialise the H-bridge GPIO pins and timers
  */
-void h_bridge_init(void) {
+int32_t h_bridge_init(void) {
 	/* For the driving the H bridge, the the CH1 and CH2 output compare
 	 * channels of TIM1 are used.
 	 * They are connected to the H bridge as follows:
@@ -78,20 +81,19 @@ void h_bridge_init(void) {
 
 	/* set the channel 4 compare value (used to trigger the ADC)
 	 * otherwise the ADC wil not take a sample. CH4 is now low for 1 clk-pulse */
-//	h_bridge_set_ch4(H_BRIDGE_ADC_TRIGGER);
-	TIM1->CCR4 = H_BRIDGE_ADC_TRIGGER;
+//	TIM1->CCR4 = H_BRIDGE_ADC_TRIGGER;
+	TIM1->CCR4 = 1023;
 	/* select correct output mode */
-//	TIM1->CCMR2 &= ~(TIM_CCMR2_OC4M_2);
-	/* toggle on ccr match */
-	TIM1->CCMR2 |= TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_0 | TIM_CCMR2_OC4PE;
-	TIM1->CCER |= TIM_CCER_CC4E;
-	/* set the channel 4 compare result as triger output */
+	/* toggle on cnt=ccr */
+	TIM1->CCMR2 |= TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_0;
+	/* set the channel 4 compare result as trigger output */
 	TIM1->CR2 |= TIM_CR2_MMS_2 | TIM_CR2_MMS_1 | TIM_CR2_MMS_0;
-
+	/* enable cc4 output */
+	TIM1->CCER |= TIM_CCER_CC4E;
 	TIM1->BDTR |= TIM_BDTR_OSSI;
+	TIM1->EGR |= TIM_EGR_UG;
 	/* enable timer, but do NOT enable output */
 	TIM1->CR1 |= TIM_CR1_CEN;
-	TIM1->EGR |= TIM_EGR_UG;
 
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOA_CLK_ENABLE()
@@ -123,7 +125,42 @@ void h_bridge_init(void) {
 	vregs_write(VREGS_H_BRIDGE_MODE, H_BRIDGE_MODE_IDLE);
 	vregs_write(VREGS_H_BRIDGE_DUTY_A, 0);
 	vregs_write(VREGS_H_BRIDGE_DUTY_B, 0);
+	return 0;
 }
+//
+//void TIM1_CC_IRQHandler(void) {
+//	static uint16_t counter = 0;
+//
+//	interrupts_disable();
+//	if (TIM1->SR & TIM_SR_CC4IF) {
+//		TIM1->SR = 0x00000000;
+//		if ((counter % 8) == 0) {
+////			if (!(ADC1->CR & ADC_CR_ADSTART)) {
+////				ADC1->CHSELR = 0x00000000;
+////				/* select the correct channel to scan */
+////				ADC1->CHSELR = (1 << ADC_MOTOR_CURRENT_CH);
+////				/* disable the dma-interrupts for extra speed */
+////				ADC1->CFGR1 &= ~ADC_CFGR1_DMAEN;
+////				/* start the conversion */
+////				ADC1->CR = ADC_CR_ADSTART;
+////				interrupts_enable();
+////				/* wait for new data to become available (takes 1 microsecond) */
+////				while ((!(ADC1->ISR)) & ADC_ISR_EOSEQ);
+////				ADC1->ISR |= ADC_ISR_EOSEQ;
+////				adc_control_motor_current(get_current_setpoint(), ADC1->DR);
+////				counter += 1;
+////			}
+//			interrupts_enable();
+//		} else {
+//			counter += 1;
+//			interrupts_enable();
+//		}
+//	} else {
+//		TIM1->SR = 0x00000000; /* lots of interrupts are generated (especially in init.). no idea why. Clear them all */
+//		counter += 1;
+//		interrupts_enable();
+//	}
+//}
 
 /**
  * Given a selected motor speed and mode, actuate the H-bridge
@@ -249,8 +286,6 @@ void h_bridge_lock_anti_phase(uint16_t duty_cycle) {
  * 		from 0 to H_BRIDGE_MAX_DUTYCYCLE
  */
 void h_bridge_sign_magnitude(uint8_t direction, uint16_t duty_cycle) {
-	uint16_t compareValue;
-
 	/* first check if the system is in an emergency stop state */
 	if (errors_check_for_emergency_stop()) {
 		h_bridge_disable();
@@ -271,12 +306,14 @@ void h_bridge_sign_magnitude(uint8_t direction, uint16_t duty_cycle) {
 
 		/* provide info to the vregs */
 		vregs_write(VREGS_H_BRIDGE_MODE, H_BRIDGE_MODE_SIGN_MAGNITUDE);
+		vregs_write(VREGS_H_BRIDGE_DIRECTION, H_BRIDGE_BACKWARD);
 	} else {
 		/* Force CH1 low, and set PWM1 mode on CH2 */
 		//TIM1->CCMR1 = TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1;
 		TIM1->CCMR1 = TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC1M_2;
 		/* provide info to the vregs */
 		vregs_write(VREGS_H_BRIDGE_MODE, H_BRIDGE_MODE_SIGN_MAGNITUDE);
+		vregs_write(VREGS_H_BRIDGE_DIRECTION, H_BRIDGE_FORWARD);
 	}
 
 	/* Set CH2 to normal polarity */
@@ -285,11 +322,11 @@ void h_bridge_sign_magnitude(uint8_t direction, uint16_t duty_cycle) {
 	/* calculate and set compare values */
 //	compareValue = duty_cycle * H_BRDIGE_ARR;
 //	compareValue /= H_BRIDGE_MAX_DUTYCYCLE;
-	compareValue = duty_cycle;
+//	compareValue = duty_cycle;
 	vregs_write(VREGS_H_BRIDGE_DUTY_A, (uint8_t) duty_cycle);
 	vregs_write(VREGS_H_BRIDGE_DUTY_B, (uint8_t) duty_cycle >> 8);
-	TIM1->CCR2 = compareValue;
-	TIM1->CCR1 = compareValue;
+	TIM1->CCR2 = duty_cycle;
+	TIM1->CCR1 = duty_cycle;
 
 //	h_bridge_set_ch4(H_BRIDGE_ADC_TRIGGER);
 
@@ -341,7 +378,6 @@ void h_bridge_set_ch4(uint16_t trigger_value) {
 	TIM1->CCMR2 &= ~(TIM_CCMR2_OC4M_2);
 	TIM1->CCMR2 |= TIM_CCMR2_OC4M_0;
 	TIM1->CCER |= TIM_CCER_CC4E;
-
 }
 
 /**

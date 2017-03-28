@@ -32,6 +32,7 @@
 #include "motion.h"
 #include "fans.h"
 #include "address.h"
+#include "interrupts.h"
 //#include "peak_detect.h"
 #include "peak.h"
 //#include "position.h"
@@ -49,25 +50,26 @@ int main(void) {
 	SystemClock_Config();
 
 	/* initialise all the things */
+//	interrupts_disable();
+	uart1_init_dma();
+	h_bridge_init();
+	adc_init();
 	vregs_init();
 	errors_init();
-	uart1_init_dma();
 	leds_init();
-	h_bridge_init();
 	pootbus_master_init();
-	adc_init();
 	time_init();
 	fans_init();
 	encoder_init();
-	/* need to get ADC data before running address_init() */
-	adc_request_conversion();
-	adc_wait_for_data();
-	address_init();
+//	interrupts_enable();
+	/* need to get ADC data before running address_init(). ADC is coupled with TIM1_CC4 in h_bridge_init() */
+//	adc_request_conversion();
 	zebrobus_slave_init();
+	address_init();
+	/* motion uses address */
 	motion_init();
 
-	/* keep a loop coun
-	 * ter */
+	/* keep a loop counter */
 	uint8_t loop_counter = 0;
 	uint32_t start_time, stop_time = 0;
 
@@ -75,7 +77,6 @@ int main(void) {
 	vregs_write(VREGS_RCC_CSR31_24, RCC->CSR >> 24);
 	vregs_write(VREGS_RCC_CSR23_16, RCC->CSR >> 16);
 	RCC->CSR |= RCC_CSR_RMVF;
-
 	/* debug only */
 //  int32_t first = 1;
 //  int32_t segment = 120;
@@ -91,9 +92,6 @@ int main(void) {
 		 * Every time new measurement data is available we go through it
 		 */
 
-		/* start the ADC */
-		adc_request_conversion();
-
 		/* trigger PootBus if needed */
 		pootbus_request_data();
 		/* process data from PootBus */
@@ -102,13 +100,11 @@ int main(void) {
 		/* let the watchdog now we are still alive */
 		time_reset_watchdog();
 
-		/* wait for new data to become available (takes 1 microsecond) */
-		adc_wait_for_data();
-
 		/* process data from ADC */
-		adc_write_data_to_vregs();
+//		adc_request_conversion();
+//		ADC1->CR |= ADC_CR_ADSTART;
+		adc_write_data_to_vregs(); /* not the most recent data, maybe, but that's not important */
 		adc_get_temperature();
-		adc_check_motor_current();
 
 		fans_calc_and_set_speeds();
 

@@ -39,7 +39,7 @@ uint8_t peak_process_adc_values_sensor(void) {
 	static uint16_t filteredHistory[PEAK_NUM_OF_SENSORS][PEAK_HISTORY_LAG];
 	static uint16_t array_deltas[PEAK_HISTORY_LAG];
 	static uint16_t avgHistory[PEAK_NUM_OF_SENSORS][2];
-	uint16_t standard_deviation = get_std_var();
+	uint32_t standard_deviation = get_std_var();
 	uint8_t sensor;
 	uint8_t threshold = 1; // 1 standard deviations for signal
 	uint8_t influence = 5; // Now we need to shift the result inside the first if statement by 4 bits.
@@ -58,16 +58,19 @@ uint8_t peak_process_adc_values_sensor(void) {
 
 		// We assume the magnet in the leg is positioned such that peaks will be positive.
 		delta = abs(adc_data - avgHistory[sensor][0]);
+		if (delta > 5000) { /* a delta larger than 5000 wouldn't make sense looking at the ADC data */
+			delta = 0;
+		}
 #ifdef DEBUG_VREGS
 		move_over_array_elements(array_deltas, PEAK_HISTORY_LAG);
 		array_deltas[PEAK_HISTORY_LAG - 1] = delta;
 		avg_delta = mean(array_deltas, PEAK_HISTORY_LAG);
 		if (avg_delta>max_avg_delta) {
 			max_avg_delta = avg_delta;
-		vregs_write(VREGS_PEAK_MAX_AVG_DELTA, (uint8_t) max_avg_delta);
-		vregs_write(VREGS_PEAK_AVG_DELTA, (uint8_t) avg_delta);
-#endif
 		}
+		vregs_write(VREGS_PEAK_MAX_AVG_DELTA, (uint8_t) (max_avg_delta>>4));
+		vregs_write(VREGS_PEAK_AVG_DELTA, (uint8_t) (avg_delta>>4));
+#endif
 
 		if (delta > (threshold * abs(standard_deviation))) {
 			peak_detected[sensor] = 1;
@@ -79,7 +82,7 @@ uint8_t peak_process_adc_values_sensor(void) {
 					* adc_data)
 					+ ((16 - influence)
 							* filteredHistory[sensor][PEAK_HISTORY_LAG - 2]))
-					>> 4; //Divide sum to get average. We lose some accuracy, but this is no problem.
+					>> 4; //Divide sum to get average of 8 samples. We lose some accuracy, but this is no problem.
 			avgHistory[sensor][0] = avgHistory[sensor][1];
 			avgHistory[sensor][1] = mean(filteredHistory[sensor],
 			PEAK_HISTORY_LAG); //Divide sum to get average. We lose some accuracy, but this is no problem.
@@ -94,7 +97,7 @@ uint8_t peak_process_adc_values_sensor(void) {
 		}
 #ifdef DEBUG_VREGS
 		vregs_write((VREGS_PEAK_1_ADC_AVERAGE + sensor),
-				avgHistory[sensor][1] >> 4);
+				(avgHistory[sensor][1] >> 8));
 		vregs_write((VREGS_PEAK_1_DETECTED + sensor), peak_detected[sensor]);
 #endif
 		}
@@ -113,12 +116,12 @@ void move_over_array_elements(uint16_t *array, uint8_t array_size) {
 // Get the mean of an array of length array_size
 uint16_t mean(uint16_t *array, uint8_t array_size) {
 	uint8_t i = 0;
-	uint16_t sum = 0;
+	uint32_t sum = 0;
 	uint16_t average;
 	for (i = 0; i < array_size; i++) {
 		sum += array[i];
 	}
-	average = sum / array_size; //Divide sum to get average. We lose some accuracy, but this is no problem.
+	average = (uint16_t)(sum / array_size); //Divide sum to get average. We lose some accuracy, but this is no problem. Because array size is multiple of 2, compiler will make it a shift.
 	return average;
 }
 

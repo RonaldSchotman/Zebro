@@ -32,6 +32,7 @@
 #include "peak.h"
 #include "adc.h"
 #include "errors.h"
+#include "interrupts.h"
 
 static struct motion_state state = { 0, 0, 0, 0, 0, 0, 0 };
 static struct motion_state new_state = { 0, 0, 0, 0, 0, 0, 0 };
@@ -44,6 +45,8 @@ static uint16_t lift_off_position = 0;
 static uint16_t last_known_position = 0;
 static uint8_t side_of_zebro = 0;
 static uint32_t increasing_delay = 0;
+/* current setpoint. This is a setpoint between 0 and 2^16 with 2^15 being 0 amps, 0 being -max_amps and 2^16 being +max_amps */
+static int32_t current_setpoint = 0;
 
 /**
  * Process data send to any of the addresses in the motion control range.
@@ -86,7 +89,10 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
 		 * Reset the 'new_state' struct in either case
 		 */
 	case VREGS_MOTION_UPDATE:
-		if ((!motion_validate_state(new_state) && (calibrate == 0)) || (!motion_validate_state(new_state) && (new_state.mode == 1))) {
+		if (!motion_validate_state(new_state) && ((calibrate == 0)
+				|| (new_state.mode == 0) /* idle state should always be reached */
+				|| (new_state.mode == 1) /* we should always be able to go to calibration state if necessary */
+				|| (new_state.mode == 255))) { /* panic state should of course always be reachable */
 			state = new_state;
 			motion_write_state_to_vregs(state);
 		}
@@ -152,6 +158,7 @@ int32_t motion_drive_h_bridge() {
 	static uint16_t adc_data[ARRAY_SIZE];
 	static uint8_t fsm_flag = 0;
 	static uint16_t position[2] = { 0, 0 };
+	uint8_t side_of_zebro = address_get_side();
 //	static uint32_t stand_up_time = 0;
 //	static uint32_t touch_down_time = 0;
 //	static uint32_t lift_off_time = 0;
@@ -167,12 +174,13 @@ int32_t motion_drive_h_bridge() {
 //	static uint16_t Kp = 5000, Ki = 0, Kd = 10;
 //	static int32_t pid_output;
 //	static uint32_t dt, time_old;
-	static uint16_t duty_cycle;
+//	static uint16_t duty_cycle;
 
 #ifdef DEBUG_VREGS
 	vregs_write(VREGS_MOTION_STD_DEV_A, (uint8_t) get_std_var());
 	vregs_write(VREGS_MOTION_STD_DEV_B, (uint8_t) (get_std_var() >> 8));
 	vregs_write(VREGS_FSM_FLAG, (uint8_t) fsm_flag);
+	vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) calibrate);
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_A,
 			(uint8_t) last_known_position);
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_B,
@@ -181,17 +189,17 @@ int32_t motion_drive_h_bridge() {
 			(uint8_t) (stabilizing_direction));
 #endif
 
-	if (adc_get_absolute_motor_current_ma() < 15000) {
-		if (over_current_counter > 0) {
-			over_current_counter--;
-		}
-	} else {
-		over_current_counter++;
-		if (over_current_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
-			motion_set_state(255, 0, 0, 0, 0, 0, 0);
-			fsm_flag = 255;
-		}
-	}
+//	if (adc_get_absolute_motor_current_ma() < 15000) {
+//		if (over_current_counter > 0) {
+//			over_current_counter--;
+//		}
+//	} else {
+//		over_current_counter++;
+//		if (over_current_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
+//			motion_set_state(255, 0, 0, 0, 0, 0, 0);
+//			fsm_flag = 255;
+//		}
+//	}
 
 	switch (state.mode) {
 
@@ -200,6 +208,7 @@ int32_t motion_drive_h_bridge() {
 		 * But: not more than a quarter of an entire circle.
 		 */
 		fsm_flag = 0;
+		current_setpoint = 0;
 		h_bridge_disable();
 		return 0;
 
@@ -212,8 +221,14 @@ int32_t motion_drive_h_bridge() {
 			fsm_flag = 1;
 		}
 		if (fsm_flag == 1) {
-			h_bridge_drive_motor(MOTION_PROBE_SPEED, !side_of_zebro,
-			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+//			h_bridge_drive_motor(MOTION_PROBE_SPEED, !side_of_zebro,
+//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+
+			if (side_of_zebro == 0) {
+				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
+			}else {
+				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
+			}
 			/* If the legs current position is smaller of equal to the last position, we are touching the ground.
 			 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
 			if ((position[!side_of_zebro] <= position[side_of_zebro])) { /* We will always enter this loop the first time the calibrate-loop runs because positions are initialized equal.*/
@@ -221,6 +236,7 @@ int32_t motion_drive_h_bridge() {
 				/* wait for position to hold */
 				if (stop_and_return_timing_measurement(400)) {
 					h_bridge_disable();
+					current_setpoint = 0;
 					fsm_flag = 2;
 				}
 			} else {
@@ -230,8 +246,14 @@ int32_t motion_drive_h_bridge() {
 		}
 		if (fsm_flag == 2) {
 			static uint16_t n = 0;
-			h_bridge_drive_motor(MOTION_PROBE_SPEED, side_of_zebro,
-			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+//			h_bridge_drive_motor(MOTION_PROBE_SPEED, side_of_zebro,
+//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+
+			if (side_of_zebro == 0) {
+				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
+			}else {
+				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
+			}
 			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
 				adc_data[n] = adc_get_value(2); /* We're only interested in the value of the 3rd hall sensor */
 				n = n + 1;
@@ -247,6 +269,7 @@ int32_t motion_drive_h_bridge() {
 				/* wait for position data */
 				if (stop_and_return_timing_measurement(400)) {
 					h_bridge_disable();
+					current_setpoint = 0;
 					/* Calculate the standard deviation of the collected samples. */
 					std_var = std_var_stable(adc_data, n);
 					fsm_flag = 3;
@@ -261,10 +284,17 @@ int32_t motion_drive_h_bridge() {
 			fsm_flag = 4;
 		}
 		if (fsm_flag == 4) {
-			h_bridge_drive_motor(MOTION_PROBE_SPEED, !side_of_zebro,
-			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+//			h_bridge_drive_motor(MOTION_PROBE_SPEED, !side_of_zebro,
+//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+
+			if (side_of_zebro == 0) {
+				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
+			}else {
+				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
+			}
 			if (get_peak_detected(2) == 1) {
 				h_bridge_disable();
+				current_setpoint = 0;
 				encoder_reset_position();
 				last_known_position = encoder_get_position();
 				set_calibrate(0);
@@ -302,6 +332,19 @@ int32_t motion_drive_h_bridge() {
 
 		/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
 	case MOTION_MODE_WALK_FORWARD:
+		/* current setpoint should be between -1000 and 1000 for an amp */
+		start_timing_measurement();
+		if (stop_and_return_timing_measurement(2) == 1) {
+			if ((current_setpoint == -1000) | (current_setpoint == 0)) {
+				interrupts_disable();
+				current_setpoint = 1000;
+				interrupts_enable();
+			}else if (current_setpoint == 1000) {
+				interrupts_disable();
+				current_setpoint = -1000;
+				interrupts_enable();
+			}
+		}
 //		lift_off_time = (state.lift_off_time_a * 4)
 //				+ (state.lift_off_time_b * 1000);
 //		touch_down_time = (state.touch_down_time_a * 4)
@@ -341,17 +384,27 @@ int32_t motion_drive_h_bridge() {
 //		}
 		break;
 
+	case MOTION_MODE_WALK_BACKWARD:
+
+		break;
+
 	case MOTION_MODE_CONTINUOUS_ROTATION:
 		/* This mode is more a debug thing. */
 		/* Continuously rotate the leg forward at a 10th of the dutycycle */
-		start_timing_measurement();
-		if ((stop_and_return_timing_measurement(2000) == 1) && (duty_cycle <= 895)) {
-			duty_cycle = duty_cycle + 64;
-			h_bridge_drive_motor(duty_cycle, !side_of_zebro, H_BRIDGE_MODE_SIGN_MAGNITUDE);
-		}
-		if (duty_cycle > 895) {
-			motion_stop();
-		}
+//		start_timing_measurement();
+//		if (stop_and_return_timing_measurement(1) == 1) {
+//			interrupts_disable();
+//			current_setpoint = ((~current_setpoint) + 1);
+//			interrupts_enable();
+//		}
+//				&& (duty_cycle <= 895)) {
+//			duty_cycle = duty_cycle + 64;
+//			h_bridge_drive_motor(duty_cycle, !side_of_zebro,
+//					H_BRIDGE_MODE_SIGN_MAGNITUDE);
+//		}
+//		if (duty_cycle > 895) {
+//			motion_stop();
+//		}
 		break;
 
 	case MOTION_MODE_MOVE_TO_LIFT_OFF:
@@ -369,20 +422,20 @@ int32_t motion_drive_h_bridge() {
 		 */
 
 		/* If we got here due to overcurrent we are allowed to continue after a bit. */
-//		if (fsm_flag == 255) {
-//			increasing_delay = increasing_delay + 2500;
-//			start_timing_measurement();
-//			fsm_flag = 254;
-//		}
-//		if (stop_and_return_timing_measurement(increasing_delay)
-//				&& fsm_flag == 254) {
-//			over_current_counter = 0;
-//			last_known_position = encoder_get_position();
-//			motion_stop();
-//		}
+		if (fsm_flag == 255) {
+			increasing_delay = increasing_delay + 2500;
+			start_timing_measurement();
+			fsm_flag = 254;
+		}
+		if (stop_and_return_timing_measurement(increasing_delay)
+				&& fsm_flag == 254) {
+			over_current_counter = 0;
+			last_known_position = encoder_get_position();
+			motion_stop();
+		}
 		h_bridge_disable();
 		fsm_flag = 0;
-//		last_known_position = encoder_get_position();
+		last_known_position = encoder_get_position();
 		break;
 
 	default:
@@ -629,13 +682,32 @@ int32_t motion_drive_h_bridge() {
 //	return status;
 //}
 
+/* Set the setpoint for current */
+void set_current_setpoint (int32_t value) {
+	current_setpoint = value;
+}
+
+/* Get the setpoint for current */
+int32_t get_current_setpoint (void) {
+	return current_setpoint;
+}
+
+uint8_t get_state_mode (void) {
+	return state.mode;
+}
+
+void set_state_mode (uint8_t mode) {
+	state.mode = mode;
+	return;
+}
+
 /* Return standard deviation */
 uint32_t get_std_var(void) {
 	return std_var;
 }
 
 /* Calculate the standard deviation from a vector with length n. */
-uint16_t std_var_stable(uint16_t *a, uint16_t n) {
+uint32_t std_var_stable(uint16_t *a, uint16_t n) {
 	if (n == 0)
 		return 0;
 	uint64_t sum = 0;
@@ -648,7 +720,7 @@ uint16_t std_var_stable(uint16_t *a, uint16_t n) {
 	}
 	uint64_t N = n;
 	uint32_t std_var = (N * sq_sum - sum * sum) / (N * N);
-	std_var = (uint16_t) isqrt(std_var);
+	std_var = isqrt(std_var);
 	return std_var;
 }
 

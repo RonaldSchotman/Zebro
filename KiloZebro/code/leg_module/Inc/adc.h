@@ -20,14 +20,20 @@
 
 int32_t adc_init();
 void adc_write_data_to_vregs();
-void adc_request_conversion(void);
-void adc_wait_for_data(void);
+//void adc_request_conversion(void);
+//void adc_wait_for_data(void);
 int32_t adc_get_temperature(void);
-int32_t adc_get_absolute_motor_current_ma(void);
-int32_t adc_check_motor_current(void);
+int32_t adc_get_motor_current_ma(void);
+uint32_t adc_get_absolute_motor_current_ma(void);
+uint8_t adc_check_motor_current(uint16_t current_measured);
+void adc_control_motor_current(int32_t current_setpoint, uint16_t current_measured);
+void adc_current_control_set_kp(uint8_t value);
+uint8_t adc_current_control_get_kp(void);
+uint8_t adc_current_control_get_ki(void);
+void adc_current_control_set_ki(uint8_t value);
 uint16_t adc_get_value(int32_t index);
 
-#define ADC_SHIFT_AMOUNT 2 /*bits to shift to get to a uint8_t. ADC now gives 10 bit accuracy, so 2 shifts. */
+//#define ADC_SHIFT_AMOUNT 2 /*bits to shift to get to a uint8_t. ADC now gives 10 bit accuracy, so 2 shifts. */
 
 /* Temperature sensor calibration value address */
 //#define ADC_TEMP_AVG_SLOPE_FP3 ((int32_t) 4)
@@ -42,12 +48,14 @@ uint16_t adc_get_value(int32_t index);
 #define VDD_CALIB ((uint16_t) (330<<4))
 #define VDD_APPLI ((uint16_t) (300<<4))
 
-#define ADC_FULL_RANGE_COUNT (4096<<4)
-#define ADC_MID_RANGE_COUNT (2048<<4)
-#define ADC_FULL_RANGE_MILLIVOLT (3300<<4)
-#define ADC_MID_RANGE_MILLIVOLT (1650<<4)
+#define ADC_FULL_RANGE_COUNT 65536 // max number is uint10 left aligned = 65472
+#define ADC_MID_RANGE_COUNT 32768 // halfway of max is uint9 left aligned = 32704
+#define ADC_FULL_RANGE_MILLIVOLT 3300 // max of 3.3V
+#define ADC_MID_RANGE_MILLIVOLT 1650 // voltage at 0A = vcc/2 = 1.65V
+#define ADC_OVER_CURRENT_COUNT 26000
 
-#define ADC_CURRENT_SENSITIVITY (55<<4) // mV/A
+#define ADC_CURRENT_SENSITIVITY 55 // 55 mV/A See acs711 25AB-T datasheet. (65536/(1650/55)) = 1092.26667 #/Amp
+#define ADC_CURRENT_SENSITIVITY_SCALED 592
 #define ADC_CURRENT_EMERGENCY_VALUE 24000 // mA
 #define ADC_CURRENT_EMERGENCY_SAMPLES 100
 
