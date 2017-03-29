@@ -65,10 +65,11 @@ class Control_Zebro_Thread(threading.Thread):
             if Connected == 0:
                 Last_Movement = "Stop"
                 # Obtain Serial condition
-                ser.write("Connected_devices")
+                #ser.write("Connected_devices")
                 time.sleep(1)   # Wait for sending of data
-                ser.readline(Connected_Devices)
+                #ser.readline(Connected_Devices)
                 # Release serial Connection
+                Connected_Devices = [10,1]
                 for Connected_D in Connected_Devices:
                     if Connected_D == self.Zebro:   # Needs to be Pico_N1
                         Connected = 1
@@ -181,7 +182,7 @@ class Control_Zebro_Thread(threading.Thread):
                         # Release Serial Write
                     else:
                         # Obtain Serial Write
-                        ser.write(self.Zebro, "Movement")
+                        #ser.write(self.Zebro, "Movement")
                         # Release Serial Write
                         Last_Movement = Movement
                     DONT_Send = 0
@@ -272,20 +273,56 @@ def main():
         cv2.imshow("original %s" % Timetest,image)
 
         start_time = time.time() # Testing Function for how long a part of a code takes.
-        print ("My program took", time.time() - start_time, "to run")   #print how long it took
+        #print ("My program took", time.time() - start_time, "to run")   #print how long it took
 
         # Take original Picture minimal after first loop for the first frame to avoid weird pictures.
         if Picture == 1:
             #Global command turn all leds off. (This needs to be tested how long this takes.)
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. (So all zebro Thread wait with sending next movement.)
-            ser.write("Global Leds_off\n")
+            #ser.write("Global Leds_off\n")
             #Release condition only at end so the Zebro Treads cannot interfere
             
             time.sleep(0.001)
-            Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-            Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-            Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-            Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y = 0
+            Zebro_1_Middle_x = 0
+            Zebro_2_Middle_x = 0
+            Zebro_3_Middle_x = 0
+            Zebro_4_Middle_x = 0
+            Zebro_5_Middle_x = 0
+            Zebro_6_Middle_x = 0
+            Zebro_7_Middle_x = 0
+            Zebro_8_Middle_x = 0
+            Zebro_9_Middle_x = 0
+            Zebro_10_Middle_x = 0
+            Zebro_11_Middle_x = 0
+            Zebro_12_Middle_x = 0
+            Zebro_13_Middle_x = 0
+            Zebro_14_Middle_x = 0
+            Zebro_15_Middle_x = 0
+            Zebro_16_Middle_x = 0
+            Zebro_17_Middle_x = 0
+            Zebro_18_Middle_x = 0
+            Zebro_19_Middle_x = 0
+            Zebro_20_Middle_x = 0
+            Zebro_1_Middle_y = 0
+            Zebro_2_Middle_y = 0
+            Zebro_3_Middle_y = 0
+            Zebro_4_Middle_y = 0
+            Zebro_5_Middle_y = 0
+            Zebro_6_Middle_y = 0
+            Zebro_7_Middle_y = 0
+            Zebro_8_Middle_y = 0
+            Zebro_9_Middle_y = 0
+            Zebro_10_Middle_y = 0
+            Zebro_11_Middle_y = 0
+            Zebro_12_Middle_y = 0
+            Zebro_13_Middle_y = 0
+            Zebro_14_Middle_y = 0
+            Zebro_15_Middle_y = 0
+            Zebro_16_Middle_y = 0
+            Zebro_17_Middle_y = 0
+            Zebro_18_Middle_y = 0
+            Zebro_19_Middle_y = 0
+            Zebro_20_Middle_y = 0
             
             cv2.imwrite("Image%s.jpg"%Picture, image)   # Save a picture to Image1.jpg
 
@@ -298,19 +335,19 @@ def main():
             #print(Devices)  #Here to show in the terminal which device the program is trying to detect.
             Devices_Serial = Devices + 1
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. 
-            ser.write("PicoN%s Led1_on\n" % Devices_Serial)
+            #ser.write("PicoN%s Led1_on\n" % Devices_Serial)
             #Release condition  only at end so the Zebro Treads cannot interfere
             time.sleep(0.001)
             #Wait until said back in register it is turned on for certain time (Now it is a hard wait) 
             cv2.imwrite("Image%s.jpg"%Picture, image)   # Take the second picture with led 1 on. Which is
 
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. 
-            ser.write("PicoN%s Leds_off\n" % Devices_Serial)   # Turn led 1 of again
+            #ser.write("PicoN%s Leds_off\n" % Devices_Serial)   # Turn led 1 of again
 
          #Again do some other stuff
         if Picture == 3:
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. 
-            ser.write("PicoN%s Led3_on\n" % Devices_Serial)    # Turn led 3 on
+            #ser.write("PicoN%s Led3_on\n" % Devices_Serial)    # Turn led 3 on
             #Release condition  only at end so the Zebro Treads cannot interfere
             time.sleep(0.001)
             cv2.imwrite("Image%s.jpg"%Picture, image)
@@ -359,8 +396,8 @@ def main():
                 area_led_3 = cv2.contourArea(c)
                 areaArray_Led_3.append(area_led_3)
 
-            sorteddata_Led_1 = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
-            sorteddata_Led_3 = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
+            sorteddata_Led_1 = sorted(zip(areaArray_Led_1, contours_Led_1), key=lambda x: x[0], reverse=True)
+            sorteddata_Led_3 = sorted(zip(areaArray_Led_3, contours_Led_3), key=lambda x: x[0], reverse=True)
 
             try:
                 Largest_contour_led_1 = sorteddata_Led_1[0][0]
