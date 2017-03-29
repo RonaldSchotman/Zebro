@@ -13,7 +13,7 @@ from picamera import PiCamera           # PiCamera liberary
 import time                             # For real time video (using openCV)
 import numpy as np                      # Optimized library for numerical operations
 import cv2                              # Include OpenCV library (Most important one)
-import Queue                            # Library for Queueing sharing variables between threads
+#import Queue                            # Library for Queueing sharing variables between threads
 import threading                        # Library for Multithreading
 import serial                           # Import serial uart library for raspberry pi
 import math                             # mathematical functions library
@@ -109,46 +109,46 @@ class Control_Zebro_Thread(threading.Thread):
                             
                     if Last_Movement == "Stop":
                         Random_N = random.randrange(1,100)
-                        if Random_N =< 60:
+                        if Random_N <= 60:
                             Movement = "Forward"
-                        elif Random_N > 60 and Random_N =< 70:
+                        elif Random_N > 60 and Random_N <= 70:
                             Movement = "Stop"
-                        elif Random_N > 70 and  Random_N =< 85:
+                        elif Random_N > 70 and  Random_N <= 85:
                             Movement = "Right"
-                        elif Random_N > 85 and  Random_N =< 100:
+                        elif Random_N > 85 and  Random_N <= 100:
                             Movement = "Left"
 
                     if Last_Movement == "Forward":
                         Random_N = random.randrange(1,100)
-                        if Random_N =< 80:
+                        if Random_N <= 80:
                             Movement = "Forward"
-                        elif Random_N > 80 and Random_N =< 90:
+                        elif Random_N > 80 and Random_N <= 90:
                             Movement = "Stop"
-                        elif Random_N > 90 and Random_N =< 95:
+                        elif Random_N > 90 and Random_N <= 95:
                             Movement = "Right"
-                        elif Random_N > 95 and Random_N =< 100:
+                        elif Random_N > 95 and Random_N <= 100:
                             Movement = "Left"
 
                     if Last_Movement == "Right":
                         Random_N = random.randrange(1,100)
-                        if Random_N =< 30:
+                        if Random_N <= 30:
                             Movement = "Forward"
-                        elif Random_N > 30 and Random_N =< 35:
+                        elif Random_N > 30 and Random_N <= 35:
                             Movement = "Stop"
-                        elif Random_N > 35 and Random_N =< 95:
+                        elif Random_N > 35 and Random_N <= 95:
                             Movement = "Right"
-                        elif Random_N > 95 and Random_N =< 100:
+                        elif Random_N > 95 and Random_N <= 100:
                             Movement = "Left"
                             
                     if Last_Movement == "Left":
                         Random_N = random.randrange(1,100)
-                        if Random_N =< 30:
+                        if Random_N <= 30:
                             Movement = "Forward"
-                        elif Random_N > 30 and Random_N =< 35:
+                        elif Random_N > 30 and Random_N <= 35:
                             Movement = "Stop"
-                        elif Random_N > 35 and Random_N =< 40:
+                        elif Random_N > 35 and Random_N <= 40:
                             Movement = "Right"
-                        elif Random_N > 40 and Random_N =< 100:
+                        elif Random_N > 40 and Random_N <= 100:
                             Movement = "Left"
                     if Movement == "Forward":
                         Direction = Current_Direction
@@ -259,6 +259,7 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
 def main():
     # Initialize Picture to 0 for the first time when program starts.
     Picture = 0
+    Devices = 0
     # capture frames from the camera
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         # grab the NumPy array representing the image, the initialize the timestamp
@@ -281,445 +282,453 @@ def main():
             #Release condition only at end so the Zebro Treads cannot interfere
             
             time.sleep(0.001)
+            Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+            Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+            Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+            Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y = 0
             
             cv2.imwrite("Image%s.jpg"%Picture, image)   # Save a picture to Image1.jpg
 
         Original = cv2.imread("Image1.jpg")     # This is the original picture where the diferences will be compared with.
         
         # Do some other stuff
-        for Devices in range(19):       #range(20) is the maximum amount of pico zebro's 
-            Picture = 2     # Make Picture 2 for taking Picture 2 with Led 1 on.
-            print(Devices)  #Here to show in the terminal which device the program is trying to detect.
-
+        
+        #for Devices in range(19):       #range(20) is the maximum amount of pico zebro's
+        if Picture == 2:    # Make Picture 2 for taking Picture 2 with Led 1 on.    
+            #print(Devices)  #Here to show in the terminal which device the program is trying to detect.
+            Devices_Serial = Devices + 1
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. 
-            ser.write("PicoN%s Led1_on\n" % Devices)
+            ser.write("PicoN%s Led1_on\n" % Devices_Serial)
             #Release condition  only at end so the Zebro Treads cannot interfere
             time.sleep(0.001)
-            #Wait until said back in register it is turned on for certain time (Now it is a hard wait)
-
-            if Picture == 2:
-                cv2.imwrite("Image%s.jpg"%Picture, image)   # Take the second picture with led 1 on. Which is    
+            #Wait until said back in register it is turned on for certain time (Now it is a hard wait) 
+            cv2.imwrite("Image%s.jpg"%Picture, image)   # Take the second picture with led 1 on. Which is
 
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. 
-            ser.write("PicoN%s Leds_off\n" % Devices)   # Turn led 1 of again
-            ser.write("PicoN%s Led3_on\n" % Devices)    # Turn led 3 on
-            #Release condition  only at end so the Zebro Treads cannot interfere
-            time.sleep(0.001)
+            ser.write("PicoN%s Leds_off\n" % Devices_Serial)   # Turn led 1 of again
 
-            Picture = 3
-
-            #Again do some other stuff
-            if Picture == 3:
-                cv2.imwrite("Image%s.jpg"%Picture, image)
-                Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y = 0
-
+         #Again do some other stuff
+        if Picture == 3:
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. 
-            ser.write("PicoN%s Leds_off\n" % Devices)   # Turn led 1 of again
-            ser.write("PicoN%s Led3_on\n" % Devices)    # Turn led 3 on
+            ser.write("PicoN%s Led3_on\n" % Devices_Serial)    # Turn led 3 on
             #Release condition  only at end so the Zebro Treads cannot interfere
             time.sleep(0.001)
-
-            Picture = 4 # Do the calculations for determing where the Pico Zebro is.
+            cv2.imwrite("Image%s.jpg"%Picture, image)
             
-            if Picture == 4:
-                # Take both pictures with the leds.
-                Led_1 = cv2.imread("Image2.jpg")
-                Led_3 = cv2.imread("Image3.jpg")
+        if Picture == 4:
+            # Take both pictures with the leds.
+            Led_1 = cv2.imread("Image2.jpg")
+            Led_3 = cv2.imread("Image3.jpg")
 
-                New_image_Led_1 = abs(Original - Led_1)
-                New_image_Led_3 = abs(Original - Led_3)
-                Difference_led_1 = Image_Difference(New_image_Led_1) # Make only the led visible
-                Difference_led_3 = Image_Difference(New_image_Led_3) # Make only the led visible
+            New_image_Led_1 = abs(Original - Led_1)
+            New_image_Led_3 = abs(Original - Led_3)
+            Difference_led_1 = Image_Difference(New_image_Led_1) # Make only the led visible
+            Difference_led_3 = Image_Difference(New_image_Led_3) # Make only the led visible
 
-                Finding_Canny_Led_1 = cv2.Canny(Difference_led_1, 15, 200)
-                Finding_Canny_Led_3 = cv2.Canny(Difference_led_3, 15, 200)
+            Finding_Canny_Led_1 = cv2.Canny(Difference_led_1, 15, 200)
+            Finding_Canny_Led_3 = cv2.Canny(Difference_led_3, 15, 200)
                     
-                Finding_Canny_Led_1 = cv2.morphologyEx(Finding_Canny_Led_1, cv2.MORPH_CLOSE, np.ones((8,8),np.uint8))
-                Finding_Canny_Led_3 = cv2.morphologyEx(Finding_Canny_Led_3, cv2.MORPH_CLOSE, np.ones((8,8),np.uint8))
+            Finding_Canny_Led_1 = cv2.morphologyEx(Finding_Canny_Led_1, cv2.MORPH_CLOSE, np.ones((8,8),np.uint8))
+            Finding_Canny_Led_3 = cv2.morphologyEx(Finding_Canny_Led_3, cv2.MORPH_CLOSE, np.ones((8,8),np.uint8))
 
-                Finding_Canny_Led_1 = cv2.Canny(Finding_Canny_Led_1, 100, 200)
-                Finding_Canny_Led_3 = cv2.Canny(Finding_Canny_Led_3, 100, 200)
+            Finding_Canny_Led_1 = cv2.Canny(Finding_Canny_Led_1, 100, 200)
+            Finding_Canny_Led_3 = cv2.Canny(Finding_Canny_Led_3, 100, 200)
 
-                (_, contours_Led_1, _) = cv2.findContours(Finding_Canny_Led_1.copy(), cv2.RETR_EXTERNAL,
-                                                          cv2.CHAIN_APPROX_NONE) # Find the contours of Led 1
-                (_, contours_Led_3, _) = cv2.findContours(Finding_Canny_Led_3.copy(), cv2.RETR_EXTERNAL,
-                                                          cv2.CHAIN_APPROX_NONE) # Find the contours of Led 3
-                x_Led_1 = 0
-                y_Led_1 = 0
-                w_Led_1 = 0
-                h_Led_1 = 0
+            (_, contours_Led_1, _) = cv2.findContours(Finding_Canny_Led_1.copy(), cv2.RETR_EXTERNAL,
+                                                      cv2.CHAIN_APPROX_NONE) # Find the contours of Led 1
+            (_, contours_Led_3, _) = cv2.findContours(Finding_Canny_Led_3.copy(), cv2.RETR_EXTERNAL,
+                                                      cv2.CHAIN_APPROX_NONE) # Find the contours of Led 3
+            x_Led_1 = 0
+            y_Led_1 = 0
+            w_Led_1 = 0
+            h_Led_1 = 0
 
-                x_Led_3 = 0
-                y_Led_3 = 0
-                w_Led_3 = 0
-                h_Led_3 = 0 
+            x_Led_3 = 0
+            y_Led_3 = 0
+            w_Led_3 = 0
+            h_Led_3 = 0 
                 
-                areaArray_Led_1 = []
-                areaArray_Led_3 = []
+            areaArray_Led_1 = []
+            areaArray_Led_3 = []
                 
-                for i, c in enumerate(contours_Led_1):
-                    area_led_1 = cv2.contourArea(c)
-                    areaArray_Led_1.append(area_led_1)
+            for i, c in enumerate(contours_Led_1):
+                area_led_1 = cv2.contourArea(c)
+                areaArray_Led_1.append(area_led_1)
 
-                for i, c in enumerate(contours_Led_3):
-                    area_led_3 = cv2.contourArea(c)
-                    areaArray_Led_3.append(area_led_3)
+            for i, c in enumerate(contours_Led_3):
+                area_led_3 = cv2.contourArea(c)
+                areaArray_Led_3.append(area_led_3)
 
-                sorteddata_Led_1 = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
-                sorteddata_Led_3 = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
+            sorteddata_Led_1 = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
+            sorteddata_Led_3 = sorted(zip(areaArray, contours2), key=lambda x: x[0], reverse=True)
 
-                try:
-                    Largest_contour_led_1 = sorteddata_Led_1[0][0]
-                    [x_Led_1,y_Led_1,w_Led_1,h_Led_1] = cv2.boundingRect(Largest_contour_led_1)
-                except IndexError:
-                    print("Nothing Found")
-                    pass
+            try:
+                Largest_contour_led_1 = sorteddata_Led_1[0][0]
+                [x_Led_1,y_Led_1,w_Led_1,h_Led_1] = cv2.boundingRect(Largest_contour_led_1)
+            except IndexError:
+                print("Nothing Found")
+                pass
 
-                try:
-                    Largest_contour_led_3 = sorteddata_Led_3[0][0]
-                    [x_Led_3,y_Led_3,w_Led_3,h_Led_3] = cv2.boundingRect(Largest_contour_led_3)
-                except IndexError:
-                    print("Nothing Found")
-                    pass
+            try:
+                Largest_contour_led_3 = sorteddata_Led_3[0][0]
+                [x_Led_3,y_Led_3,w_Led_3,h_Led_3] = cv2.boundingRect(Largest_contour_led_3)
+            except IndexError:
+                print("Nothing Found")
+                pass
 
-                (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
-                print(Zebro_Middle_x,Zebro_Middle_y,Direction, Angle)  # Debug print
+            (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
+            print(Zebro_Middle_x,Zebro_Middle_y,Direction, Angle)  # Debug print
 
-                # If someone can tell me how I can make this shorter plz but I don't think I can considering for each zebro three different values need to be set.
-                if Devices == 0: 
-                    #set data from PZ 1
-                    Zebro_1_Middle_x = Zebro_Middle_x
-                    Zebro_1_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_1 = Direction
-                    Angle_Zebro_1 = Angle
+            if Devices == 0: 
+                #set data from PZ 1
+                Zebro_1_Middle_x = Zebro_Middle_x
+                Zebro_1_Middle_y = Zebro_Middle_y
+                Direction_Zebro_1 = Direction
+                Angle_Zebro_1 = Angle
+                Picture = 1
 
-                if Devices == 1: 
-                    #set data from PZ 2
-                    Zebro_2_Middle_x = Zebro_Middle_x
-                    Zebro_2_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_2 = Direction
-                    Angle_Zebro_2 = Angle
+            if Devices == 1: 
+                #set data from PZ 2
+                Zebro_2_Middle_x = Zebro_Middle_x
+                Zebro_2_Middle_y = Zebro_Middle_y
+                Direction_Zebro_2 = Direction
+                Angle_Zebro_2 = Angle
+                Picture = 1
 
-                if Devices == 2: 
-                    #set data from PZ 3
-                    Zebro_3_Middle_x = Zebro_Middle_x
-                    Zebro_3_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_3 = Direction
-                    Angle_Zebro_3 = Angle
+            if Devices == 2: 
+                #set data from PZ 3
+                Zebro_3_Middle_x = Zebro_Middle_x
+                Zebro_3_Middle_y = Zebro_Middle_y
+                Direction_Zebro_3 = Direction
+                Angle_Zebro_3 = Angle
+                Picture = 1
 
-                if Devices == 3: 
-                    #set data from PZ 4
-                    Zebro_4_Middle_x = Zebro_Middle_x
-                    Zebro_4_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_4 = Direction
-                    Angle_Zebro_4 = Angle
+            if Devices == 3: 
+                #set data from PZ 4
+                Zebro_4_Middle_x = Zebro_Middle_x
+                Zebro_4_Middle_y = Zebro_Middle_y
+                Direction_Zebro_4 = Direction
+                Angle_Zebro_4 = Angle
+                Picture = 1
 
-                if Devices == 4: 
-                    #set data from PZ 5
-                    Zebro_5_Middle_x = Zebro_Middle_x
-                    Zebro_5_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_5 = Direction
-                    Angle_Zebro_5 = Angle
+            if Devices == 4: 
+                #set data from PZ 5
+                Zebro_5_Middle_x = Zebro_Middle_x
+                Zebro_5_Middle_y = Zebro_Middle_y
+                Direction_Zebro_5 = Direction
+                Angle_Zebro_5 = Angle
+                Picture = 1
 
-                if Devices == 5: 
-                    #set data from PZ 6
-                    Zebro_6_Middle_x = Zebro_Middle_x
-                    Zebro_6_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_6 = Direction
-                    Angle_Zebro_6 = Angle
+            if Devices == 5: 
+                #set data from PZ 6
+                Zebro_6_Middle_x = Zebro_Middle_x
+                Zebro_6_Middle_y = Zebro_Middle_y
+                Direction_Zebro_6 = Direction
+                Angle_Zebro_6 = Angle
+                Picture = 1
 
-                if Devices == 6: 
-                    #set data from PZ 7
-                    Zebro_7_Middle_x = Zebro_Middle_x
-                    Zebro_7_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_7 = Direction
-                    Angle_Zebro_7 = Angle
+            if Devices == 6: 
+                #set data from PZ 7
+                Zebro_7_Middle_x = Zebro_Middle_x
+                Zebro_7_Middle_y = Zebro_Middle_y
+                Direction_Zebro_7 = Direction
+                Angle_Zebro_7 = Angle
+                Picture = 1
 
-                if Devices == 7: 
-                    #set data from PZ 8
-                    Zebro_8_Middle_x = Zebro_Middle_x
-                    Zebro_8_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_8 = Direction
-                    Angle_Zebro_8 = Angle
+            if Devices == 7: 
+                #set data from PZ 8
+                Zebro_8_Middle_x = Zebro_Middle_x
+                Zebro_8_Middle_y = Zebro_Middle_y
+                Direction_Zebro_8 = Direction
+                Angle_Zebro_8 = Angle
+                Picture = 1
 
-                if Devices == 8: 
-                    #set data from PZ 9
-                    Zebro_9_Middle_x = Zebro_Middle_x
-                    Zebro_9_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_9 = Direction
-                    Angle_Zebro_9 = Angle
+            if Devices == 8: 
+                #set data from PZ 9
+                Zebro_9_Middle_x = Zebro_Middle_x
+                Zebro_9_Middle_y = Zebro_Middle_y
+                Direction_Zebro_9 = Direction
+                Angle_Zebro_9 = Angle
+                Picture = 1
 
-                if Devices == 9: 
-                    #set data from PZ 10
-                    Zebro_10_Middle_x = Zebro_Middle_x
-                    Zebro_10_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_10 = Direction
-                    Angle_Zebro_10 = Angle
+            if Devices == 9: 
+                #set data from PZ 10
+                Zebro_10_Middle_x = Zebro_Middle_x
+                Zebro_10_Middle_y = Zebro_Middle_y
+                Direction_Zebro_10 = Direction
+                Angle_Zebro_10 = Angle
+                Picture = 1
 
-                if Devices == 10: 
-                    #set data from PZ 11
-                    Zebro_11_Middle_x = Zebro_Middle_x
-                    Zebro_11_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_11 = Direction
-                    Angle_Zebro_11 = Angle
+            if Devices == 10: 
+                #set data from PZ 11
+                Zebro_11_Middle_x = Zebro_Middle_x
+                Zebro_11_Middle_y = Zebro_Middle_y
+                Direction_Zebro_11 = Direction
+                Angle_Zebro_11 = Angle
+                Picture = 1
 
-                if Devices == 11: 
-                    #set data from PZ 12
-                    Zebro_12_Middle_x = Zebro_Middle_x
-                    Zebro_12_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_12 = Direction
-                    Angle_Zebro_12 = Angle
+            if Devices == 11: 
+                #set data from PZ 12
+                Zebro_12_Middle_x = Zebro_Middle_x
+                Zebro_12_Middle_y = Zebro_Middle_y
+                Direction_Zebro_12 = Direction
+                Angle_Zebro_12 = Angle
+                Picture = 1
 
-                if Devices == 12: 
-                    #set data from PZ 13
-                    Zebro_13_Middle_x = Zebro_Middle_x
-                    Zebro_13_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_13 = Direction
-                    Angle_Zebro_13 = Angle
+            if Devices == 12: 
+                #set data from PZ 13
+                Zebro_13_Middle_x = Zebro_Middle_x
+                Zebro_13_Middle_y = Zebro_Middle_y
+                Direction_Zebro_13 = Direction
+                Angle_Zebro_13 = Angle
+                Picture = 1
 
-                if Devices == 13: 
-                    #set data from PZ 14
-                    Zebro_14_Middle_x = Zebro_Middle_x
-                    Zebro_14_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_14 = Direction
-                    Angle_Zebro_14 = Angle
+            if Devices == 13: 
+                #set data from PZ 14
+                Zebro_14_Middle_x = Zebro_Middle_x
+                Zebro_14_Middle_y = Zebro_Middle_y
+                Direction_Zebro_14 = Direction
+                Angle_Zebro_14 = Angle
+                Picture = 1
 
-                if Devices == 14: 
-                    #set data from PZ 15
-                    Zebro_15_Middle_x = Zebro_Middle_x
-                    Zebro_15_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_15 = Direction
-                    Angle_Zebro_15 = Angle
+            if Devices == 14: 
+                #set data from PZ 15
+                Zebro_15_Middle_x = Zebro_Middle_x
+                Zebro_15_Middle_y = Zebro_Middle_y
+                Direction_Zebro_15 = Direction
+                Angle_Zebro_15 = Angle
+                Picture = 1
 
-                if Devices == 15: 
-                    #set data from PZ 16
-                    Zebro_16_Middle_x = Zebro_Middle_x
-                    Zebro_16_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_16 = Direction
-                    Angle_Zebro_16 = Angle
+            if Devices == 15: 
+                #set data from PZ 16
+                Zebro_16_Middle_x = Zebro_Middle_x
+                Zebro_16_Middle_y = Zebro_Middle_y
+                Direction_Zebro_16 = Direction
+                Angle_Zebro_16 = Angle
+                Picture = 1
 
-                if Devices == 16: 
-                    #set data from PZ 17
-                    Zebro_17_Middle_x = Zebro_Middle_x
-                    Zebro_17_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_17 = Direction
-                    Angle_Zebro_17 = Angle
+            if Devices == 16: 
+                #set data from PZ 17
+                Zebro_17_Middle_x = Zebro_Middle_x
+                Zebro_17_Middle_y = Zebro_Middle_y
+                Direction_Zebro_17 = Direction
+                Angle_Zebro_17 = Angle
+                Picture = 1
 
-                if Devices == 17: 
-                    #set data from PZ 18
-                    Zebro_18_Middle_x = Zebro_Middle_x
-                    Zebro_18_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_18 = Direction
-                    Angle_Zebro_18 = Angle
+            if Devices == 17: 
+                #set data from PZ 18
+                Zebro_18_Middle_x = Zebro_Middle_x
+                Zebro_18_Middle_y = Zebro_Middle_y
+                Direction_Zebro_18 = Direction
+                Angle_Zebro_18 = Angle
+                Picture = 1
 
-                if Devices == 18: 
-                    #set data from PZ 19
-                    Zebro_19_Middle_x = Zebro_Middle_x
-                    Zebro_19_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_19 = Direction
-                    Angle_Zebro_19 = Angle
+            if Devices == 18: 
+                #set data from PZ 19
+                Zebro_19_Middle_x = Zebro_Middle_x
+                Zebro_19_Middle_y = Zebro_Middle_y
+                Direction_Zebro_19 = Direction
+                Angle_Zebro_19 = Angle
+                Picture = 1
 
-                if Devices == 19: 
-                    #set data from PZ 20
-                    Zebro_20_Middle_x = Zebro_Middle_x
-                    Zebro_20_Middle_y = Zebro_Middle_y
-                    Direction_Zebro_20 = Direction
-                    Angle_Zebro_20 = Angle
-                    
-                #once every value for every possible Zebro is determind then
-                for Zebros in range(19):
-                    Blocking_Zebro = []   #Here will be the blocking in
-                    if Zebros == 0:
-                        Blocking_Zebro = Block.Block_1(Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 1:
-                        PicoZebro_1[Zebro_1_Middle_x , Zebro_1_Middle_y, Direction_Zebro_1, Blocking_Zebro, Angle_Zebro_1]
-                        #release condition zebro 1
-
-                    if Zebros == 1:
-                        #in here the first value is the one everything will be compared to.
-                        Blocking_Zebro = Block.Block_1(Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 2:
-                        PicoZebro_2[Zebro_2_Middle_x , Zebro_2_Middle_y, Direction_Zebro_2, Blocking_Zebro, Angle_Zebro_2]
-                        #release condition zebro 2
-
-                    if Zebros == 2:
-                        Blocking_Zebro = Block.Block_1(Zebro_3_Middle_x, Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_3_Middle_y, Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 3:
-                        PicoZebro_3[Zebro_3_Middle_x , Zebro_3_Middle_y, Direction_Zebro_3, Blocking_Zebro, Angle_Zebro_3]
-                        #release condition zebro 3
-
-                    if Zebros == 3:
-                        Blocking_Zebro = Block.Block_1(Zebro_4_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_1_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_4_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_1_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 4:
-                        PicoZebro_4[Zebro_4_Middle_x , Zebro_4_Middle_y, Direction_Zebro_4, Blocking_Zebro, Angle_Zebro_4]
-                        #release condition zebro 4
-
-                    if Zebros == 4:
-                        Blocking_Zebro = Block.Block_1(Zebro_5_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_1_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_5_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_1_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 5:
-                        PicoZebro_5[Zebro_5_Middle_x , Zebro_5_Middle_y, Direction_Zebro_5, Blocking_Zebro, Angle_Zebro_5]
-                        #release condition zebro 5
-
-                    if Zebros == 5:
-                        Blocking_Zebro = Block.Block_1(Zebro_6_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_1_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_6_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_1_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 6:
-                        PicoZebro_6[Zebro_6_Middle_x , Zebro_6_Middle_y, Direction_Zebro_6, Blocking_Zebro, Angle_Zebro_6]
-                        #release condition zebro 6
-
-                    if Zebros == 6:
-                        Blocking_Zebro = Block.Block_1(Zebro_7_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_1_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_7_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_1_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 7:
-                        PicoZebro_7[Zebro_1_Middle_x , Zebro_7_Middle_y, Direction_Zebro_7, Blocking_Zebro, Angle_Zebro_7]
-                        #release condition zebro 7
-
-                    if Zebros == 7:
-                        Blocking_Zebro = Block.Block_1(Zebro_8_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_1_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_8_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_1_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 8:
-                        PicoZebro_8[Zebro_8_Middle_x , Zebro_8_Middle_y, Direction_Zebro_8, Blocking_Zebro, Angle_Zebro_8]
-                        #release condition zebro 8
-
-                    if Zebros == 8:
-                        Blocking_Zebro = Block.Block_1(Zebro_9_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_1_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_9_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_1_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 9:
-                        PicoZebro_9[Zebro_9_Middle_x , Zebro_9_Middle_y, Direction_Zebro_9, Blocking_Zebro, Angle_Zebro_9]
-                        #release condition zebro 9
-
-                    if Zebros == 9:
-                        Blocking_Zebro = Block.Block_1(Zebro_10_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_1_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_10_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_1_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 10:
-                        PicoZebro_10[Zebro_10_Middle_x , Zebro_10_Middle_y, Direction_Zebro_10, Blocking_Zebro, Angle_Zebro_10]
-                        #release condition zebro 10
-
-                    if Zebros == 10:
-                        Blocking_Zebro = Block.Block_1(Zebro_11_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_1_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_11_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_1_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 11:
-                        PicoZebro_11[Zebro_11_Middle_x , Zebro_11_Middle_y, Direction_Zebro_11, Blocking_Zebro, Angle_Zebro_11]
-                        #release condition zebro 11
-
-                    if Zebros == 11:
-                        Blocking_Zebro = Block.Block_1(Zebro_12_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_1_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_12_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_1_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 12:
-                        PicoZebro_12[Zebro_12_Middle_x , Zebro_12_Middle_y, Direction_Zebro_12, Blocking_Zebro, Angle_Zebro_12]
-                        #release condition zebro 12
-
-                    if Zebros == 12:
-                        Blocking_Zebro = Block.Block_1(Zebro_13_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_1_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_13_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y Zebro_1_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 13:
-                        PicoZebro_13[Zebro_13_Middle_x , Zebro_13_Middle_y, Direction_Zebro_13, Blocking_Zebro, Angle_Zebro_13]
-                        #release condition zebro 13
-
-                    if Zebros == 13:
-                        Blocking_Zebro = Block.Block_1(Zebro_14_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_1_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_14_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_1_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 14:
-                        PicoZebro_14[Zebro_14_Middle_x , Zebro_14_Middle_y, Direction_Zebro_14, Blocking_Zebro, Angle_Zebro_14]
-                        #release condition zebro 14
-
-                    if Zebros == 14:
-                        Blocking_Zebro = Block.Block_1(Zebro_15_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_1_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_15_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_1_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 15:
-                        PicoZebro_15[Zebro_15_Middle_x , Zebro_15_Middle_y, Direction_Zebro_15, Blocking_Zebro, Angle_Zebro_15]
-                        #release condition zebro 15
-
-                    if Zebros == 15:
-                        Blocking_Zebro = Block.Block_1(Zebro_16_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_1_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_16_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_1_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 16:
-                        PicoZebro_16[Zebro_16_Middle_x , Zebro_16_Middle_y, Direction_Zebro_16, Blocking_Zebro, Angle_Zebro_16]
-                        #release condition zebro 16
-
-                    if Zebros == 16:
-                        Blocking_Zebro = Block.Block_1(Zebro_17_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_1_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_17_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_1_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 17:
-                        PicoZebro_17[Zebro_17_Middle_x , Zebro_17_Middle_y, Direction_Zebro_17, Blocking_Zebro, Angle_Zebro_17]
-                        #release condition zebro 17
-
-                    if Zebros == 17:
-                        Blocking_Zebro = Block.Block_1(Zebro_18_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_1_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_18_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_1_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 18:
-                        PicoZebro_18[Zebro_18_Middle_x , Zebro_18_Middle_y, Direction_Zebro_18, Blocking_Zebro, Angle_Zebro_18]
-                        #release condition zebro 18
-
-                    if Zebros == 18:
-                        Blocking_Zebro = Block.Block_1(Zebro_19_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_1_Middle_x, Zebro_20_Middle_x,
-                                                       Zebro_19_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_1_Middle_y, Zebro_20_Middle_y)
-                        # Grab condition zebro 19:
-                        PicoZebro_19[Zebro_19_Middle_x , Zebro_19_Middle_y, Direction_Zebro_19, Blocking_Zebro, Angle_Zebro_19]
-                        #release condition zebro 19
-
-                    if Zebros == 19:
-                        Blocking_Zebro = Block.Block_1(Zebro_20_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
-                                                       Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_1_Middle_x,
-                                                       Zebro_20_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
-                                                       Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_1_Middle_y)
-                        # Grab condition zebro 20:
-                        PicoZebro_20[Zebro_20_Middle_x , Zebro_20_Middle_y, Direction_Zebro_20, Blocking_Zebro, Angle_Zebro_20]
-                        #release condition zebro 20
-                        
-                    # Release Condition Serial Write. (Now movement can start.)
-
-                        # Once it is known to work for these two Pico Zebro's then the copy and paste will start for the rest
+            if Devices == 19: 
+                #set data from PZ 20
+                Zebro_20_Middle_x = Zebro_Middle_x
+                Zebro_20_Middle_y = Zebro_Middle_y
+                Direction_Zebro_20 = Direction
+                Angle_Zebro_20 = Angle
                 Picture = 5
                 
-                #time.sleep(60)
+            Devices = Devices + 1
+                    
         if Picture == 5:
+            Devices = 0
+            #once every value for every possible Zebro is determind then
+            for Zebros in range(19):
+                Blocking_Zebro = []   #Here will be the blocking in
+                if Zebros == 0:
+                    Blocking_Zebro = Block.Block_1(Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 1:
+                    PicoZebro_1[Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro, Direction_Zebro_1, Angle_Zebro_1]
+                    #release condition zebro 1
+
+                if Zebros == 1:
+                    #in here the first value is the one everything will be compared to.
+                    Blocking_Zebro = Block.Block_1(Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 2:
+                    PicoZebro_2[Zebro_2_Middle_x , Zebro_2_Middle_y, Blocking_Zebro, Direction_Zebro_2, Angle_Zebro_2]
+                    #release condition zebro 2
+
+                if Zebros == 2:
+                    Blocking_Zebro = Block.Block_1(Zebro_3_Middle_x, Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_3_Middle_y, Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 3:
+                    PicoZebro_3[Zebro_3_Middle_x , Zebro_3_Middle_y, Blocking_Zebro, Direction_Zebro_3, Angle_Zebro_3]
+                    #release condition zebro 3
+
+                if Zebros == 3:
+                    Blocking_Zebro = Block.Block_1(Zebro_4_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_1_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_4_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_1_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 4:
+                    PicoZebro_4[Zebro_4_Middle_x , Zebro_4_Middle_y, Blocking_Zebro, Direction_Zebro_4, Angle_Zebro_4]
+                    #release condition zebro 4
+
+                if Zebros == 4:
+                    Blocking_Zebro = Block.Block_1(Zebro_5_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_1_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_5_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_1_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 5:
+                    PicoZebro_5[Zebro_5_Middle_x , Zebro_5_Middle_y, Blocking_Zebro, Direction_Zebro_5, Angle_Zebro_5]
+                    #release condition zebro 5
+
+                if Zebros == 5:
+                    Blocking_Zebro = Block.Block_1(Zebro_6_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_1_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_6_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_1_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 6:
+                    PicoZebro_6[Zebro_6_Middle_x , Zebro_6_Middle_y, Blocking_Zebro, Direction_Zebro_6, Angle_Zebro_6]
+                    #release condition zebro 6
+
+                if Zebros == 6:
+                    Blocking_Zebro = Block.Block_1(Zebro_7_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_1_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_7_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_1_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 7:
+                    PicoZebro_7[Zebro_1_Middle_x , Zebro_7_Middle_y, Blocking_Zebro, Direction_Zebro_7, Angle_Zebro_7]
+                    #release condition zebro 7
+
+                if Zebros == 7:
+                    Blocking_Zebro = Block.Block_1(Zebro_8_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_1_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_8_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_1_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 8:
+                    PicoZebro_8[Zebro_8_Middle_x , Zebro_8_Middle_y, Blocking_Zebro, Direction_Zebro_8, Angle_Zebro_8]
+                    #release condition zebro 8
+
+                if Zebros == 8:
+                    Blocking_Zebro = Block.Block_1(Zebro_9_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_1_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_9_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_1_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 9: 
+                    PicoZebro_9[Zebro_9_Middle_x , Zebro_9_Middle_y, Blocking_Zebro, Direction_Zebro_9, Angle_Zebro_9]
+                    #release condition zebro 9
+
+                if Zebros == 9:
+                    Blocking_Zebro = Block.Block_1(Zebro_10_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_1_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_10_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_1_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 10:
+                    PicoZebro_10[Zebro_10_Middle_x , Zebro_10_Middle_y, Blocking_Zebro, Direction_Zebro_10, Angle_Zebro_10]
+                    #release condition zebro 10
+
+                if Zebros == 10:
+                    Blocking_Zebro = Block.Block_1(Zebro_11_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_1_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_11_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_1_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 11:
+                    PicoZebro_11[Zebro_11_Middle_x , Zebro_11_Middle_y, Blocking_Zebro, Direction_Zebro_11, Angle_Zebro_11]
+                    #release condition zebro 11
+
+                if Zebros == 11:
+                    Blocking_Zebro = Block.Block_1(Zebro_12_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_1_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_12_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_1_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 12:
+                    PicoZebro_12[Zebro_12_Middle_x , Zebro_12_Middle_y, Blocking_Zebro, Direction_Zebro_12, Angle_Zebro_12]
+                    #release condition zebro 12
+
+                if Zebros == 12:
+                    Blocking_Zebro = Block.Block_1(Zebro_13_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_1_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_13_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_1_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 13:
+                    PicoZebro_13[Zebro_13_Middle_x , Zebro_13_Middle_y, Blocking_Zebro, Direction_Zebro_13, Angle_Zebro_13]
+                    #release condition zebro 13
+
+                if Zebros == 13:
+                    Blocking_Zebro = Block.Block_1(Zebro_14_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_1_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_14_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_1_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 14:
+                    PicoZebro_14[Zebro_14_Middle_x , Zebro_14_Middle_y, Blocking_Zebro, Direction_Zebro_14, Angle_Zebro_14]
+                    #release condition zebro 14
+
+                if Zebros == 14:
+                    Blocking_Zebro = Block.Block_1(Zebro_15_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_1_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_15_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_1_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 15:
+                    PicoZebro_15[Zebro_15_Middle_x , Zebro_15_Middle_y, Blocking_Zebro, Direction_Zebro_15, Angle_Zebro_15]
+                    #release condition zebro 15
+
+                if Zebros == 15:
+                    Blocking_Zebro = Block.Block_1(Zebro_16_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_1_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_16_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_1_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 16:
+                    PicoZebro_16[Zebro_16_Middle_x , Zebro_16_Middle_y, Blocking_Zebro, Direction_Zebro_16, Angle_Zebro_16]
+                    #release condition zebro 16
+
+                if Zebros == 16:
+                    Blocking_Zebro = Block.Block_1(Zebro_17_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_1_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_17_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_1_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 17:
+                    PicoZebro_17[Zebro_17_Middle_x , Zebro_17_Middle_y, Blocking_Zebro, Direction_Zebro_17, Angle_Zebro_17]
+                    #release condition zebro 17
+
+                if Zebros == 17:
+                    Blocking_Zebro = Block.Block_1(Zebro_18_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_1_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_18_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_1_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 18:
+                    PicoZebro_18[Zebro_18_Middle_x , Zebro_18_Middle_y, Blocking_Zebro, Direction_Zebro_18, Angle_Zebro_18]
+                    #release condition zebro 18
+
+                if Zebros == 18:
+                    Blocking_Zebro = Block.Block_1(Zebro_19_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_1_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_19_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_1_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 19:
+                    PicoZebro_19[Zebro_19_Middle_x , Zebro_19_Middle_y, Blocking_Zebro, Direction_Zebro_19, Angle_Zebro_19]
+                    #release condition zebro 19
+
+                if Zebros == 19:
+                    Blocking_Zebro = Block.Block_1(Zebro_20_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_1_Middle_x,
+                                                   Zebro_20_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_1_Middle_y)
+                    # Grab condition zebro 20:
+                    PicoZebro_20[Zebro_20_Middle_x , Zebro_20_Middle_y, Blocking_Zebro, Direction_Zebro_20, Angle_Zebro_20]            
+                # Release Condition Serial Write. (Now movement can start.)
+
+                        # Once it is known to work for these two Pico Zebro's then the copy and paste will start for the rest
+        if Picture == 6:
             #Global Command Turn all leds off
             #Glabal Command turn all led 1 on.  #Do this once
             #Wait untill this is done.
@@ -749,65 +758,287 @@ def main():
                 y_compare_2 = y - 30
                 if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):
                     cv2.putText(image, "#1", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-                    Zebro_1_Middle_x
+                    Zebro_1_Middle_x = x
+                    Zebro_1_Middle_y = y
                     print("This is Zebro 1")
                 elif (x_compare_2 < Zebro_2_Middle_x < x_compare_1) and (y_compare_2 < Zebro_2_Middle_y < y_compare_1):
+                    Zebro_2_Middle_x = x
+                    Zebro_2_Middle_y = y
                     print("This is Zebro 2")
                     cv2.putText(image, "#2", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_3_Middle_x < x_compare_1) and (y_compare_2 < Zebro_3_Middle_y < y_compare_1):
+                    Zebro_3_Middle_x = x
+                    Zebro_3_Middle_y = y
                     print("This is Zebro 3")
                     cv2.putText(image, "#3", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_4_Middle_x < x_compare_1) and (y_compare_2 < Zebro_4_Middle_y < y_compare_1):
+                    Zebro_4_Middle_x = x
+                    Zebro_4_Middle_y = y
                     print("This is Zebro 4")
                     cv2.putText(image, "#4", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_5_Middle_x < x_compare_1) and (y_compare_2 < Zebro_5_Middle_y < y_compare_1):
+                    Zebro_5_Middle_x = x
+                    Zebro_5_Middle_y = y
                     print("This is Zebro 5")
                     cv2.putText(image, "#5", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_6_Middle_x < x_compare_1) and (y_compare_2 < Zebro_6_Middle_y < y_compare_1):
+                    Zebro_6_Middle_x = x
+                    Zebro_6_Middle_y = y
                     print("This is Zebro 6")
                     cv2.putText(image, "#6", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_7_Middle_x < x_compare_1) and (y_compare_2 < Zebro_7_Middle_y < y_compare_1):
+                    Zebro_7_Middle_x = x
+                    Zebro_7_Middle_y = y
                     print("This is Zebro 7")
                     cv2.putText(image, "#7", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_8_Middle_x < x_compare_1) and (y_compare_2 < Zebro_8_Middle_y < y_compare_1):
+                    Zebro_8_Middle_x = x
+                    Zebro_8_Middle_y = y
                     print("This is Zebro 8")
                     cv2.putText(image, "#8", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_9_Middle_x < x_compare_1) and (y_compare_2 < Zebro_9_Middle_y < y_compare_1):
+                    Zebro_9_Middle_x = x
+                    Zebro_9_Middle_y = y
                     print("This is Zebro 9")
                     cv2.putText(image, "#9", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_10_Middle_x < x_compare_1) and (y_compare_2 < Zebro_10_Middle_y < y_compare_1):
+                    Zebro_10_Middle_x = x
+                    Zebro_10_Middle_y = y
                     print("This is Zebro 10")
                     cv2.putText(image, "#10", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_11_Middle_x < x_compare_1) and (y_compare_2 < Zebro_11_Middle_y < y_compare_1):
+                    Zebro_11_Middle_x = x
+                    Zebro_11_Middle_y = y
                     print("This is Zebro 11")
                     cv2.putText(image, "#11", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_12_Middle_x < x_compare_1) and (y_compare_2 < Zebro_12_Middle_y < y_compare_1):
+                    Zebro_12_Middle_x = x
+                    Zebro_12_Middle_y = y
                     print("This is Zebro 12")
                     cv2.putText(image, "#12", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_13_Middle_x < x_compare_1) and (y_compare_2 < Zebro_13_Middle_y < y_compare_1):
+                    Zebro_13_Middle_x = x
+                    Zebro_13_Middle_y = y
                     print("This is Zebro 13")
                     cv2.putText(image, "#13", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_14_Middle_x < x_compare_1) and (y_compare_2 < Zebro_14_Middle_y < y_compare_1):
+                    Zebro_14_Middle_x = x
+                    Zebro_14_Middle_y = y
                     print("This is Zebro 14")
                     cv2.putText(image, "#14", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_15_Middle_x < x_compare_1) and (y_compare_2 < Zebro_15_Middle_y < y_compare_1):
+                    Zebro_15_Middle_x = x
+                    Zebro_15_Middle_y = y
                     print("This is Zebro 15")
                     cv2.putText(image, "#15", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_16_Middle_x < x_compare_1) and (y_compare_2 < Zebro_16_Middle_y < y_compare_1):
+                    Zebro_16_Middle_x = x
+                    Zebro_16_Middle_y = y
                     print("This is Zebro 16")
                     cv2.putText(image, "#16", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_17_Middle_x < x_compare_1) and (y_compare_2 < Zebro_17_Middle_y < y_compare_1):
+                    Zebro_17_Middle_x = x
+                    Zebro_17_Middle_y = y
                     print("This is Zebro 17")
                     cv2.putText(image, "#17", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_18_Middle_x < x_compare_1) and (y_compare_2 < Zebro_18_Middle_y < y_compare_1):
+                    Zebro_18_Middle_x = x
+                    Zebro_18_Middle_y = y
                     print("This is Zebro 18")
                     cv2.putText(image, "#18", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_19_Middle_x < x_compare_1) and (y_compare_2 < Zebro_19_Middle_y < y_compare_1):
+                    Zebro_19_Middle_x = x
+                    Zebro_19_Middle_y = y
                     print("This is Zebro 19")
                     cv2.putText(image, "#19", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                 elif (x_compare_2 < Zebro_20_Middle_x < x_compare_1) and (y_compare_2 < Zebro_20_Middle_y < y_compare_1):
+                    Zebro_20_Middle_x = x
+                    Zebro_20_Middle_y = y
                     print("This is Zebro 20")
-                    cv2.putText(image, "#20", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)             
+                    cv2.putText(image, "#20", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+            for Zebros in range(19):
+                Blocking_Zebro = []   #Here will be the blocking in
+                if Zebros == 0:
+                    Blocking_Zebro = Block.Block_1(Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 1:
+                    PicoZebro_1[Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro]
+                    #release condition zebro 1
+
+                if Zebros == 1:
+                    #in here the first value is the one everything will be compared to.
+                    Blocking_Zebro = Block.Block_1(Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 2:
+                    PicoZebro_2[Zebro_2_Middle_x , Zebro_2_Middle_y, Blocking_Zebro]
+                    #release condition zebro 2
+
+                if Zebros == 2:
+                    Blocking_Zebro = Block.Block_1(Zebro_3_Middle_x, Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_3_Middle_y, Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 3:
+                    PicoZebro_3[Zebro_3_Middle_x , Zebro_3_Middle_y, Blocking_Zebro]
+                    #release condition zebro 3
+
+                if Zebros == 3:
+                    Blocking_Zebro = Block.Block_1(Zebro_4_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_1_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_4_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_1_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 4:
+                    PicoZebro_4[Zebro_4_Middle_x , Zebro_4_Middle_y, Blocking_Zebro]
+                    #release condition zebro 4
+
+                if Zebros == 4:
+                    Blocking_Zebro = Block.Block_1(Zebro_5_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_1_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_5_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_1_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 5:
+                    PicoZebro_5[Zebro_5_Middle_x , Zebro_5_Middle_y, Blocking_Zebro]
+                    #release condition zebro 5
+
+                if Zebros == 5:
+                    Blocking_Zebro = Block.Block_1(Zebro_6_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_1_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_6_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_1_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 6:
+                    PicoZebro_6[Zebro_6_Middle_x , Zebro_6_Middle_y, Blocking_Zebro]
+                    #release condition zebro 6
+
+                if Zebros == 6:
+                    Blocking_Zebro = Block.Block_1(Zebro_7_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_1_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_7_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_1_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 7:
+                    PicoZebro_7[Zebro_1_Middle_x , Zebro_7_Middle_y, Blocking_Zebro]
+                    #release condition zebro 7
+
+                if Zebros == 7:
+                    Blocking_Zebro = Block.Block_1(Zebro_8_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_1_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_8_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_1_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 8:
+                    PicoZebro_8[Zebro_8_Middle_x , Zebro_8_Middle_y, Blocking_Zebro]
+                    #release condition zebro 8
+
+                if Zebros == 8:
+                    Blocking_Zebro = Block.Block_1(Zebro_9_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_1_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_9_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_1_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 9: 
+                    PicoZebro_9[Zebro_9_Middle_x , Zebro_9_Middle_y, Blocking_Zebro]
+                    #release condition zebro 9
+
+                if Zebros == 9:
+                    Blocking_Zebro = Block.Block_1(Zebro_10_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_1_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_10_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_1_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 10:
+                    PicoZebro_10[Zebro_10_Middle_x , Zebro_10_Middle_y, Blocking_Zebro]
+                    #release condition zebro 10
+
+                if Zebros == 10:
+                    Blocking_Zebro = Block.Block_1(Zebro_11_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_1_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_11_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_1_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 11:
+                    PicoZebro_11[Zebro_11_Middle_x , Zebro_11_Middle_y, Blocking_Zebro]
+                    #release condition zebro 11
+
+                if Zebros == 11:
+                    Blocking_Zebro = Block.Block_1(Zebro_12_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_1_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_12_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_1_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 12:
+                    PicoZebro_12[Zebro_12_Middle_x , Zebro_12_Middle_y, Blocking_Zebro]
+                    #release condition zebro 12
+
+                if Zebros == 12:
+                    Blocking_Zebro = Block.Block_1(Zebro_13_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_1_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_13_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_1_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 13:
+                    PicoZebro_13[Zebro_13_Middle_x , Zebro_13_Middle_y, Blocking_Zebro]
+                    #release condition zebro 13
+
+                if Zebros == 13:
+                    Blocking_Zebro = Block.Block_1(Zebro_14_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_1_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_14_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_1_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 14:
+                    PicoZebro_14[Zebro_14_Middle_x , Zebro_14_Middle_y, Blocking_Zebro]
+                    #release condition zebro 14
+
+                if Zebros == 14:
+                    Blocking_Zebro = Block.Block_1(Zebro_15_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_1_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_15_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_1_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 15:
+                    PicoZebro_15[Zebro_15_Middle_x , Zebro_15_Middle_y, Blocking_Zebro]
+                    #release condition zebro 15
+
+                if Zebros == 15:
+                    Blocking_Zebro = Block.Block_1(Zebro_16_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_1_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_16_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_1_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 16:
+                    PicoZebro_16[Zebro_16_Middle_x , Zebro_16_Middle_y, Blocking_Zebro]
+                    #release condition zebro 16
+
+                if Zebros == 16:
+                    Blocking_Zebro = Block.Block_1(Zebro_17_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_1_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_17_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_1_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 17:
+                    PicoZebro_17[Zebro_17_Middle_x , Zebro_17_Middle_y, Blocking_Zebro]
+                    #release condition zebro 17
+
+                if Zebros == 17:
+                    Blocking_Zebro = Block.Block_1(Zebro_18_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_1_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_18_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_1_Middle_y, Zebro_19_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 18:
+                    PicoZebro_18[Zebro_18_Middle_x , Zebro_18_Middle_y, Blocking_Zebro]
+                    #release condition zebro 18
+
+                if Zebros == 18:
+                    Blocking_Zebro = Block.Block_1(Zebro_19_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_1_Middle_x, Zebro_20_Middle_x,
+                                                   Zebro_19_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_1_Middle_y, Zebro_20_Middle_y)
+                    # Grab condition zebro 19:
+                    PicoZebro_19[Zebro_19_Middle_x , Zebro_19_Middle_y, Blocking_Zebro]
+                    #release condition zebro 19
+
+                if Zebros == 19:
+                    Blocking_Zebro = Block.Block_1(Zebro_20_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
+                                                   Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_1_Middle_x,
+                                                   Zebro_20_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
+                                                   Zebro_11_Middle_y, Zebro_12_Middle_y, Zebro_13_Middle_y, Zebro_14_Middle_y, Zebro_15_Middle_y, Zebro_16_Middle_y, Zebro_17_Middle_y, Zebro_18_Middle_y, Zebro_19_Middle_y, Zebro_1_Middle_y)
+                    # Grab condition zebro 20:
+                    PicoZebro_20[Zebro_20_Middle_x , Zebro_20_Middle_y, Blocking_Zebro]
+                    #release condition zebro 20
+                Picture = 5
 
         Picture = Picture + 1
         
@@ -828,6 +1059,8 @@ def main():
 if __name__ == '__main__':
     names = []
     condition = threading.Condition()
+    Pico_N1 = "Pico_N1"
+    Pico_N2 = "Pico_N2"
     
     Pico_Zebro_1 = Control_Zebro_Thread(names, condition, Pico_N1)
     Pico_Zebro_1.setName('Pico_Zebro_1')
