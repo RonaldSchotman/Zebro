@@ -32,6 +32,11 @@ import random
 import threading
 import bluetooth
 
+# import the necessary packages for tracking
+from imutils import contours
+from skimage import measure
+import imutils
+
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (1648, 928)
@@ -418,9 +423,37 @@ def main():
             #              Block_%s North, Zebros_1
             #   Set(Zebro_1_Middle_x , Zebro_1_Middle_y, Direction, Blocked_Direction%s) 
             
-            Picture = 0
+            Picture = 5
             #time.sleep(60)
+        if Picture == 5:
+            #Glabal Command turn all led 1 on.
+            #Wait untill this is done.
+            gray = cv2.cvtColor(Led_1, cv2.COLOR_BGR2GRAY)  # Take a gray picture
+            blurred = cv2.GaussianBlur(gray, (11, 11), 0)   # Blur image for noise reduction
+            
+            
+            # threshold the image to reveal light regions in the
+            # blurred image
+            thresh = cv2.threshold(blurred, 240, 250, cv2.THRESH_BINARY)[1]
+            # perform a series of erosions and dilations to remove
+            # any small blobs of noise from the thresholded image
+            thresh = cv2.erode(thresh, None, iterations=2)
+            thresh = cv2.dilate(thresh, None, iterations=4)
 
+            # find the contours in the mask, then sort them from left to
+            # right
+            cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cnts = cnts[0] if imutils.is_cv2() else cnts[1]
+            cnts = contours.sort_contours(cnts)[0]
+             
+            # loop over the contours
+            for (i, c) in enumerate(cnts):
+                # draw the bright spot on the image
+                (x, y, w, h) = cv2.boundingRect(c)
+                ((cX, cY), radius) = cv2.minEnclosingCircle(c)
+                cv2.circle(Led_1, (int(cX), int(cY)), int(radius), (0, 0, 255), 3)
+                cv2.putText(Led_1, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+            cv2.imshow("Finding LEds", Led_1)
         Picture = Picture + 1
         
         # show the frame
