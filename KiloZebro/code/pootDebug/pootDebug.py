@@ -134,9 +134,9 @@ class Debugger:
                     # exit gracefully
                     self.close_log()
                     break;
-                elif key == ord('u'):
+                elif key == ord('q'):
                     self.udp_enabled = True
-                elif key == ord('y'):
+                elif key == ord('w'):
                     self.udp_enabled = False
                 elif key == ord(' '):
                     if not self.write_log:

@@ -23,9 +23,10 @@
 #include "address.h"
 #include "time.h"
 #include "interrupts.h"
+#include "uart1.h"
 
 volatile static uint16_t adc_data_dump[ADC_NUM_OF_CHANNELS];
-static uint16_t kp = 0, ki = 0;
+static uint8_t kp = 0, ki = 0;
 
 /**
  * Enables the ADC. This function should only be called when it is
@@ -136,10 +137,7 @@ int32_t adc_init() {
 }
 
 void ADC1_IRQHandler(void) {
-//	static uint8_t counter = 0;
 	interrupts_disable();
-//	counter += 1;
-//	vregs_write(VREGS_DEBUG_FLAG_2, counter);
 	if (ADC1->ISR & ADC_ISR_EOC) {
 		ADC1->ISR |= ADC_ISR_EOC;
 	}
@@ -180,7 +178,7 @@ void adc_write_data_to_vregs(void) {
 	current_measured = abs(((adc_data_dump[5])) - ADC_MID_RANGE_COUNT);
 	current_measured = (current_measured * ADC_FULL_RANGE_MILLIVOLT)
 			/ ADC_FULL_RANGE_COUNT;
-	/* convert to mA */
+	/* convert to A */
 	current_measured = (current_measured) / ADC_CURRENT_SENSITIVITY;
 	vregs_write(VREGS_MOTOR_CURRENT, (uint8_t) current_measured);
 }
@@ -280,7 +278,10 @@ void adc_control_motor_current(int32_t current_setpoint,
 	static int32_t duty_cycle = 0;
 	static int32_t error_integral = 0;
 	int32_t error;
-	int8_t dt = 5;
+	uint16_t dt = 0;
+	static uint16_t time_prev = 0;
+	dt = time_prev - (TIM17->CNT); /* overflow is taken care of by uint16_t and ARR = 0xFFFF */
+	time_prev = (TIM17->CNT);
 
 	/* 3300 mV - 1650 mV = 1650 mV of maximum current measurement range. Sensitivity is 55 mV/A, meaning 1650 / 55 = 30A.
 	 * 1650 mV = 512 (0.5*int10) (better shifting a bit too much) Now, dt is dependent on the ARR value of TIM1. This is 1023, meaning a period of 2048.
@@ -291,9 +292,8 @@ void adc_control_motor_current(int32_t current_setpoint,
 	/* remove offset */
 	current_measured_cast = current_measured_cast - ADC_MID_RANGE_COUNT;
 #ifdef DEBUG_VREGS
-	vregs_write(VREGS_CURRENT_SETPOINT, (uint8_t) (current_setpoint >> 3));
-	vregs_write(VREGS_MOTOR_CURRENT_COUNT,
-			(uint8_t) (current_measured_cast >> 3));
+		vregs_write(VREGS_MOTOR_CURRENT_COUNT, (uint8_t) ((current_measured - ADC_MID_RANGE_COUNT) >> 3));
+		vregs_write(VREGS_DEBUG_FLAG_2, (uint8_t) (error_integral));
 #endif
 	if (current_setpoint != 0) {
 		error = current_setpoint - current_measured_cast;
@@ -302,9 +302,9 @@ void adc_control_motor_current(int32_t current_setpoint,
 						|| ((error < 0) && (error_integral < 0)))) {
 			/* let error_integral be the same */
 		} else {
-			error_integral = error_integral + error * dt;
+			error_integral = (error_integral + (error * dt)/(48000000));
 		}
-		duty_cycle = ((((kp * error) + ((ki * error_integral) >> 14))) >> 6); /* shift 6 because of 10 bits adc left aligned. One extra shift because we have error and error_integral */
+		duty_cycle = (((kp * error) - ((ki * error_integral))) >> 6); /* shift 6 because of 10 bits adc left aligned. Divide by 48e6 because this is the clock freq. */
 		if (duty_cycle < 0) {
 			duty_cycle = (uint16_t) abs(duty_cycle);
 			h_bridge_drive_motor(duty_cycle, H_BRIDGE_BACKWARD,

@@ -1,14 +1,10 @@
-16:08:01 **** Incremental Build of configuration Debug for project leg_module ****
+18:09:12 **** Incremental Build of configuration Debug for project leg_module ****
 make all 
-Building file: ../Src/motion.c
+Building file: ../Src/adc.c
 Invoking: MCU GCC Compiler
 /home/rob/zebro/KiloZebro/code/leg_module/Debug
-arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/motion.d" -MT"Src/motion.o" -o "Src/motion.o" "../Src/motion.c"
-../Src/motion.c: In function 'motion_drive_h_bridge':
-../Src/motion.c:157:17: warning: variable 'over_current_counter' set but not used [-Wunused-but-set-variable]
-  static uint8_t over_current_counter = 0;
-                 ^
-Finished building: ../Src/motion.c
+arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/adc.d" -MT"Src/adc.o" -o "Src/adc.o" "../Src/adc.c"
+Finished building: ../Src/adc.c
  
 Building target: poot.elf
 Invoking: MCU GCC Linker
@@ -20,8 +16,8 @@ Generating binary and Printing size information:
 arm-none-eabi-objcopy -O binary "poot.elf" "poot.bin"
 arm-none-eabi-size "poot.elf"
    text	   data	    bss	    dec	    hex	filename
-  15784	     16	   3560	  19360	   4ba0	poot.elf
+  15740	     16	   3552	  19308	   4b6c	poot.elf
  
 
-16:08:02 Build Finished (took 375ms)
+18:09:13 Build Finished (took 423ms)
 

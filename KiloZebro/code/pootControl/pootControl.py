@@ -191,6 +191,7 @@ def main(stdscr):
     commands = CommandCollection()
     commands.add_new_command("[0x00 30 1 0 0 0 0 0 0 1]", "c", 'Calibrate Encoders')
     commands.add_new_command("[0x00 30 3 0 0 0 0 0 0 1]", "v", 'Walk Forward')
+    commands.add_new_command("[0x00 30 4 0 0 0 0 0 0 1]", "b", 'Walk Backward')
     commands.add_new_command("[0x00 30 0 0 0 0 0 0 0 1]", " ", 'Stop all')
     commands.add_new_command("[0x00 22 0x12]", 'e', "Reset emergency_stop")
     # commands.add_new_command("[0x00 30 7 0 120 1 0 0]", "d", "Debug Command")
@@ -226,6 +227,8 @@ def main(stdscr):
                 command = commands.find_command_by_key(input_char)  
             if input_char == 'v':
                 command = commands.find_command_by_key(input_char)
+            if input_char == 'b':
+                command = commands.find_command_by_key(input_char)                
             if input_char == 'u':
                 if (main.kp<255):
                     main.kp += 1

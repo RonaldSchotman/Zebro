@@ -36,18 +36,17 @@
 #define MOTION_DIRECTION_FORWARD 0
 #define MOTION_DIRECTION_BACKWARD 1
 
-#define MOTION_PROBE_SPEED 100
 #define MOTION_PROBE_CURRENT_SETPOINT 1000
 
 /* At a very maximum a leg should be able to spin 2 rounds in 1 second (120 RPM). This is 1820 pulses per second.
  * The motor is measured to do 140 RPM at full dutycycle. So our max dutycycle is 223 for 120 RPM. Now we have (1820/1)/223 ~= 8.
  */
 /* This is not 8 because it is also a measure of how aggressive the speed up is when the leg is delayed. Lower is more aggressive. */
-#define DUTYCYCLE_PER_PULSE_PER_SECOND 5
+//#define DUTYCYCLE_PER_PULSE_PER_SECOND 5
 /* This determines how many pulses the encoder can pass a certain position and still say it reached the position. This is necessary especially when the loop is not fast enough. */
 #define MOTION_POSITION_HYSTERESIS 5
 /* Time in ms the leg gets to turn back the leg to the last known position. */
-#define STABALIZING_TIME 250
+//#define STABALIZING_TIME 250
 
 #define ARRAY_SIZE 255
 #define TOUCH_DOWN_POSITION_L 350

@@ -34,6 +34,7 @@ uint8_t start_flag = 1;
  */
 int32_t time_init(void){
 	time_clock_init();
+	time_clock_17_init();
 
 #ifndef LIVING_ON_THE_EDGE
 	time_watchdog_init();
@@ -82,6 +83,28 @@ int32_t time_clock_init(void){
 
 	return 0;
 }
+
+uint16_t time_clock_17_init(void){
+	/* enable the clock to TIM16 */
+	__HAL_RCC_TIM17_CLK_ENABLE();
+
+	/* set the auto reload value to all ones */
+	TIM17->ARR = ~0;
+	/* set prescaler */
+	TIM17->PSC = 0;
+	/* start counting at 0 */
+	TIM17->CNT = 0;
+	/* UEV events generated only by overflows */
+	TIM17->CR1 |= TIM_CR1_UDIS;
+	/* generate update event */
+	TIM17->EGR |= TIM_EGR_UG;
+
+	/* enable the counter */
+	TIM17->CR1 |= TIM_CR1_CEN;
+
+	return 0;
+}
+
 
 /**
  * Reset the counter of the clock to zero

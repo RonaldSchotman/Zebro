@@ -113,6 +113,32 @@ int32_t vregs_writeout(){
 }
 
 /**
+ * Copy specific vregs to the buffer, where they can be accessed over ZebroBus
+ * and UART1. These Vregs are used to tune the motor current control loop
+ */
+int32_t vregs_writeout_specific(){
+	int32_t cursor;
+
+	for(cursor = 44; cursor < 46; cursor++){
+		vregs_buffer[!buffer_selector][cursor] = vregs[cursor];
+	}
+
+	/**
+	 * BEGIN critical section
+	 */
+	interrupts_disable();
+
+	buffer_selector = !buffer_selector;
+
+	interrupts_enable();
+	/**
+	 * END critical section
+	 */
+
+	return 0;
+}
+
+/**
  * Return a pointer to the buffered vregs
  */
 uint8_t *vregs_get_buffer_address(){

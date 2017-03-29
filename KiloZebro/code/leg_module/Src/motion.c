@@ -44,8 +44,8 @@ static uint16_t stand_up_position = 0;
 static uint16_t lift_off_position = 0;
 static uint16_t last_known_position = 0;
 static uint8_t side_of_zebro = 0;
-static uint32_t increasing_delay = 0;
-/* current setpoint. This is a setpoint between 0 and 2^16 with 2^15 being 0 amps, 0 being -max_amps and 2^16 being +max_amps */
+//static uint32_t increasing_delay = 0;
+/* current setpoint. This is a setpoint between -2^15 and 2^15 */
 static int32_t current_setpoint = 0;
 
 /**
@@ -154,7 +154,6 @@ int32_t motion_validate_state(struct motion_state motion_state) {
  */
 int32_t motion_drive_h_bridge() {
 	int32_t return_value = 0;
-	static uint8_t over_current_counter = 0;
 	static uint16_t adc_data[ARRAY_SIZE];
 	static uint8_t fsm_flag = 0;
 	static uint16_t position[2] = { 0, 0 };
@@ -187,19 +186,8 @@ int32_t motion_drive_h_bridge() {
 			(uint8_t) (last_known_position >> 8));
 	vregs_write(VREGS_MOTION_STABILIZING_DIRECTION,
 			(uint8_t) (stabilizing_direction));
+	vregs_write(VREGS_CURRENT_SETPOINT, (uint8_t) (current_setpoint >> 3));
 #endif
-
-//	if (adc_get_absolute_motor_current_ma() < 15000) {
-//		if (over_current_counter > 0) {
-//			over_current_counter--;
-//		}
-//	} else {
-//		over_current_counter++;
-//		if (over_current_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
-//			motion_set_state(255, 0, 0, 0, 0, 0, 0);
-//			fsm_flag = 255;
-//		}
-//	}
 
 	switch (state.mode) {
 
@@ -385,7 +373,7 @@ int32_t motion_drive_h_bridge() {
 		break;
 
 	case MOTION_MODE_WALK_BACKWARD:
-
+		current_setpoint = 1000;
 		break;
 
 	case MOTION_MODE_CONTINUOUS_ROTATION:
@@ -414,28 +402,6 @@ int32_t motion_drive_h_bridge() {
 //		MOTION_DIRECTION_FORWARD, lift_off_time)) {
 //			motion_stop();
 //		}
-		break;
-
-	case MOTION_MODE_PANIC_STOP:
-		/* Set fsm_flag to zero because this might not have happened and disable h-bridge for the same reason.
-		 * We will not pick up where we left off, but when going out of this state, we will just wait for the next instruction.
-		 */
-
-		/* If we got here due to overcurrent we are allowed to continue after a bit. */
-		if (fsm_flag == 255) {
-			increasing_delay = increasing_delay + 2500;
-			start_timing_measurement();
-			fsm_flag = 254;
-		}
-		if (stop_and_return_timing_measurement(increasing_delay)
-				&& fsm_flag == 254) {
-			over_current_counter = 0;
-			last_known_position = encoder_get_position();
-			motion_stop();
-		}
-		h_bridge_disable();
-		fsm_flag = 0;
-		last_known_position = encoder_get_position();
 		break;
 
 	default:

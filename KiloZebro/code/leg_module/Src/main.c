@@ -83,7 +83,7 @@ int main(void) {
 //  int32_t time = 1000;
 //	motion_set_state(1, 0, 0, 0, 0);
 	while (1) {
-		start_time = time_get_time_ms();
+		start_time = TIM16->CNT;
 		//todo: implement system where motor will stop executing a command
 		// when no drive command have been received for a number of seconds
 
@@ -101,8 +101,6 @@ int main(void) {
 		time_reset_watchdog();
 
 		/* process data from ADC */
-//		adc_request_conversion();
-//		ADC1->CR |= ADC_CR_ADSTART;
 		adc_write_data_to_vregs(); /* not the most recent data, maybe, but that's not important */
 		adc_get_temperature();
 
@@ -151,8 +149,10 @@ int main(void) {
 //	  motion_drive_h_bridge_simple();
 		/* wait a bit */
 		//HAL_Delay(1);
-		stop_time = time_get_time_ms();
-		vregs_write(VREGS_LOOP_TIME, (stop_time - start_time));
+		stop_time = TIM16->CNT;
+		uint16_t time_diff = stop_time - start_time; /* automatically deals with rollover because of uint */
+		time_diff = time_diff / 64; /* convert to ms */
+		vregs_write(VREGS_LOOP_TIME, (uint8_t) time_diff);
 	}
 
 	/* this should never happen */
