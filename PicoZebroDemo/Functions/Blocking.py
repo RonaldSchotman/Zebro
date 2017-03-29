@@ -3,7 +3,10 @@ import math                             # mathematical functions library
 class Blocking:
     def __init__(self):
         pass
-
+    #Check if any of the x and y values are close to each other.
+    #or if any of the x or y values are to close to the edge which is
+    # if x == 0 or x == 1600 or y = 0 or y == 920 
+    #So a gigantic multiple if statement. which becomes smaller and smaller
     def Block_1(self, Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
                 Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
                 Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,

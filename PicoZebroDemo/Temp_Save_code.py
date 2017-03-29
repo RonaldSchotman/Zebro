@@ -1,3 +1,37 @@
+#Here comes a calculation for determing new middle point. (for now only with forward because turning depends on how it turns.(On same position or with going forward.
+                    #Also With these values will be done nothing untill it is determined this works (In theorie it does)
+                    if Movement == "Forward" and DONT_Send == 0:
+                        Max_x = 60 #(EXAMPLE NEEDS TO BE TESTED)
+                        Max_y = 80 #(EXAMPLE NEEDS TO BE TESTED)
+                        if Current_Direction == "North":
+                            Angle_90 = Angle - 270
+                            X_1 = (90 - Angle_90)
+                            X = (X_1/ 90) * Max_x
+                            Y = Angle_90 * Max_y
+                            New_Middle_point_x = Middle_point_x + X
+                            New_Middle_point_y = Middle_point_y + Y
+                        elif Current_Direction == "South":
+                            Angle_90 = Angle - 90
+                            X_1 = (90 - Angle_90)
+                            X = (X_1/ 90) * Max_x
+                            Y = Angle_90 * Max_y
+                            New_Middle_point_x = Middle_point_x - X
+                            New_Middle_point_y = Middle_point_y - Y
+                        elif Current_Direction == "East":
+                            Angle_90 = Angle
+                            Y_1 = (90 - Angle_90)
+                            Y = (Y_1/ 90) * Max_y
+                            X = Angle_90 * Max_x
+                            New_Middle_point_x = Middle_point_x + X
+                            New_Middle_point_y = Middle_point_y - Y
+                        elif Current_Direction == "West":
+                            Angle_90 = Angle - 180
+                            Y_1 = (90 - Angle_90)
+                            Y = (Y_1/ 90) * Max_x
+                            X = Angle_90 * Max_y
+                            New_Middle_point_x = Middle_point_x - X
+                            New_Middle_point_y = Middle_point_y + Y
+                        print(New_Middle_point_x, New_Middle_point_y)
 #For Pico Zebro 1
                     if Zebros == 0:
                         Blocking_x_2 = abs(Zebro_1_Middle_x - Zebro_2_Middle_x)
