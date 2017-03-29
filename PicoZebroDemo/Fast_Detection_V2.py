@@ -13,9 +13,10 @@ from picamera import PiCamera           # PiCamera liberary
 import time                             # For real time video (using openCV)
 import numpy as np                      # Optimized library for numerical operations
 import cv2                              # Include OpenCV library (Most important one)
-import Queue
+import Queue                            # Library for Queueing sharing variables between threads
 import threading                        # Library for Multithreading
 import serial                           # Import serial uart library for raspberry pi
+import math                             # mathematical functions library
 
 #Serial connection init 
 ser = serial.Serial(
@@ -83,6 +84,7 @@ class Control_Zebro_Thread(threading.Thread):
                 Middle_point_y = self.PicoZebro[1]
                 Current_Direction = self.PicoZebro[2]
                 Blocked_Direction = self.PicoZebro[3]
+                Angle = self.PicoZebro[4]
 
                 #release condition PicoZebro
                 if (Middle_point_x == 0) or (Middle_Point_y == 0):
@@ -173,21 +175,51 @@ class Control_Zebro_Thread(threading.Thread):
                             DONT_Send = 1
                     if DONT_Send == 1:
                         # Obtain Serial Write
-                        ser.write(self.Zebro, "Don't Move")
+                        ser.write(self.Zebro, "Stop")
                         # Release Serial Write
                     else:
                         # Obtain Serial Write
                         ser.write(self.Zebro, "Movement")
                         # Release Serial Write
-                    #for Names in Blocked_Direction
-                         #if Direction == Blocked_Direction:    (THis needs to be in a for loop for every value in Blocked_direction
-                            #Movement is Blocked               #With Blocked Direction Cleard at the end (Which Doesn't matter anymore)
-                            #Send Movement == Don't Move (don't assign it)
-                        #if Movement == Blocked_Movement:
-                        #   Don't send Movement
-                        
-                    # previous_movement = Movement
-                    # Block_direction == empty
+                        Last_Movement = Movement
+
+                    #Here comes a calculation for determing new middle point. (for now only with forward because turning depends on how it turns.(On same position or with going forward.
+                    #Also With these values will be done nothing untill it is determined this works (In theorie it does)
+                    if Movement == "Forward" and DONT_Send == 0:
+                        Max_x = 60 #(EXAMPLE NEEDS TO BE TESTED)
+                        Max_y = 80 #(EXAMPLE NEEDS TO BE TESTED)
+                        if Current_Direction == "North":
+                            Angle_90 = Angle - 270
+                            X_1 = (90 - Angle_90)
+                            X = (X_1/ 90) * Max_x
+                            Y = Angle_90 * Max_y
+                            New_Middle_point_x = Middle_point_x + X
+                            New_Middle_point_y = Middle_point_y + Y
+                        elif Current_Direction == "South":
+                            Angle_90 = Angle - 90
+                            X_1 = (90 - Angle_90)
+                            X = (X_1/ 90) * Max_x
+                            Y = Angle_90 * Max_y
+                            New_Middle_point_x = Middle_point_x - X
+                            New_Middle_point_y = Middle_point_y - Y
+                        elif Current_Direction == "East":
+                            Angle_90 = Angle
+                            Y_1 = (90 - Angle_90)
+                            Y = (Y_1/ 90) * Max_y
+                            X = Angle_90 * Max_x
+                            New_Middle_point_x = Middle_point_x + X
+                            New_Middle_point_y = Middle_point_y - Y
+                        elif Current_Direction == "West":
+                            Angle_90 = Angle - 180
+                            Y_1 = (90 - Angle_90)
+                            Y = (Y_1/ 90) * Max_x
+                            X = Angle_90 * Max_y
+                            New_Middle_point_x = Middle_point_x - X
+                            New_Middle_point_y = Middle_point_y + Y
+                        print(New_Middle_point_x, New_Middle_point_y)
+                    DONT_Send = 0
+                    
+
 
 # Functions For looking for Pico Zebro
 def Image_Difference(Image):
@@ -204,18 +236,18 @@ def Image_Difference(Image):
 def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
     x_middle = 0
     y_middle = 0
+    Angle = 0
     Direction = None
 
-    # (This only needs to be done if just north, south east and west work.)
-    # Once known what the max and minimum distance is between two points
+    #Once known what the max and minimum Distance is between two points
     # The following calculation can be done for saying that angle is the
-    # Pico Zebro Turned: 
+    # Pico Zebro Turned: (This only needs to be done if just north, south east and west work.
     # 90 - atan(x) with x from 0 -90 and being the difference between Max and Min
     # So x = ? * Factor = 90  for max between max and min 
     
     #No points Found
     if(x_Led_1 or x_Led_3 or y_Led_1 or y_Led_3) == 0:
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     #Facing North (dermine middle point)
     elif (x_Led_1 < x_Led_3) and (y_Led_1 < y_Led_3):
@@ -223,34 +255,37 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
         # Middle Point Zebro is:
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)
         y_middle = ((y_Led_3 - y_Led_1) + y_Led_1)
+        Angle = 360 - (abs(x_Led_3 - x_Led_1)*1.384)    #From 360-270
         Direction = "North"
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     elif (x_Led_1 < x_Led_3) and (y_Led_1 > y_Led_3):
         # Pico Zebro is facing East
         # Middle Point Zebro is:
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)
         y_middle = ((y_Led_1 - y_Led_3) + y_Led_3)
+        Angle = 0 + (abs(x_Led_3 - x_Led_1)*1.384)    #From 0-90
         Direction = "East"
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     elif (x_Led_1 > x_Led_3) and (y_Led_1 > y_Led_3):
         # Pico Zebro is facing South
         # Middle Point Zebro is:
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
         y_middle = ((y_Led_1 - y_Led_3) + y_Led_3)
+        Angle = 180 - (abs(x_Led_1 - x_Led_3)*1.384)    #From 180-90
         Direction = "South"
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     elif (x_Led_1 > x_Led_3) and (y_Led_1 < y_Led_3):
         # Pico Zebro is facing West
         # Middle Point Zebro is:
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
         y_middle = ((y_Led_3 - y_Led_1) + y_Led_1)
+        Angle = 270 - (abs(x_Led_1 - x_Led_3)*1.384)    #From 270-180
         Direction = "West"
-        return x_middle, y_middle, Direction
-    
-    return x_middle, y_middle, Direction #extra return to avoid errors
+        return x_middle, y_middle, Direction, Angle
+    return x_middle, y_middle, Direction, Angle  #extra return to avoid errors
 
 
 
@@ -384,8 +419,8 @@ def main():
                 #cv2.imshow("LEds together", LEDS_Image)
                 #cv2.imwrite("Leds_Tog1.jpg", LEDS_Image)
 
-                (Zebro_Middle_x,Zebro_Middle_y,Direction) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
-                print(Zebro_Middle_x,Zebro_Middle_y,Direction)  # Debug print
+                (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
+                print(Zebro_Middle_x,Zebro_Middle_y,Direction, Angle)  # Debug print
 
                 # If someone can tell me how I can make this shorter plz but I don't think I can considering for each zebro three different values need to be set.
                 if Devices == 0: 
@@ -393,120 +428,140 @@ def main():
                     Zebro_1_Middle_x = Zebro_Middle_x
                     Zebro_1_Middle_y = Zebro_Middle_y
                     Direction_Zebro_1 = Direction
+                    Angle_Zebro_1 = Angle
 
                 if Devices == 1: 
                     #set data from PZ 2
                     Zebro_2_Middle_x = Zebro_Middle_x
                     Zebro_2_Middle_y = Zebro_Middle_y
                     Direction_Zebro_2 = Direction
+                    Angle_Zebro_2 = Angle
 
                 if Devices == 2: 
                     #set data from PZ 3
                     Zebro_3_Middle_x = Zebro_Middle_x
                     Zebro_3_Middle_y = Zebro_Middle_y
                     Direction_Zebro_3 = Direction
+                    Angle_Zebro_3 = Angle
 
                 if Devices == 3: 
                     #set data from PZ 4
                     Zebro_4_Middle_x = Zebro_Middle_x
                     Zebro_4_Middle_y = Zebro_Middle_y
                     Direction_Zebro_4 = Direction
+                    Angle_Zebro_4 = Angle
 
                 if Devices == 4: 
                     #set data from PZ 5
                     Zebro_5_Middle_x = Zebro_Middle_x
                     Zebro_5_Middle_y = Zebro_Middle_y
                     Direction_Zebro_5 = Direction
+                    Angle_Zebro_5 = Angle
 
                 if Devices == 5: 
                     #set data from PZ 6
                     Zebro_6_Middle_x = Zebro_Middle_x
                     Zebro_6_Middle_y = Zebro_Middle_y
                     Direction_Zebro_6 = Direction
+                    Angle_Zebro_6 = Angle
 
                 if Devices == 6: 
                     #set data from PZ 7
                     Zebro_7_Middle_x = Zebro_Middle_x
                     Zebro_7_Middle_y = Zebro_Middle_y
                     Direction_Zebro_7 = Direction
+                    Angle_Zebro_7 = Angle
 
                 if Devices == 7: 
                     #set data from PZ 8
                     Zebro_8_Middle_x = Zebro_Middle_x
                     Zebro_8_Middle_y = Zebro_Middle_y
                     Direction_Zebro_8 = Direction
+                    Angle_Zebro_8 = Angle
 
                 if Devices == 8: 
                     #set data from PZ 9
                     Zebro_9_Middle_x = Zebro_Middle_x
                     Zebro_9_Middle_y = Zebro_Middle_y
                     Direction_Zebro_9 = Direction
+                    Angle_Zebro_9 = Angle
 
                 if Devices == 9: 
                     #set data from PZ 10
                     Zebro_10_Middle_x = Zebro_Middle_x
                     Zebro_10_Middle_y = Zebro_Middle_y
                     Direction_Zebro_10 = Direction
+                    Angle_Zebro_10 = Angle
 
                 if Devices == 10: 
                     #set data from PZ 11
                     Zebro_11_Middle_x = Zebro_Middle_x
                     Zebro_11_Middle_y = Zebro_Middle_y
                     Direction_Zebro_11 = Direction
+                    Angle_Zebro_11 = Angle
 
                 if Devices == 11: 
                     #set data from PZ 12
                     Zebro_12_Middle_x = Zebro_Middle_x
                     Zebro_12_Middle_y = Zebro_Middle_y
                     Direction_Zebro_12 = Direction
+                    Angle_Zebro_12 = Angle
 
                 if Devices == 12: 
                     #set data from PZ 13
                     Zebro_13_Middle_x = Zebro_Middle_x
                     Zebro_13_Middle_y = Zebro_Middle_y
                     Direction_Zebro_13 = Direction
+                    Angle_Zebro_13 = Angle
 
                 if Devices == 13: 
                     #set data from PZ 14
                     Zebro_14_Middle_x = Zebro_Middle_x
                     Zebro_14_Middle_y = Zebro_Middle_y
                     Direction_Zebro_14 = Direction
+                    Angle_Zebro_14 = Angle
 
                 if Devices == 14: 
                     #set data from PZ 15
                     Zebro_15_Middle_x = Zebro_Middle_x
                     Zebro_15_Middle_y = Zebro_Middle_y
                     Direction_Zebro_15 = Direction
+                    Angle_Zebro_15 = Angle
 
                 if Devices == 15: 
                     #set data from PZ 16
                     Zebro_16_Middle_x = Zebro_Middle_x
                     Zebro_16_Middle_y = Zebro_Middle_y
                     Direction_Zebro_16 = Direction
+                    Angle_Zebro_16 = Angle
 
                 if Devices == 16: 
                     #set data from PZ 17
                     Zebro_17_Middle_x = Zebro_Middle_x
                     Zebro_17_Middle_y = Zebro_Middle_y
                     Direction_Zebro_17 = Direction
+                    Angle_Zebro_17 = Angle
 
                 if Devices == 17: 
                     #set data from PZ 18
                     Zebro_18_Middle_x = Zebro_Middle_x
                     Zebro_18_Middle_y = Zebro_Middle_y
                     Direction_Zebro_18 = Direction
+                    Angle_Zebro_18 = Angle
 
                 if Devices == 18: 
                     #set data from PZ 19
                     Zebro_19_Middle_x = Zebro_Middle_x
                     Zebro_19_Middle_y = Zebro_Middle_y
                     Direction_Zebro_19 = Direction
+                    Angle_Zebro_19 = Angle
 
                 if Devices == 19: 
                     #set data from PZ 20
                     Zebro_20_Middle_x = Zebro_Middle_x
                     Zebro_20_Middle_y = Zebro_Middle_y
                     Direction_Zebro_20 = Direction
+                    Angle_Zebro_20 = Angle
                     
                 #once every value for every possible Zebro is determind then
                 #Check if any of the x and y values are close to each other.
@@ -600,7 +655,7 @@ def main():
                                 Bloking.append(Block)
                                 Block = None
                         # Grab condition zebro 1:
-                        PicoZebro_1[Zebro_1_Middle_x , Zebro_1_Middle_y, Direction_Zebro_1, Blocking]
+                        PicoZebro_1[Zebro_1_Middle_x , Zebro_1_Middle_y, Direction_Zebro_1, Blocking, Angle_Zebro_1]
                         #release condition zebro 1
                         
                     # For Pico Zebro 2 (Also here if know how to do this shorter plz do so)
@@ -688,7 +743,7 @@ def main():
                                 Block = None
                         # Grab condition zebro 2:
                         PicoZebro = []
-                        PicoZebro_2 = Zebro_2_Middle_x , Zebro_2_Middle_y, Direction_Zebro_2, Blocking
+                        PicoZebro_2 = Zebro_2_Middle_x , Zebro_2_Middle_y, Direction_Zebro_2, Blocking, Angle_Zebro_2
                         PicoZebro = PicoZebro_2
                         #release condition zebro 2
                     # Release Condition Serial Write. (Now movement can start.)

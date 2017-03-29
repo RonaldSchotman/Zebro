@@ -239,6 +239,7 @@ def Image_Difference(Image):
 def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
     x_middle = 0
     y_middle = 0
+    Angle = 0
     Direction = None
 
     #Once known what the max and minimum Distance is between two points
@@ -249,7 +250,7 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
     
     #No points Found
     if(x_Led_1 or x_Led_3 or y_Led_1 or y_Led_3) == 0:
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     #Facing North (dermine middle point)
     elif (x_Led_1 < x_Led_3) and (y_Led_1 < y_Led_3):
@@ -257,33 +258,37 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
         # Middle Point Zebro is:
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)
         y_middle = ((y_Led_3 - y_Led_1) + y_Led_1)
+        Angle = 360 - (abs(x_Led_3 - x_Led_1)*1.384)    #From 360-270
         Direction = "North"
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     elif (x_Led_1 < x_Led_3) and (y_Led_1 > y_Led_3):
         # Pico Zebro is facing East
         # Middle Point Zebro is:
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)
         y_middle = ((y_Led_1 - y_Led_3) + y_Led_3)
+        Angle = 0 + (abs(x_Led_3 - x_Led_1)*1.384)    #From 0-90
         Direction = "East"
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     elif (x_Led_1 > x_Led_3) and (y_Led_1 > y_Led_3):
         # Pico Zebro is facing South
         # Middle Point Zebro is:
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
         y_middle = ((y_Led_1 - y_Led_3) + y_Led_3)
+        Angle = 180 - (abs(x_Led_1 - x_Led_3)*1.384)    #From 180-90
         Direction = "South"
-        return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
     
     elif (x_Led_1 > x_Led_3) and (y_Led_1 < y_Led_3):
         # Pico Zebro is facing West
         # Middle Point Zebro is:
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
         y_middle = ((y_Led_3 - y_Led_1) + y_Led_1)
+        Angle = 270 - (abs(x_Led_1 - x_Led_3)*1.384)    #From 270-180
         Direction = "West"
-        return x_middle, y_middle, Direction
-    return x_middle, y_middle, Direction
+        return x_middle, y_middle, Direction, Angle
+    return x_middle, y_middle, Direction, Angle
 
 def main():
     # capture frames from the camera
@@ -377,8 +382,9 @@ def main():
             cv2.imshow("LEds together", LEDS_Image)
             cv2.imwrite("Leds_Tog1.jpg", LEDS_Image)
 
-            (Zebro_Middle_x,Zebro_Middle_y,Direction) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
-            print(Zebro_Middle_x,Zebro_Middle_y,Direction)
+            (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
+            print(x_Led_1, x_Led_3, y_Led_1, y_Led_3)
+            print(Zebro_Middle_x,Zebro_Middle_y,Direction, Angle)
 
             #if Devices == 0: in here it is multiple times aquire
                 #set data from PZ 1
