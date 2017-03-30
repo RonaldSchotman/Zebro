@@ -24,6 +24,7 @@
 #include "interrupts.h"
 #include "errors.h"
 #include "adc.h"
+#include "globals.h"
 
 static int32_t zebrobus_is_master = 0;
 static int32_t state = ZEBROBUS_STATE_IDLE;
@@ -236,12 +237,16 @@ struct zebrobus_write_request zebrobus_get_write_request() {
 
 				case VREGS_CURRENT_CONTROL_KP:
 					adc_current_control_set_kp(request.data);
+#ifdef DEBUG_VREGS
 					vregs_write(VREGS_CURRENT_CONTROL_KP, adc_current_control_get_kp());
+#endif
 				break;
 
 				case VREGS_CURRENT_CONTROL_KI:
 					adc_current_control_set_ki(request.data);
+#ifdef DEBUG_VREGS
 					vregs_write(VREGS_CURRENT_CONTROL_KI, adc_current_control_get_ki());
+#endif
 				break;
 
 				case VREGS_POSITION_CONTROL_KP:
@@ -254,7 +259,9 @@ struct zebrobus_write_request zebrobus_get_write_request() {
 				break;
 
 				case VREGS_TEST_FIELD:
+#ifdef DEBUG_VREGS
 					vregs_write(request.address, request.data);
+#endif
 					break;
 
 				case VREGS_SYNC_COUNTER:

@@ -33,6 +33,7 @@
 #include "adc.h"
 #include "errors.h"
 #include "interrupts.h"
+#include "globals.h"
 
 static struct motion_state state = { 0, 0, 0, 0, 0, 0, 0 };
 static struct motion_state new_state = { 0, 0, 0, 0, 0, 0, 0 };

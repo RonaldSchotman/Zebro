@@ -81,8 +81,7 @@ int32_t h_bridge_init(void) {
 
 	/* set the channel 4 compare value (used to trigger the ADC)
 	 * otherwise the ADC wil not take a sample. CH4 is now low for 1 clk-pulse */
-//	TIM1->CCR4 = H_BRIDGE_ADC_TRIGGER;
-	TIM1->CCR4 = 1023;
+	TIM1->CCR4 = H_BRIDGE_ADC_TRIGGER;
 	/* select correct output mode */
 	/* toggle on cnt=ccr */
 	TIM1->CCMR2 |= TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_0;
@@ -127,40 +126,6 @@ int32_t h_bridge_init(void) {
 	vregs_write(VREGS_H_BRIDGE_DUTY_B, 0);
 	return 0;
 }
-//
-//void TIM1_CC_IRQHandler(void) {
-//	static uint16_t counter = 0;
-//
-//	interrupts_disable();
-//	if (TIM1->SR & TIM_SR_CC4IF) {
-//		TIM1->SR = 0x00000000;
-//		if ((counter % 8) == 0) {
-////			if (!(ADC1->CR & ADC_CR_ADSTART)) {
-////				ADC1->CHSELR = 0x00000000;
-////				/* select the correct channel to scan */
-////				ADC1->CHSELR = (1 << ADC_MOTOR_CURRENT_CH);
-////				/* disable the dma-interrupts for extra speed */
-////				ADC1->CFGR1 &= ~ADC_CFGR1_DMAEN;
-////				/* start the conversion */
-////				ADC1->CR = ADC_CR_ADSTART;
-////				interrupts_enable();
-////				/* wait for new data to become available (takes 1 microsecond) */
-////				while ((!(ADC1->ISR)) & ADC_ISR_EOSEQ);
-////				ADC1->ISR |= ADC_ISR_EOSEQ;
-////				adc_control_motor_current(get_current_setpoint(), ADC1->DR);
-////				counter += 1;
-////			}
-//			interrupts_enable();
-//		} else {
-//			counter += 1;
-//			interrupts_enable();
-//		}
-//	} else {
-//		TIM1->SR = 0x00000000; /* lots of interrupts are generated (especially in init.). no idea why. Clear them all */
-//		counter += 1;
-//		interrupts_enable();
-//	}
-//}
 
 /**
  * Given a selected motor speed and mode, actuate the H-bridge
@@ -320,11 +285,8 @@ void h_bridge_sign_magnitude(uint8_t direction, uint16_t duty_cycle) {
 	TIM1->CCER &= ~(TIM_CCER_CC2P | TIM_CCER_CC2NP);
 
 	/* calculate and set compare values */
-//	compareValue = duty_cycle * H_BRDIGE_ARR;
-//	compareValue /= H_BRIDGE_MAX_DUTYCYCLE;
-//	compareValue = duty_cycle;
 	vregs_write(VREGS_H_BRIDGE_DUTY_A, (uint8_t) duty_cycle);
-	vregs_write(VREGS_H_BRIDGE_DUTY_B, (uint8_t) duty_cycle >> 8);
+	vregs_write(VREGS_H_BRIDGE_DUTY_B, (uint8_t) (duty_cycle >> 8));
 	TIM1->CCR2 = duty_cycle;
 	TIM1->CCR1 = duty_cycle;
 
@@ -335,37 +297,7 @@ void h_bridge_sign_magnitude(uint8_t direction, uint16_t duty_cycle) {
 	TIM1->BDTR |= TIM_BDTR_MOE;
 	TIM1->EGR |= TIM_EGR_UG;
 }
-/**
- * Sets up an interrupt that will fire the next time the h-bridge
- * reaches the middle of a cycle.
- */
-//void h_bridge_request_center_interupt(){
-//	/* set the value of the counter to fire the interrupt on */
-//	TIM1->CCR4 = TIM1->ARR / 2;
-//	/* Set the output mode of channel four to active level on match */
-//	TIM1->CCMR2 = TIM_CCMR2_OC4M_0;
-//	/* Enable interrupt generation */
-//	TIM1->DIER = TIM_DIER_CC4IE;
-/* configure NVIC */
-//	HAL_NVIC_SetPriority();
-//}
-/**
- * Show off some features of the H-bridge controller
- */
-//void h_bridge_demo(void){
-//	while(1){
-//		h_bridge_lock_anti_phase(75);
-//		HAL_Delay(H_BRIDGE_DEMO_DELAY);
-//		h_bridge_lock_anti_phase(25);
-//		HAL_Delay(H_BRIDGE_DEMO_DELAY);
-//		h_bridge_sign_magnitude(1, 50);
-//		HAL_Delay(H_BRIDGE_DEMO_DELAY);
-//		h_bridge_sign_magnitude(0, 50);
-//		HAL_Delay(H_BRIDGE_DEMO_DELAY);
-//		h_bridge_disable();
-//		HAL_Delay(H_BRIDGE_DEMO_DELAY);
-//	  }
-//}
+
 /**
  * Set the comparator on channel 4, and set it so that
  * the the ADC can trigger on it
@@ -380,21 +312,7 @@ void h_bridge_set_ch4(uint16_t trigger_value) {
 	TIM1->CCER |= TIM_CCER_CC4E;
 }
 
-/**
- * Calculate the value to set the comparator on channel 4 to, and set it
- * Ch4 triggers the ADC conversion
- */
-//int32_t h_bridge_calc_and_set_ch4(int32_t dutycycle){
-//	/* if the duty cycle is less then 50%, trigger at 60% of cycle */
-//	if( dutycycle < (H_BRIDGE_MAX_DUTYCYCLE / 2)){
-//		h_bridge_set_ch4(H_BRIDGE_LATE_TRIGGER);
-//	}
-//	else{
-//		h_bridge_set_ch4(H_BRIDGE_EARLY_TRIGGER);
-//	}
-//
-//	return 0;
-//}
+
 /**
  * Check if the dutycycle given would make one of the top FETS closed
  * all of the time. Because of the caps used to charge their gates this is

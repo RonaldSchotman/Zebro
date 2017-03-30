@@ -1,4 +1,4 @@
-18:09:12 **** Incremental Build of configuration Debug for project leg_module ****
+16:55:21 **** Incremental Build of configuration Debug for project leg_module ****
 make all 
 Building file: ../Src/adc.c
 Invoking: MCU GCC Compiler
@@ -16,8 +16,8 @@ Generating binary and Printing size information:
 arm-none-eabi-objcopy -O binary "poot.elf" "poot.bin"
 arm-none-eabi-size "poot.elf"
    text	   data	    bss	    dec	    hex	filename
-  15740	     16	   3552	  19308	   4b6c	poot.elf
+  15792	     16	   3560	  19368	   4ba8	poot.elf
  
 
-18:09:13 Build Finished (took 423ms)
+16:55:21 Build Finished (took 421ms)
 

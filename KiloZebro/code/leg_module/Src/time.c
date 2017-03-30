@@ -43,15 +43,15 @@ int32_t time_init(void){
 	return 0;
 }
 
-void TIM16_IRQHandler(void){
-	TIM16->SR &= ~TIM_SR_UIF;
-
-#ifndef LIVING_ON_THE_EDGE
-	errors_emergency_stop();
-	errors_report(ERRORS_ZEBROBUS_NO_TIMING_INFO);
-#endif /* LIVING_ON_THE_EDGE */
-
-}
+//void TIM16_IRQHandler(void){
+//	TIM16->SR &= ~TIM_SR_UIF;
+//
+//#ifndef LIVING_ON_THE_EDGE
+//	errors_emergency_stop();
+//	errors_report(ERRORS_ZEBROBUS_NO_TIMING_INFO);
+//#endif /* LIVING_ON_THE_EDGE */
+//
+//}
 
 int32_t time_clock_init(void){
 
@@ -71,20 +71,20 @@ int32_t time_clock_init(void){
 	/* generate update event */
 	TIM16->EGR |= TIM_EGR_UG;
 	/* generate interrupt on UEV event */
-	TIM16->DIER |= TIM_DIER_UIE;
+//	TIM16->DIER |= TIM_DIER_UIE;
 
 	/* enable the counter */
 	TIM16->CR1 |= TIM_CR1_CEN;
 
 	TIM16->SR &= ~TIM_SR_UIF;
 	/* enable the ISR in the NVIC, give it a high priority */
-	NVIC_EnableIRQ(TIM16_IRQn);
-	NVIC_SetPriority(TIM16_IRQn, TIME_EMERGENCY_STOP_PRIORITY);
+//	NVIC_EnableIRQ(TIM16_IRQn);
+//	NVIC_SetPriority(TIM16_IRQn, TIME_EMERGENCY_STOP_PRIORITY);
 
 	return 0;
 }
 
-uint16_t time_clock_17_init(void){
+uint8_t time_clock_17_init(void){
 	/* enable the clock to TIM16 */
 	__HAL_RCC_TIM17_CLK_ENABLE();
 
@@ -144,6 +144,10 @@ uint32_t time_get_time_ms(void){
 	time = time + ((TIM16->CNT * 1000) / TIME_ONE_SECOND_COUNTER_VALUE);
 
 	return time;
+}
+
+uint16_t time17_get_time(void){
+	return TIM17->CNT;
 }
 
 /**

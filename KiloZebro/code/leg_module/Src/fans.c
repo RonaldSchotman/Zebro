@@ -20,6 +20,7 @@
 #include "vregs.h"
 #include "pootbus.h"
 #include "adc.h"
+#include "globals.h"
 
 /**
  * Initialise the fans GPIO pins and timers
@@ -85,12 +86,16 @@ int32_t fans_set_speed(int32_t speed, int32_t fan) {
 
 	if (fan == FANS_FAN_1) {
 		TIM15->CCR1 = new_compare;
+#ifdef DEBUG_VREGS
 		vregs_write(VREGS_FAN_1_SPEED, speed);
+#endif
 	}
 
 	else if (fan == FANS_FAN_2) {
 		TIM15->CCR2 = new_compare;
+#ifdef DEBUG_VREGS
 		vregs_write(VREGS_FAN_2_SPEED, speed);
+#endif
 	}
 
 	return (int32_t) new_compare;

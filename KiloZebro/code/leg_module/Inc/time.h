@@ -25,10 +25,11 @@
 
 int32_t time_init(void);
 int32_t time_clock_init(void);
-uint16_t time_clock_17_init(void);
+uint8_t time_clock_17_init(void);
 int32_t time_watchdog_init(void);
 uint16_t time_check_time(void);
 uint32_t time_get_time_ms(void);
+uint16_t time17_get_time(void);
 uint8_t get_current_seconds(void);
 uint8_t time_set_time(uint8_t seconds);
 int32_t time_set_clock(void);

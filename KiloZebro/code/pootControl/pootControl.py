@@ -190,7 +190,7 @@ def main(stdscr):
     display = SerialDisplay(stdscr)
     commands = CommandCollection()
     commands.add_new_command("[0x00 30 1 0 0 0 0 0 0 1]", "c", 'Calibrate Encoders')
-    commands.add_new_command("[0x00 30 3 0 0 0 0 0 0 1]", "v", 'Walk Forward')
+    commands.add_new_command("[0x00 30 3 0 0 0 0 0 0 1]", "f", 'Walk Forward')
     commands.add_new_command("[0x00 30 4 0 0 0 0 0 0 1]", "b", 'Walk Backward')
     commands.add_new_command("[0x00 30 0 0 0 0 0 0 0 1]", " ", 'Stop all')
     commands.add_new_command("[0x00 22 0x12]", 'e', "Reset emergency_stop")
@@ -225,26 +225,26 @@ def main(stdscr):
                 command = commands.find_command_by_key(input_char)
             if input_char == 'e':
                 command = commands.find_command_by_key(input_char)  
-            if input_char == 'v':
+            if input_char == 'f':
                 command = commands.find_command_by_key(input_char)
             if input_char == 'b':
                 command = commands.find_command_by_key(input_char)                
             if input_char == 'u':
                 if (main.kp<255):
                     main.kp += 1
-                command = Command("[0x00 42 {0}]".format(main.kp), "u", 'Increase kp current control')
+                command = Command("[0x00 50 {0}]".format(main.kp), "u", 'Increase kp current control')
             if input_char == 'j':
                 if (main.kp>0):
                     main.kp -= 1
-                command = Command("[0x00 42 {0}]".format(main.kp), "j", 'Decrease kp current control')
+                command = Command("[0x00 50 {0}]".format(main.kp), "j", 'Decrease kp current control')
             if input_char == 'i':
                 if (main.ki<255):
                     main.ki += 1
-                command = Command("[0x00 43 {0}]".format(main.ki), "i", 'Increase ki current control')
+                command = Command("[0x00 51 {0}]".format(main.ki), "i", 'Increase ki current control')
             if input_char == 'k':
-                if (main.kp>0):
+                if (main.ki>0):
                     main.ki -= 1
-                command = Command("[0x00 43 {0}]".format(main.ki), "k", 'Decrease ki current control')
+                command = Command("[0x00 51 {0}]".format(main.ki), "k", 'Decrease ki current control')
             if input_char == 'z':
                 stand_up_time = time_sync_counter + 2
                 command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')     

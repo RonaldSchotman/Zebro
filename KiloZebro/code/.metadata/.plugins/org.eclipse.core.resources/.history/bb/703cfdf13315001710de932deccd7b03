@@ -1,0 +1,380 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: adc.c
+ *
+ * Description:
+ * Code to drive the ADC
+ *
+ * Authors:
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+
+#include "stm32f0xx_hal.h"
+#include "stdlib.h"
+#include "h_bridge.h"
+#include "motion.h"
+#include "adc.h"
+#include "vregs.h"
+#include "errors.h"
+#include "address.h"
+#include "time.h"
+#include "interrupts.h"
+#include "uart1.h"
+#include "globals.h"
+
+volatile static uint16_t adc_data_dump[ADC_NUM_OF_CHANNELS];
+static uint8_t kp = 0, ki = 0;
+
+/**
+ * Enables the ADC. This function should only be called when it is
+ * certain that the ADC is disabled!
+ *
+ * This function uses busy loops, but this should not be
+ * a problem during when only using it during initialisation
+ *
+ * The ADC in triggered on the output of TIM1 CC4 via TRG0. Because the ADC
+ * is configured in discontinious mode, it has to trigger for the
+ * conversion of every channel.
+ * Converted data is automagicaly moved to adc_data_dump register via DMA.
+ */
+int32_t adc_init() {
+
+	/**
+	 * FIRST we enable the ADC
+	 * */
+
+	/* Enable the clock to the ADC */
+	__HAL_RCC_ADC1_CLK_ENABLE()
+	;
+
+	/* Select SYSCLK / 4 as clock source */
+	ADC1->CFGR2 = ADC_CFGR2_CKMODE_1;
+
+	/* Do a calibration */
+	ADC1->CR |= ADC_CR_ADCAL;
+	while (ADC1->CR & ADC_CR_ADCAL)
+		;
+
+	/* Now we enable the ADC */
+	ADC1->CR |= ADC_CR_ADEN;
+	/* Wait for the ADC to be ready */
+	while (!(ADC1->ISR & ADC_ISR_ADRDY))
+		;
+
+//	/* set discontinuous mode to make sure all (but specifically the current measurement is taken in the middle of the low of the PWM) */
+	ADC1->CFGR1 |= ADC_CFGR1_DISCEN;
+//	ADC1->CFGR1 |= ADC_CFGR1_CONT;
+	/* set resolution to 10 bit */
+	ADC1->CFGR1 |= ADC_CFGR1_RES_0;
+	/* set left alignment of data */
+	ADC1->CFGR1 |= ADC_CFGR1_ALIGN;
+	/**
+	 * FOURTH set up ADC to trigger based on TIM1, no, software trigger.
+	 * */
+	/* select TIM1 TRG0 as external trigger, so do nothing. Don't select TRG1, TIM1_CC4 */
+//	ADC1->CFGR1 |= ADC_CFGR1_EXTSEL_0;
+	/* trigger on rising edges, adstart is not cleared. */
+	ADC1->CFGR1 |= ADC_CFGR1_EXTEN_1 | ADC_CFGR1_EXTEN_0;
+	/* enable overwriting data when overrun occurs */
+	ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;
+	/* enable used channels */
+	ADC1->CHSELR = (1 << ADC_HAL_1_CH) | (1 << ADC_HAL_2_CH)
+			| (1 << ADC_HAL_3_CH) | (1 << ADC_ID_RESISTOR_CH)
+			| (1 << ADC_BATTERY_CH) | (1 << ADC_MOTOR_CURRENT_CH)
+			| (1 << ADC_TEMP_CH);
+	/* set oversampling to 000, so do nothing. This gives with a resolution of 10 bits and a clock of 12 MHz a conversion time of exactly 1 us. */
+//	ADC1->SMPR = ADC_SMPR_SMP_2 | ADC_SMPR_SMP_1 | ADC_SMPR_SMP_0;
+	ADC1->CR |= ADC_CR_ADSTART;
+
+	/* enable interrupt at end of sequence */
+	ADC1->IER |= ADC_IER_EOSIE | ADC_IER_EOCIE;
+
+	/* enable temperature sensor */
+	ADC->CCR |= ADC_CCR_TSEN;
+	/* enable the DMA request generation */
+	ADC1->CFGR1 |= ADC_CFGR1_DMAEN;
+
+	/**
+	 * SECOND set up the GPIO pins
+	 * */
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	GPIO_InitStruct.Pin = ADC_HAL_1_PIN | ADC_HAL_2_PIN | ADC_HAL_3_PIN |
+	ADC_ID_RESISTOR_PIN | ADC_BATTERY_PIN | ADC_MOTOR_CURRENT_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+	/**
+	 * THIRD set up the DMA channel
+	 * */
+
+	__HAL_RCC_DMA1_CLK_ENABLE()
+	;
+
+	/* channel has high priority */
+	DMA1_Channel1->CCR = DMA_CCR_PL_1;
+	/* 16 bit data transfers */
+	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0 | DMA_CCR_PSIZE_0;
+	/* Auto increment in memory, and circular*/
+	DMA1_Channel1->CCR |= DMA_CCR_MINC | DMA_CCR_CIRC;
+	/* set size of transfer */
+	DMA1_Channel1->CNDTR = ADC_NUM_OF_CHANNELS;
+	/* set source to ADC data register */
+	DMA1_Channel1->CPAR = (uint32_t) &(ADC1->DR);
+	/* set the destination to the data array */
+	DMA1_Channel1->CMAR = (uint32_t) adc_data_dump;
+	/* enable the DMA channel */
+	DMA1_Channel1->CCR |= DMA_CCR_EN;
+
+	/* enable the ISR in the NVIC, give it a high priority */
+	NVIC_EnableIRQ(ADC1_IRQn);
+	NVIC_SetPriority(ADC1_IRQn, 1);
+	return 0;
+}
+
+void ADC1_IRQHandler(void) {
+	interrupts_disable();
+	if (ADC1->ISR & ADC_ISR_EOC) {
+		ADC1->ISR |= ADC_ISR_EOC;
+	}
+	if (ADC1->ISR & ADC_ISR_EOS) {
+		ADC1->ISR |= ADC_ISR_EOS;
+		/* wait for the DMA handler to finish, so we are using the latest data */
+		while (!(DMA1->ISR & DMA_ISR_TCIF1))
+			;
+		DMA1->IFCR |= DMA_IFCR_CTCIF1;
+		/* measured current is 10 bits left aligned. */
+		adc_control_motor_current(get_current_setpoint(), (adc_data_dump[5]));
+		adc_check_motor_current((adc_data_dump[5]));
+		ADC1->CR |= ADC_CR_ADSTART;
+	}
+	interrupts_enable();
+}
+
+/**
+ * Write the data read by the ADC to the vregs, for debug and status purposes
+ */
+void adc_write_data_to_vregs(void) {
+	uint32_t current_measured;
+#ifdef DEBUG_VREGS
+	vregs_write(VREGS_ADC_DATA0A, (uint8_t) (adc_data_dump[0] >> 14)); //hall1a
+	vregs_write(VREGS_ADC_DATA1A, (uint8_t) (adc_data_dump[1] >> 14)); //hall2a
+	vregs_write(VREGS_ADC_DATA2A, (uint8_t) (adc_data_dump[2] >> 14)); //hall3a
+	vregs_write(VREGS_ADC_DATA3A, (uint8_t) (adc_data_dump[3] >> 14)); //ID resistor
+	vregs_write(VREGS_ADC_DATA4A, (uint8_t) (adc_data_dump[4] >> 14)); //Battery
+	vregs_write(VREGS_ADC_DATA5A, (uint8_t) (adc_data_dump[5] >> 14)); //motor current
+	vregs_write(VREGS_ADC_DATA6A, (uint8_t) (adc_data_dump[6] >> 14)); //internal temp
+
+	vregs_write(VREGS_ADC_DATA0B, (uint8_t) (adc_data_dump[0] >> 6)); //hall1b
+	vregs_write(VREGS_ADC_DATA1B, (uint8_t) (adc_data_dump[1] >> 6)); //hall2b
+	vregs_write(VREGS_ADC_DATA2B, (uint8_t) (adc_data_dump[2] >> 6)); //hall3b
+	vregs_write(VREGS_ADC_DATA3B, (uint8_t) (adc_data_dump[3] >> 6)); //ID resistor
+	vregs_write(VREGS_ADC_DATA4B, (uint8_t) (adc_data_dump[4] >> 6)); //Battery
+	vregs_write(VREGS_ADC_DATA5B, (uint8_t) (adc_data_dump[5] >> 6)); //motor current
+	vregs_write(VREGS_ADC_DATA6B, (uint8_t) (adc_data_dump[6] >> 6)); //internal temp
+#endif
+	current_measured = abs(((adc_data_dump[5])) - ADC_MID_RANGE_COUNT);
+	current_measured = (current_measured * ADC_FULL_RANGE_MILLIVOLT)
+			/ ADC_FULL_RANGE_COUNT;
+	/* convert to A */
+	current_measured = (current_measured) / ADC_CURRENT_SENSITIVITY;
+	vregs_write(VREGS_MOTOR_CURRENT, (uint8_t) current_measured);
+}
+
+/**
+ * Return a value from the ADC raw data register.
+ * Should not be called during ADC operation.
+ */
+uint16_t adc_get_value(int32_t index) {
+	return adc_data_dump[index];
+}
+
+/**
+ * Return the internal ADC temperature sensor
+ * TODO does not work yet, AAAAARCHGGGGG
+ */
+int32_t adc_get_temperature(void) {
+	volatile int32_t temperature;
+	int32_t temp_30 = (int32_t) ((*TEMP30_CAL_ADDR) << 4);
+
+	temperature = (((int32_t) adc_data_dump[6] * VDD_APPLI / VDD_CALIB)
+			- temp_30);
+	temperature = temperature * (int32_t) (110 - 30);
+	temperature = temperature / (int32_t) (TEMP110_CAL_ADDR - temp_30);
+	temperature = temperature + 30; // +30
+#ifdef DEBUG_VREGS
+	vregs_write(VREGS_ADC_INTERNAL_TEMP_A, (uint8_t) temperature);
+//	vregs_write(VREGS_ADC_INTERNAL_TEMP_A + 1, (uint8_t) temperature >> 8);
+#endif
+	return (int32_t) temperature;
+}
+
+/* on board is an ACS711 hall efffect current sensor. assumed that 0 and 3.3 are max currents and 1.65V is 0 current. */
+void adc_control_motor_current(int32_t current_setpoint,
+		uint16_t current_measured) {
+	int32_t current_measured_cast = (int32_t) current_measured;
+	static int32_t duty_cycle = 0;
+	static int32_t error_integral = 0;
+	static int32_t error = 0;
+	static uint16_t dt = 0;
+	static uint16_t time_prev = 0;
+
+	/* 3300 mV - 1650 mV = 1650 mV of maximum current measurement range. Sensitivity is 55 mV/A, meaning 1650 / 55 = 30A.
+	 * dt is dependent on the ARR value of TIM1. This is 1023, meaning a period of 2048.
+	 * dt = 1/(48e6/2048/7 channels) = 0.29866 ms.
+	 * Ki can make sure the amount of error_i is still ok.
+	 */
+
+	/* remove offset */
+	current_measured_cast = current_measured_cast - ADC_MID_RANGE_COUNT;
+#ifdef DEBUG_VREGS
+	vregs_write(VREGS_CURRENT_MEASURED,
+			(uint8_t) ((current_measured - ADC_MID_RANGE_COUNT) >> 3));
+	if (error > 0) {
+		vregs_write(VREGS_CURRENT_CONTROL_E_POS, (uint8_t) (error >> 6));
+		vregs_write(VREGS_CURRENT_CONTROL_E_NEG, (uint8_t) (0));
+	} else {
+		vregs_write(VREGS_CURRENT_CONTROL_E_NEG, (uint8_t) ((-error) >> 6));
+		vregs_write(VREGS_CURRENT_CONTROL_E_POS, (uint8_t) (0));
+	}
+	if (error_integral > 0) {
+		vregs_write(VREGS_CURRENT_CONTROL_EI_POS,
+				(uint8_t) (error_integral >> 6));
+		vregs_write(VREGS_CURRENT_CONTROL_EI_NEG,
+				(uint8_t) (0));
+	} else {
+		vregs_write(VREGS_CURRENT_CONTROL_EI_NEG,
+				(uint8_t) ((-error_integral) >> 6));
+		vregs_write(VREGS_CURRENT_CONTROL_EI_POS,
+				(uint8_t) (0));
+	}
+	vregs_write(VREGS_CURRENT_CONTROL_DT, (dt>>7));
+#endif
+	if (current_setpoint != 0) {
+		dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF */
+		time_prev = time17_get_time();
+		error = current_setpoint - current_measured_cast;
+		if ((duty_cycle > H_BRIDGE_MAX_DUTYCYCLE)
+				&& (((error >= 0) && (error_integral >= 0))
+						|| ((error < 0) && (error_integral < 0)))) {
+			/* let error_integral be the same to prevend wind-up */
+		} else {
+			error_integral = (error_integral + (((error * dt)) / (48000000))); /* Divide by 48e6 because this is the clock freq. */
+		}
+		duty_cycle = (((kp * error) + ((ki * (error_integral>>10)))) >> 6); /* shift 6 because of 10 bits adc left aligned. It is engineered to nicely be the order of magnitude of the dutycycle. */
+		if (duty_cycle < 0) {
+			duty_cycle = (uint16_t) abs(duty_cycle);
+			h_bridge_drive_motor(duty_cycle, H_BRIDGE_BACKWARD,
+			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+		} else {
+			h_bridge_drive_motor((uint16_t) duty_cycle, H_BRIDGE_FORWARD,
+			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+		}
+	}
+	return;
+}
+
+void adc_current_control_set_kp(uint8_t value) {
+	kp = value;
+}
+
+uint8_t adc_current_control_get_kp(void) {
+	return kp;
+}
+
+void adc_current_control_set_ki(uint8_t value) {
+	ki = value;
+}
+uint8_t adc_current_control_get_ki(void) {
+	return ki;
+}
+
+/**
+ * Check and process the motor current
+ */
+uint8_t adc_check_motor_current(uint16_t current_measured) {
+	static uint32_t over_current_counter = 0;
+	/* check for overcurrent */
+	current_measured = abs(current_measured - ADC_MID_RANGE_COUNT);
+	if (current_measured >= ADC_OVER_CURRENT_COUNT) { /* roughly 24A: 32768/30*24 */
+		over_current_counter++;
+		if (over_current_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
+			errors_emergency_stop();
+			errors_report(ERRORS_MOTOR_OVERCURRENT);
+		}
+	} else if (over_current_counter > 0)
+		over_current_counter--;
+	return 0;
+}
+
+/* ------------------------------
+ *
+ * OLD CODE
+ *
+ */
+
+/**
+ * Request a conversion from the ADC
+ */
+//void adc_request_conversion(void) {
+//	interrupts_disable();
+//	if (!(ADC1->CR & ADC_CR_ADSTART)) {
+//		ADC1->CHSELR = (1 << ADC_HAL_1_CH) | (1 << ADC_HAL_2_CH)
+//				| (1 << ADC_HAL_3_CH) | (1 << ADC_ID_RESISTOR_CH)
+//				| (1 << ADC_BATTERY_CH) | (1 << ADC_TEMP_CH)
+//				| (1 << ADC_MOTOR_CURRENT_CH);
+//		ADC1->CFGR1 |= ADC_CFGR1_DMAEN;
+//		ADC1->CR = ADC_CR_ADSTART;
+//		interrupts_enable();
+//		adc_wait_for_data();
+//	} else {
+//		interrupts_enable();
+//	}
+//
+//}
+/**
+ * Wait for the end of sequence flag to come high, and clear it.
+ */
+//void adc_wait_for_data(void) {
+//	// TODO check for overrun and report error
+//	while ((!(ADC1->ISR)) & ADC_ISR_EOS)
+//		;
+//	ADC1->ISR |= ADC_ISR_EOS;
+//	while (!(DMA1->ISR & DMA_ISR_TCIF1))
+//		;
+//	DMA1->IFCR |= DMA_IFCR_CTCIF1;
+//}
+/**
+ * Returns the motor current, in mA.
+ */
+//int32_t adc_get_motor_current_ma(void) {
+//	int32_t current;
+//
+//	current = adc_get_value(ADC_MOTOR_CURRENT_INDEX);
+////	/* remove offset */
+//	current = current - ADC_MID_RANGE_COUNT;
+//	/* convert to mV */
+////	current = (current * ADC_FULL_RANGE_MILLIVOLT) / ADC_FULL_RANGE_COUNT;
+//	current = (current * ADC_FULL_RANGE_MILLIVOLT) >> 16;
+//	/* convert to mA */
+//	current = (current * 1000) / ADC_CURRENT_SENSITIVITY;
+//
+//	return current;
+//}
+/**
+ * Returns the absolute value of the motor current, in mA.
+ */
+//uint32_t adc_get_absolute_motor_current_ma(void) {
+//	int32_t current;
+//
+//	current = adc_get_motor_current_ma();
+//	if (current < 0)
+//		current = -current;
+//
+//	return current;
+//}

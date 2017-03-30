@@ -20,12 +20,12 @@
 
 #define H_BRIDGE_PRESCALER 0
 #define H_BRDIGE_ARR 1023
-#define H_BRIDGE_MAX_DUTYCYCLE (H_BRDIGE_ARR)
-#define H_BRIDGE_MAX_MOTOR_SPEED (H_BRDIGE_ARR)
+#define H_BRIDGE_MAX_DUTYCYCLE (H_BRDIGE_ARR-20)
+#define H_BRIDGE_MAX_MOTOR_SPEED (H_BRDIGE_ARR-20)
 #define H_BRIDGE_FORWARD 1
 #define H_BRIDGE_BACKWARD 0
 #define H_BRIDGE_DEMO_DELAY 5000
-#define H_BRIDGE_ADC_TRIGGER (H_BRDIGE_ARR)
+#define H_BRIDGE_ADC_TRIGGER (H_BRDIGE_ARR) // needs to be the same as the h_bridge arr for measurement in middle of PWM low
 //#define H_BRIDGE_EARLY_TRIGGER 240
 //#define H_BRIDGE_LATE_TRIGGER 1440
 
@@ -37,7 +37,6 @@
 
 
 int32_t h_bridge_init(void);
-void TIM1_CC_IRQHandler(void);
 uint8_t h_bridge_drive_motor(uint16_t, uint8_t, uint8_t);
 void h_bridge_disable(void);
 void h_bridge_lock_anti_phase(uint16_t);

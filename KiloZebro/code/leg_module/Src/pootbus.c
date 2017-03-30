@@ -27,6 +27,7 @@
 #include "errors.h"
 #include "time.h"
 #include "errors.h"
+#include "globals.h"
 
 /* Used for the PootBus statemachine */
 static int32_t state = POOTBUS_STATE_IDLE;
@@ -46,7 +47,9 @@ static int32_t pootbus_transaction_start_time = 0;
  */
 inline void pootbus_set_state(int32_t new_state){
 	state = new_state;
+#ifdef DEBUG_VREGS
 	vregs_write(VREGS_POOTBUS_STATE, (uint8_t) new_state);
+#endif
 }
 
 /**
@@ -95,7 +98,9 @@ int32_t pootbus_master_init(){
 int32_t pootbus_read_temperature(uint8_t slave_address){
 	/* check if the bus is busy */
 	if (I2C2->ISR & I2C_ISR_BUSY){
+#ifdef DEBUG_VREGS
 		vregs_write(VREGS_POOTBUS_BUSY, 1);
+#endif
 		return POOTBUS_BUS_BUSY;
 	}
 
@@ -105,7 +110,9 @@ int32_t pootbus_read_temperature(uint8_t slave_address){
 	interrupts_disable();
 
 	if (state != POOTBUS_STATE_IDLE){
+#ifdef DEBUG_VREGS
 		vregs_write(VREGS_POOTBUS_BUSY, 2);
+#endif
 		interrupts_enable();
 		return POOTBUS_BUS_BUSY;
 	}
@@ -118,7 +125,9 @@ int32_t pootbus_read_temperature(uint8_t slave_address){
 	 * End critical section
 	 */
 
+#ifdef DEBUG_VREGS
 	vregs_write(VREGS_POOTBUS_BUSY, 0);
+#endif
 
 	/* remember where to write data to */
 	switch(slave_address){

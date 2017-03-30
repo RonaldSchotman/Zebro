@@ -20,6 +20,7 @@
 #include "encoder.h"
 #include "vregs.h"
 #include "errors.h"
+#include "globals.h"
 
 /**
  * Initialises the rotational encoder
@@ -95,10 +96,12 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
 void encoder_write_to_vregs(void) {
 	uint16_t counter_value; // Counter value is max 16 bits according to datasheet. Tested and it's true.
 	counter_value = TIM3->CNT;
+#ifdef DEBUG_VREGS
 	vregs_write(VREGS_ENCODER_POSITION_A, (uint8_t) (counter_value));
 	vregs_write(VREGS_ENCODER_POSITION_B, (uint8_t) (counter_value >> 8));
 	uint16_t dir = TIM3->CR1;
 	vregs_write(VREGS_ENCODER_DIR, (uint8_t)((dir>>4)&0x0001)); // 1 = counterclockwise/count down, 0 = clockwise/count upwards looking at the front of the motor.
+#endif
 }
 
 /**
