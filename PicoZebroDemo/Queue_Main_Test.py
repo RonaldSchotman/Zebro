@@ -238,10 +238,10 @@ class Control_Zebro_Thread(threading.Thread):
                     if DONT_Send == 1:
                         # Obtain Serial Write
                         #self.Serial_Lock.mutex.acquire()
-                        print("We Blocking Boys")
-                        print(Current_Direction)
-                        print(Movement)
-                        print(Blocked_Direction)
+                        #print("We Blocking Boys")
+                        #print(Current_Direction)
+                        #print(Movement)
+                        #print(Blocked_Direction)
                         self.Serial_Lock.acquire(blocking=True, timeout=-1)
                         Writing = (self.Zebro + " Stop")
                         Writing = Writing.encode('utf-8')
@@ -252,10 +252,10 @@ class Control_Zebro_Thread(threading.Thread):
                     else:
                         # Obtain Serial Write
                         #self.Serial_Lock.mutex.acquire()
-                        print(Movement)
-                        print(Current_Direction)
-                        print(Middle_point_x)
-                        print(Middle_point_y)
+                        #print(Movement)
+                        #print(Current_Direction)
+                        #print(Middle_point_x)
+                        #print(Middle_point_y)
                         self.Serial_Lock.acquire(blocking=True, timeout=-1)
                         Writing = (self.Zebro + Movement)
                         Writing = Writing.encode('utf-8')
@@ -265,6 +265,7 @@ class Control_Zebro_Thread(threading.Thread):
                         # Release Serial Write
                         Last_Movement = Movement
                         Current_Direction = Direction
+                        time.sleep(5)
                         
                     DONT_Send = 0
 
@@ -529,10 +530,7 @@ def main(Serial_Lock,q_PicoZebro_1,
                     Picture_1_start_time = time.time() # Testing Function for how long a part of a code takes.
 
         if Picture == 6:
-            if (time.time() - Picture_1_start_time) > 600:
-                Picture = 0
-                print("Restarting program reinit")
-                Picture_1_start_time = 0
+                
                 
             Follow_Led_1 = cv2.imread("Led1_on.jpg")
             #Global Command Turn all leds off
@@ -570,7 +568,7 @@ def main(Serial_Lock,q_PicoZebro_1,
                     cv2.putText(Follow_Led_1, "#1", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                     Zebro_1_Middle_x = x
                     Zebro_1_Middle_y = y
-                    print("This is Zebro 1")
+                    #print("This is Zebro 1")
                     
             for Zebros in range(1):
                 Blocking_Zebro = []   #Here will be the blocking in
@@ -589,6 +587,13 @@ def main(Serial_Lock,q_PicoZebro_1,
                         q_PicoZebro_1.mutex.release()
                         q_PicoZebro_1.put(PicoZebro_1)
                 Picture = 5
+                if ((time.time() - Picture_1_start_time) > 600):
+                    Picture = 0
+                    print(Picture)
+                    Picture_1_start_time = time.time()
+                    print("Restarting program reinit")
+                    print((time.time() - Picture_1_start_time))
+                    pass
                 
         Picture = Picture + 1
         

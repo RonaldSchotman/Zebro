@@ -1282,11 +1282,6 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
                     Picture_1_start_time = time.time() # Testing Function for how long a part of a code takes.
                     
         if Picture == 6:
-            if (time.time() - Picture_1_start_time) > 600:
-                Picture = 0
-                print("Restarting program reinit")
-                Picture_1_start_time = 0
-
             #Global Command Turn all leds off
             #Glabal Command turn all led 1 on.  #Do this once
             #Wait untill this is done.
@@ -1761,6 +1756,14 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
                         q_PicoZebro_20.mutex.release()
                         q_PicoZebro_20.put(PicoZebro_20)
                 Picture = 5
+                
+                if (time.time() - Picture_1_start_time) > 600:
+                    Picture = 0
+                    print(Picture)
+                    Picture_1_start_time = time.time()
+                    print("Restarting program reinit")
+                    print((time.time() - Picture_1_start_time))
+                    pass
 
         Picture = Picture + 1
         
