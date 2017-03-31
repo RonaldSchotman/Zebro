@@ -2,22 +2,23 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="interrupt" key="selection"/>
+		<item value="current_setpoint" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="current_setpoint"/>
+			<item value="error"/>
+			<item value="adc_trigger"/>
 			<item value="interrupt"/>
 			<item value="I2C1-&gt;CR2"/>
 			<item value="ack"/>
 			<item value="adc_request_conversion"/>
 			<item value="disable"/>
-			<item value="dier"/>
-			<item value="calib"/>
-			<item value="ENCODER_PULSES_PER_ROTATION"/>
 		</list>
 		<list key="replacehistory">
+			<item value=""/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

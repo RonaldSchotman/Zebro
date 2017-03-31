@@ -20,8 +20,7 @@
 
 #define H_BRIDGE_PRESCALER 0
 #define H_BRDIGE_ARR 1023
-#define H_BRIDGE_MAX_DUTYCYCLE (H_BRDIGE_ARR-20)
-#define H_BRIDGE_MAX_MOTOR_SPEED (H_BRDIGE_ARR-20)
+#define H_BRIDGE_MAX_DUTYCYCLE (H_BRDIGE_ARR-20) /* The minus 20 is to leave room for the interrupt of the adc. The ADC blocks interrupts when doing it's calculations. If in that time the ccr of tim1 triggers, it can not go and the motor stops. 20 is found to be a good number. */
 #define H_BRIDGE_FORWARD 1
 #define H_BRIDGE_BACKWARD 0
 #define H_BRIDGE_DEMO_DELAY 5000

@@ -190,8 +190,6 @@ def main(stdscr):
     display = SerialDisplay(stdscr)
     commands = CommandCollection()
     commands.add_new_command("[0x00 30 1 0 0 0 0 0 0 1]", "c", 'Calibrate Encoders')
-    commands.add_new_command("[0x00 30 3 0 0 0 0 0 0 1]", "f", 'Walk Forward')
-    commands.add_new_command("[0x00 30 4 0 0 0 0 0 0 1]", "b", 'Walk Backward')
     commands.add_new_command("[0x00 30 0 0 0 0 0 0 0 1]", " ", 'Stop all')
     commands.add_new_command("[0x00 22 0x12]", 'e', "Reset emergency_stop")
     # commands.add_new_command("[0x00 30 7 0 120 1 0 0]", "d", "Debug Command")
@@ -200,12 +198,11 @@ def main(stdscr):
     
     last_time_update = datetime.datetime.now()
     time_sync_counter = 0
-
-    if not hasattr(main, "kp"):
-        main.kp = 0
-
-    if not hasattr(main, "ki"):
-        main.ki = 0    
+    position_control_kp = 0
+    current_control_kp = 0
+    position_control_ki = 0
+    current_control_ki = 0
+    position_control_kd = 0
 
     while(True):
         display.get_data_from_bus_pirate(bus_pirate)
@@ -224,44 +221,69 @@ def main(stdscr):
             if input_char == 'c':
                 command = commands.find_command_by_key(input_char)
             if input_char == 'e':
-                command = commands.find_command_by_key(input_char)  
-            if input_char == 'f':
                 command = commands.find_command_by_key(input_char)
-            if input_char == 'b':
-                command = commands.find_command_by_key(input_char)                
-            if input_char == 'u':
-                if (main.kp<255):
-                    main.kp += 1
-                command = Command("[0x00 50 {0}]".format(main.kp), "u", 'Increase kp current control')
-            if input_char == 'j':
-                if (main.kp>0):
-                    main.kp -= 1
-                command = Command("[0x00 50 {0}]".format(main.kp), "j", 'Decrease kp current control')
-            if input_char == 'i':
-                if (main.ki<255):
-                    main.ki += 1
-                command = Command("[0x00 51 {0}]".format(main.ki), "i", 'Increase ki current control')
-            if input_char == 'k':
-                if (main.ki>0):
-                    main.ki -= 1
-                command = Command("[0x00 51 {0}]".format(main.ki), "k", 'Decrease ki current control')
-            if input_char == 'z':
-                stand_up_time = time_sync_counter + 2
-                command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')     
             if input_char == ' ':
-                command = commands.find_command_by_key(input_char)
+                command = commands.find_command_by_key(input_char)                
+
+            if input_char == 'y':
+                if (current_control_kp<255):
+                    current_control_kp += 1
+                command = Command("[0x00 50 {0}]".format(current_control_kp), "y", 'Increase kp current control')
+            if input_char == 'h':
+                if (current_control_kp>0):
+                    current_control_kp -= 1
+                command = Command("[0x00 50 {0}]".format(current_control_kp), "h", 'Decrease kp current control')
+            if input_char == 'u':
+                if (current_control_ki<255):
+                    current_control_ki += 1
+                command = Command("[0x00 51 {0}]".format(current_control_ki), "u", 'Increase ki current control')
+            if input_char == 'j':
+                if (current_control_ki>0):
+                    current_control_ki -= 1
+                command = Command("[0x00 51 {0}]".format(current_control_ki), "j", 'Decrease ki current control')
+
+            if input_char == 'i':
+                if (position_control_kp<255):
+                    position_control_kp += 1
+                command = Command("[0x00 145 {0}]".format(position_control_kp), "i", 'Increase kp position control')
+            if input_char == 'k':
+                if (position_control_kp>0):
+                    position_control_kp -= 1
+                command = Command("[0x00 145 {0}]".format(position_control_kp), "k", 'Decrease kp position control')
+            if input_char == 'o':
+                if (position_control_ki<255):
+                    position_control_ki += 1
+                command = Command("[0x00 146 {0}]".format(position_control_ki), "o", 'Increase ki position control')
+            if input_char == 'l':
+                if (position_control_ki>0):
+                    position_control_ki -= 1
+                command = Command("[0x00 146 {0}]".format(position_control_ki), "l", 'Decrease ki position control')
+            if input_char == 'p':
+                if (position_control_kd<255):
+                    position_control_kd += 1
+                command = Command("[0x00 147 {0}]".format(position_control_kd), "p", 'Increase kd position control')
+            if input_char == ';':
+                if (position_control_kd>0):
+                    position_control_kd -= 1
+                command = Command("[0x00 147 {0}]".format(position_control_kd), ";", 'Decrease kd position control')
+
             if input_char == 'w':
                 lift_off_time_a = 0
                 lift_off_time_b = time_sync_counter + 1
                 touch_down_time_a = 0
                 touch_down_time_b = lift_off_time_b + 1
-                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk')
-            if input_char == 'l':
+                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk forward')
+            if input_char == 's':
                 lift_off_time_a = 0
                 lift_off_time_b = time_sync_counter + 1
                 touch_down_time_a = 0
-                touch_down_time_b = time_sync_counter + 1
-                command = Command("[0x00 30 11 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "l", 'move to lift off position')
+                touch_down_time_b = lift_off_time_b + 1
+                command = Command("[0x00 30 4 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "s", 'walk backward')
+            if input_char == 'z':
+                stand_up_time = time_sync_counter + 2
+                command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')
+
+
             if command:
                 bus_pirate.transmit_command(command)
   

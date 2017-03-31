@@ -76,7 +76,7 @@ int main(void) {
 	RCC->CSR |= RCC_CSR_RMVF;
 
 	while (1) {
-		start_time = TIM16->CNT;
+		start_time = time17_get_time();
 		//todo: implement system where motor will stop executing a command
 		// when no drive command have been received for a number of seconds
 
@@ -113,6 +113,7 @@ int main(void) {
 
 		encoder_write_to_vregs();
 		motion_drive_h_bridge();
+		motion_control_position();
 
 		/* waiting until the previous uart transfer is done can be very useful
 		 * during debugging. It ensures that you have information about
@@ -130,9 +131,9 @@ int main(void) {
 		/* count, count, count */
 		vregs_write(VREGS_LOOP_COUNTER, loop_counter++);
 
-		stop_time = TIM16->CNT;
+		stop_time = time17_get_time();
 		uint16_t time_diff = stop_time - start_time; /* automatically deals with rollover because of uint */
-		time_diff = time_diff / 64; /* convert to ms */
+		time_diff = time_diff / 48; /* convert to us */
 		vregs_write(VREGS_LOOP_TIME, (uint8_t) time_diff);
 	}
 

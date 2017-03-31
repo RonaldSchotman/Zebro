@@ -27,7 +27,7 @@
 #include "globals.h"
 
 volatile static uint16_t adc_data_dump[ADC_NUM_OF_CHANNELS];
-static uint8_t kp = 0, ki = 0;
+static uint8_t kp = 28, ki = 150;
 
 /**
  * Enables the ADC. This function should only be called when it is
@@ -220,10 +220,9 @@ void adc_control_motor_current(int32_t current_setpoint,
 	int32_t current_measured_cast = (int32_t) current_measured;
 	static int16_t duty_cycle = 0;
 	static int32_t error_integral = 0;
-	static int32_t error = 0;
+	static int32_t error_current = 0;
 	static uint16_t dt = 0;
 	static uint16_t time_prev = 0;
-	static uint16_t max_error_integral = 0;
 
 	/* 3300 mV - 1650 mV = 1650 mV of maximum current measurement range. Sensitivity is 55 mV/A, meaning 1650 / 55 = 30A.
 	 * dt is dependent on the ARR value of TIM1. This is 1023, meaning a period of 2048.
@@ -233,18 +232,28 @@ void adc_control_motor_current(int32_t current_setpoint,
 	/* remove offset */
 	current_measured_cast = current_measured_cast - ADC_MID_RANGE_COUNT;
 	if (current_setpoint != 0) {
-		dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF */
+		dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically 108/109 ticks*/
 		time_prev = time17_get_time();
-		error = current_setpoint - current_measured_cast;
-		duty_cycle = (((kp * error) + ((ki * (error_integral)))) >> 6); /* shift 6 because of 10 bits adc left aligned. It is engineered to nicely be the order of magnitude of the dutycycle. */
-		/* max dutycycle is 1000 because otherwise the interrupt cannot finish. If dutycycle is 1020 there is 6 ticks of time to do the interrupt. This is to little. */
-		error_integral = (error_integral + (((error * dt)) / (48000000 >> 10))); /* Divide by 48e6 because this is the clock freq. Shift because of integer division*/
-		max_error_integral = 1000 - abs(duty_cycle);
-		if (abs(error_integral) >= max_error_integral) {
-			if (error_integral < 0) {
-				error_integral = -max_error_integral;
+		error_current = current_setpoint - current_measured_cast;
+		error_integral = (error_integral + (((error_current * dt)) / (48000000 >> 10))); /* Divide by 48e6 because this is the clock freq. Shift because of integer division*/
+		duty_cycle = (((kp * error_current) + ((ki * (error_integral >> 8)))) >> 6); /* shift 6 because of 10 bits adc left aligned. It is engineered to nicely be the order of magnitude of the dutycycle. */
+		/* max dutycycle is ~1000 because otherwise the interrupt cannot finish. If dutycycle is 1020 there is 6 ticks of time to do the interrupt. This is to little. */
+		if (duty_cycle > H_BRIDGE_MAX_DUTYCYCLE) {
+			duty_cycle = H_BRIDGE_MAX_DUTYCYCLE;
+			if (((kp * error_current) >> 6) < H_BRIDGE_MAX_DUTYCYCLE) {
+				error_integral =
+						((((H_BRIDGE_MAX_DUTYCYCLE << 6) - (kp * error_current)) << 8)
+								/ ki);
 			} else {
-				error_integral = max_error_integral;
+				error_integral = 0;
+			}
+		} else if (duty_cycle < (-1 * H_BRIDGE_MAX_DUTYCYCLE)) {
+			duty_cycle = (-1 * H_BRIDGE_MAX_DUTYCYCLE);
+			if (((kp * error_current) >> 6) > (-1 * H_BRIDGE_MAX_DUTYCYCLE)) {
+				error_integral = (((((-1 * H_BRIDGE_MAX_DUTYCYCLE) << 6)
+						- (kp * error_current)) << 8) / ki);
+			} else {
+				error_integral = 0;
 			}
 		}
 		if (duty_cycle < 0) {
@@ -260,22 +269,25 @@ void adc_control_motor_current(int32_t current_setpoint,
 #ifdef DEBUG_VREGS
 	vregs_write(VREGS_CURRENT_MEASURED,
 			(uint8_t) ((current_measured - ADC_MID_RANGE_COUNT) >> 3));
-	if (error > 0) {
-		vregs_write(VREGS_CURRENT_CONTROL_E_POS, (uint8_t) (error >> 6));
+	if (error_current > 0) {
+		vregs_write(VREGS_CURRENT_CONTROL_E_POS, (uint8_t) (error_current >> 6));
 		vregs_write(VREGS_CURRENT_CONTROL_E_NEG, (uint8_t) (0));
 	} else {
-		vregs_write(VREGS_CURRENT_CONTROL_E_NEG, (uint8_t) ((-error) >> 6));
+		vregs_write(VREGS_CURRENT_CONTROL_E_NEG, (uint8_t) ((abs(error_current)) >> 6));
 		vregs_write(VREGS_CURRENT_CONTROL_E_POS, (uint8_t) (0));
 	}
 	if (error_integral > 0) {
-		vregs_write(VREGS_CURRENT_CONTROL_EI_POS, (uint8_t) (error_integral));
+		vregs_write(VREGS_CURRENT_CONTROL_EI_POS,
+				(uint8_t) (error_integral >> 8));
 		vregs_write(VREGS_CURRENT_CONTROL_EI_NEG, (uint8_t) (0));
 	} else {
 		vregs_write(VREGS_CURRENT_CONTROL_EI_NEG,
-				(uint8_t) ((-error_integral)));
+				(uint8_t) ((abs(error_integral)) >> 8));
 		vregs_write(VREGS_CURRENT_CONTROL_EI_POS, (uint8_t) (0));
 	}
 	vregs_write(VREGS_CURRENT_CONTROL_DT, (dt >> 7));
+	vregs_write(VREGS_CURRENT_SETPOINT_A, (uint8_t) ((abs(current_setpoint)) >> 8));
+	vregs_write(VREGS_CURRENT_SETPOINT_B, (uint8_t) ((abs(current_setpoint))));
 #endif
 
 	return;

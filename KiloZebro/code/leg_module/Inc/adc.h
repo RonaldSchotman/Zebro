@@ -33,16 +33,7 @@ uint8_t adc_current_control_get_ki(void);
 void adc_current_control_set_ki(uint8_t value);
 uint16_t adc_get_value(int32_t index);
 
-//#define ADC_SHIFT_AMOUNT 2 /*bits to shift to get to a uint8_t. ADC now gives 10 bit accuracy, so 2 shifts. */
-
 /* Temperature sensor calibration value address */
-//#define ADC_TEMP_AVG_SLOPE_FP3 ((int32_t) 4)
-//#define ADC_VDD_FP6 ((int32_t) 3300)
-//#define ADC_TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
-#define ADC_TEMP30_VOLTAGE_FP3 1430
-
-/* Temperature sensor calibration value address */
-//#define TEMP110_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7C2))
 #define TEMP110_CAL_ADDR (557<<4) // calculated using TEMP30 (printed on screen: 213) and an average slope of 4.3 and rounded. (4.3*80+213 = 557)
 #define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
 #define VDD_CALIB ((uint16_t) (330<<4))
@@ -55,8 +46,6 @@ uint16_t adc_get_value(int32_t index);
 #define ADC_OVER_CURRENT_COUNT 26000
 
 #define ADC_CURRENT_SENSITIVITY 55 // 55 mV/A See acs711 25AB-T datasheet. (65536/(1650/55)) = 1092.26667 #/Amp
-#define ADC_CURRENT_SENSITIVITY_SCALED 592
-#define ADC_CURRENT_EMERGENCY_VALUE 24000 // mA
 #define ADC_CURRENT_EMERGENCY_SAMPLES 100
 
 #define ADC_HAL_1_PIN 0

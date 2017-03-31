@@ -50,7 +50,7 @@
  * You should only disable this during testing. Seriously.
  */
 
-#define LIVING_ON_THE_EDGE
+//#define LIVING_ON_THE_EDGE
 
 
 #endif /* __GLOBALS_H__ */

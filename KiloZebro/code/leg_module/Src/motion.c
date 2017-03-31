@@ -46,8 +46,10 @@ static uint16_t lift_off_position = 0;
 static uint16_t last_known_position = 0;
 static uint8_t side_of_zebro = 0;
 //static uint32_t increasing_delay = 0;
+static uint8_t kp = 0, ki = 0, kd = 0;
 /* current setpoint. This is a setpoint between -2^15 and 2^15 */
-static int32_t current_setpoint = 0;
+static int32_t current_setpoint;
+static int16_t position_setpoint;
 
 /**
  * Process data send to any of the addresses in the motion control range.
@@ -90,8 +92,8 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
 		 * Reset the 'new_state' struct in either case
 		 */
 	case VREGS_MOTION_UPDATE:
-		if (!motion_validate_state(new_state) && ((calibrate == 0)
-				|| (new_state.mode == 0) /* idle state should always be reached */
+		if (!motion_validate_state(new_state)
+				&& ((calibrate == 0) || (new_state.mode == 0) /* idle state should always be reached */
 				|| (new_state.mode == 1) /* we should always be able to go to calibration state if necessary */
 				|| (new_state.mode == 255))) { /* panic state should of course always be reachable */
 			state = new_state;
@@ -134,6 +136,105 @@ int32_t motion_write_state_to_vregs(struct motion_state motion_state) {
  */
 int32_t motion_validate_state(struct motion_state motion_state) {
 	return 0;
+}
+
+void motion_control_position(void) {
+	static uint8_t counter = 0;
+	static uint16_t dt, time_prev;
+	static int32_t error_position, error_position_prev, error_integral,
+			error_derivative;
+
+	dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically */
+	time_prev = time17_get_time();
+	error_position = position_setpoint - encoder_get_position(); /* there are 910 pulses in one circle, the error will typically be 1/14th of that is our guess = 65 ticks*/
+	error_integral += (dt * error_position) / (48000000>>15);
+	if (counter == 10) {
+		error_derivative = ((error_position - error_position_prev)); /* to little accuracy on the encoder for real d. The max value is 1. */
+		error_position_prev = error_position;
+		counter = 0;
+//		dt_d = 0;
+	} else {
+//		dt_d += dt;
+		counter++;
+	}
+	/* current setpoint. This is a setpoint between -2^15 and 2^15 */
+	current_setpoint = ((kp * error_position) + (ki * (error_integral>>15))
+			+ (kd * error_derivative));
+
+	/* max current_setpoint is INT16_MAX*/
+	if (current_setpoint > INT16_MAX) {
+		current_setpoint = INT16_MAX;
+		if (((kp * error_position)) < INT16_MAX) {
+			error_integral = ((((INT16_MAX) - (kp * error_position))<<15) / ki);
+		} else {
+			error_integral = 0;
+		}
+	} else if (current_setpoint < INT16_MIN) {
+		current_setpoint = INT16_MIN;
+		if (((kp * error_position) >> 6) > (INT16_MIN)) {
+			error_integral = (((((INT16_MIN)) - (kp * error_position))<<15) / ki);
+		} else {
+			error_integral = 0;
+		}
+	}
+
+#ifdef DEBUG_VREGS
+	if (error_position > 0) {
+		vregs_write(VREGS_POSITION_CONTROL_E_POS, (uint8_t) (error_position));
+		vregs_write(VREGS_POSITION_CONTROL_E_NEG, (uint8_t) (0));
+	} else {
+		vregs_write(VREGS_POSITION_CONTROL_E_NEG,
+				(uint8_t) (abs(error_position)));
+		vregs_write(VREGS_POSITION_CONTROL_E_POS, (uint8_t) (0));
+	}
+	if (error_integral > 0) {
+		vregs_write(VREGS_POSITION_CONTROL_EI_POS, (uint8_t) (error_integral>>15));
+		vregs_write(VREGS_POSITION_CONTROL_EI_NEG, (uint8_t) (0));
+	} else {
+		vregs_write(VREGS_POSITION_CONTROL_EI_NEG,
+				(uint8_t) ((abs(error_integral))>>15));
+		vregs_write(VREGS_POSITION_CONTROL_EI_POS, (uint8_t) (0));
+	}
+	if (error_derivative > 0) {
+		vregs_write(VREGS_POSITION_CONTROL_ED_POS,
+				(uint8_t) (error_derivative));
+		vregs_write(VREGS_POSITION_CONTROL_ED_NEG, (uint8_t) (0));
+	} else {
+		vregs_write(VREGS_POSITION_CONTROL_ED_NEG,
+				(uint8_t) (abs(error_derivative)));
+		vregs_write(VREGS_POSITION_CONTROL_ED_POS, (uint8_t) (0));
+	}
+	vregs_write(VREGS_POSITION_CONTROL_DT, (uint8_t) (dt/48));
+	vregs_write(VREGS_POSITION_SETPOINT, (uint8_t) (position_setpoint));
+	vregs_write(VREGS_POSITION_MEASURED, (uint8_t) (encoder_get_position()));
+#endif
+}
+
+void motion_position_control_set_kp(uint8_t value) {
+	kp = value;
+	return;
+}
+
+void motion_position_control_set_ki(uint8_t value) {
+	ki = value;
+	return;
+}
+
+void motion_position_control_set_kd(uint8_t value) {
+	kd = value;
+	return;
+}
+
+uint8_t motion_position_control_get_kp(void) {
+	return kp;
+}
+
+uint8_t motion_position_control_get_ki(void) {
+	return ki;
+}
+
+uint8_t motion_position_control_get_kd(void) {
+	return kd;
 }
 
 /**
@@ -187,7 +288,6 @@ int32_t motion_drive_h_bridge() {
 			(uint8_t) (last_known_position >> 8));
 	vregs_write(VREGS_MOTION_STABILIZING_DIRECTION,
 			(uint8_t) (stabilizing_direction));
-	vregs_write(VREGS_CURRENT_SETPOINT, (uint8_t) (current_setpoint >> 3));
 #endif
 
 	switch (state.mode) {
@@ -198,7 +298,8 @@ int32_t motion_drive_h_bridge() {
 		 */
 		fsm_flag = 0;
 		current_setpoint = 0;
-		h_bridge_disable();
+		position_setpoint = 0;
+//		h_bridge_disable();
 		return 0;
 
 	case MOTION_MODE_CALIBRATE:
@@ -210,13 +311,10 @@ int32_t motion_drive_h_bridge() {
 			fsm_flag = 1;
 		}
 		if (fsm_flag == 1) {
-//			h_bridge_drive_motor(MOTION_PROBE_SPEED, !side_of_zebro,
-//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
-
 			if (side_of_zebro == 0) {
-				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
-			}else {
-				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
+//				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
+			} else {
+//				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
 			}
 			/* If the legs current position is smaller of equal to the last position, we are touching the ground.
 			 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
@@ -225,7 +323,7 @@ int32_t motion_drive_h_bridge() {
 				/* wait for position to hold */
 				if (stop_and_return_timing_measurement(400)) {
 					h_bridge_disable();
-					current_setpoint = 0;
+//					current_setpoint = 0;
 					fsm_flag = 2;
 				}
 			} else {
@@ -235,13 +333,10 @@ int32_t motion_drive_h_bridge() {
 		}
 		if (fsm_flag == 2) {
 			static uint16_t n = 0;
-//			h_bridge_drive_motor(MOTION_PROBE_SPEED, side_of_zebro,
-//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
-
 			if (side_of_zebro == 0) {
-				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
-			}else {
-				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
+//				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
+			} else {
+//				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
 			}
 			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
 				adc_data[n] = adc_get_value(2); /* We're only interested in the value of the 3rd hall sensor */
@@ -258,7 +353,7 @@ int32_t motion_drive_h_bridge() {
 				/* wait for position data */
 				if (stop_and_return_timing_measurement(400)) {
 					h_bridge_disable();
-					current_setpoint = 0;
+//					current_setpoint = 0;
 					/* Calculate the standard deviation of the collected samples. */
 					std_var = std_var_stable(adc_data, n);
 					fsm_flag = 3;
@@ -273,17 +368,14 @@ int32_t motion_drive_h_bridge() {
 			fsm_flag = 4;
 		}
 		if (fsm_flag == 4) {
-//			h_bridge_drive_motor(MOTION_PROBE_SPEED, !side_of_zebro,
-//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
-
 			if (side_of_zebro == 0) {
-				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
-			}else {
-				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
+//				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
+			} else {
+//				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
 			}
 			if (get_peak_detected(2) == 1) {
 				h_bridge_disable();
-				current_setpoint = 0;
+//				current_setpoint = 0;
 				encoder_reset_position();
 				last_known_position = encoder_get_position();
 				set_calibrate(0);
@@ -322,18 +414,18 @@ int32_t motion_drive_h_bridge() {
 		/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
 	case MOTION_MODE_WALK_FORWARD:
 		/* current setpoint should be between -1000 and 1000 for an amp */
-		start_timing_measurement();
-		if (stop_and_return_timing_measurement(2) == 1) {
-			if ((current_setpoint == -1000) | (current_setpoint == 0)) {
-				interrupts_disable();
-				current_setpoint = 1000;
-				interrupts_enable();
-			}else if (current_setpoint == 1000) {
-				interrupts_disable();
-				current_setpoint = -1000;
-				interrupts_enable();
-			}
-		}
+//		start_timing_measurement();
+//		if (stop_and_return_timing_measurement(2) == 1) {
+//			if ((current_setpoint == -1000) | (current_setpoint == 0)) {
+//				interrupts_disable();
+//				current_setpoint = 1000;
+//				interrupts_enable();
+//			} else if (current_setpoint == 1000) {
+//				interrupts_disable();
+//				current_setpoint = -1000;
+//				interrupts_enable();
+//			}
+//		}
 //		lift_off_time = (state.lift_off_time_a * 4)
 //				+ (state.lift_off_time_b * 1000);
 //		touch_down_time = (state.touch_down_time_a * 4)
@@ -374,7 +466,7 @@ int32_t motion_drive_h_bridge() {
 		break;
 
 	case MOTION_MODE_WALK_BACKWARD:
-		current_setpoint = 1000;
+//		current_setpoint = 1000;
 		break;
 
 	case MOTION_MODE_CONTINUOUS_ROTATION:
@@ -648,22 +740,27 @@ int32_t motion_drive_h_bridge() {
 //#endif
 //	return status;
 //}
-
 /* Set the setpoint for current */
-void set_current_setpoint (int32_t value) {
+void set_current_setpoint(int32_t value) {
 	current_setpoint = value;
 }
 
 /* Get the setpoint for current */
-int32_t get_current_setpoint (void) {
+int32_t get_current_setpoint(void) {
+	if (current_setpoint >= INT16_MAX) {
+		current_setpoint = INT16_MAX;
+	}
+	if (current_setpoint <= INT16_MIN) {
+		current_setpoint = INT16_MIN;
+	}
 	return current_setpoint;
 }
 
-uint8_t get_state_mode (void) {
+uint8_t get_state_mode(void) {
 	return state.mode;
 }
 
-void set_state_mode (uint8_t mode) {
+void set_state_mode(uint8_t mode) {
 	state.mode = mode;
 	return;
 }

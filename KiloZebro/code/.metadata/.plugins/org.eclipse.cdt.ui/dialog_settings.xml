@@ -8,8 +8,8 @@
 		<item value="321" key="DIALOG_Y_ORIGIN"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
-		<item value="164" key="size.height"/>
-		<item value="800" key="size.width"/>
+		<item value="152" key="size.height"/>
+		<item value="788" key="size.width"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
 	</section>
@@ -17,6 +17,11 @@
 		<item value="false" key="caseSensitive"/>
 		<item value="227191" key="searchFlags"/>
 		<list key="previousPatterns">
+			<item value="VREGS_CURRENT_SETPOINT"/>
+			<item value="TIM1"/>
+			<item value="DEBUG_VREGS"/>
+			<item value="VREGS_CURRENT_CONTROL_KP"/>
+			<item value="vregs_write"/>
 			<item value="errors_emergency_stop"/>
 			<item value="interrupts_disable"/>
 			<item value="interrupts"/>

@@ -34,7 +34,7 @@ void encoder_init(void) {
 	TIM_HandleTypeDef timer;
 
 	timer.Instance = TIM3;
-	timer.Init.Period = 0xFFFF; /* Count up to max int16 and so on */
+	timer.Init.Period = 0xFFFF; /* Count up to max uint16 and so on */
 	timer.Init.CounterMode = TIM_COUNTERMODE_UP; // Counter increments and decrements according to DIR bit.
 //	timer.Init.Prescaler = 1;
 //	timer.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -94,7 +94,7 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
  * Stores 16 bits of the position value in the vregs
  */
 void encoder_write_to_vregs(void) {
-	uint16_t counter_value; // Counter value is max 16 bits according to datasheet. Tested and it's true.
+	int16_t counter_value; // Counter value is max 16 bits according to datasheet. Tested and it's true.
 	counter_value = TIM3->CNT;
 #ifdef DEBUG_VREGS
 	vregs_write(VREGS_ENCODER_POSITION_A, (uint8_t) (counter_value));

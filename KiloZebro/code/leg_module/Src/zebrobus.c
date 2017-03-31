@@ -250,12 +250,24 @@ struct zebrobus_write_request zebrobus_get_write_request() {
 				break;
 
 				case VREGS_POSITION_CONTROL_KP:
+					motion_position_control_set_kp(request.data);
+#ifdef DEBUG_VREGS
+					vregs_write(VREGS_POSITION_CONTROL_KP, motion_position_control_get_kp());
+#endif
 				break;
 
 				case VREGS_POSITION_CONTROL_KI:
+					motion_position_control_set_ki(request.data);
+#ifdef DEBUG_VREGS
+					vregs_write(VREGS_POSITION_CONTROL_KI, motion_position_control_get_ki());
+#endif
 				break;
 
 				case VREGS_POSITION_CONTROL_KD:
+					motion_position_control_set_kd(request.data);
+#ifdef DEBUG_VREGS
+					vregs_write(VREGS_POSITION_CONTROL_KD, motion_position_control_get_kd());
+#endif
 				break;
 
 				case VREGS_TEST_FIELD:
