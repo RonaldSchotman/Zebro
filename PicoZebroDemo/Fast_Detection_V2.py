@@ -18,6 +18,8 @@ import threading                        # Library for Multithreading
 import serial                           # Import serial uart library for raspberry pi
 import math                             # mathematical functions library
 
+import random
+
 import sys
 
 # import the necessary packages for tracking
@@ -131,7 +133,7 @@ class Control_Zebro_Thread(threading.Thread):
                 #Angle = self.q_Pico_Angle.get(block=True, timeout=None)
                 
                 
-                if (Middle_point_x == 0) or (Middle_Point_y == 0):
+                if (Middle_point_x == 0) or (Middle_point_y == 0):
                     Last_Movement == "Stop"
                     
                 else:
@@ -1312,10 +1314,10 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
             for (i, c) in enumerate(cnts):
                 # draw the bright spot on the image
                 (x, y, w, h) = cv2.boundingRect(c)
-                x_compare_1 = x + 30
-                y_compare_1 = y + 30
-                x_compare_2 = x - 30
-                y_compare_2 = y - 30
+                x_compare_1 = x + 80
+                y_compare_1 = y + 50
+                x_compare_2 = x - 80
+                y_compare_2 = y - 50
                 if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):
                     cv2.putText(image, "#1", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
                     Zebro_1_Middle_x = x
