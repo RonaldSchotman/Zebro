@@ -17,8 +17,10 @@ print ("Now Writing")
 Test = "This is a test"
 
 Test = Test.encode('utf-8')
+print(Test)
 ser.write(Test)
 x = ser.readline()
+
 print ("Did write, now read")
 x = x.decode('utf-8')
 print(x)

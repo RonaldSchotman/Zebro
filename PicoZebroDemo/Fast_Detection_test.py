@@ -382,6 +382,34 @@ def main():
                 except AttributeError:
                     print("Nothing Found")
                     pass
+            #areaArray_Led_1 = []
+            #areaArray_Led_3 = []
+                
+            #for i, c in enumerate(contours_Led_1):
+            #    area_led_1 = cv2.contourArea(c)
+            #    areaArray_Led_1.append(area_led_1)
+
+            #for i, c in enumerate(contours_Led_3):
+            #    area_led_3 = cv2.contourArea(c)
+            #    areaArray_Led_3.append(area_led_3)
+
+            #sorteddata_Led_1 = sorted(zip(areaArray_Led_1, contours_Led_1), key=lambda x: x[0], reverse=True)
+            #sorteddata_Led_3 = sorted(zip(areaArray_Led_3, contours_Led_3), key=lambda x: x[0], reverse=True)
+
+            #try:
+            #    Largest_contour_led_1 = sorteddata_Led_1[0][1]
+            #    [x_Led_1,y_Led_1,w_Led_1,h_Led_1] = cv2.boundingRect(Largest_contour_led_1)
+            #except (IndexError, cv2.error) as e:
+            #    print("Nothing Found")
+            #    pass
+
+            #try:
+            #    Largest_contour_led_3 = sorteddata_Led_3[0][1]
+            #    [x_Led_3,y_Led_3,w_Led_3,h_Led_3] = cv2.boundingRect(Largest_contour_led_3)
+            #except (IndexError, cv2.error) as e:
+            #    print("Nothing Found")
+            #    pass
+            
             #Add led 1 and 3 together for Testing purposes
             LEDS_Image = cv2.addWeighted(Difference_led_1,1,Difference_led_3,1,0)
             cv2.imshow("LEds together", LEDS_Image)
