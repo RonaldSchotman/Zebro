@@ -1,0 +1,35 @@
+In order to compile this beauty:
+
+The ncurses and the wiringPi libraries need to be installed. 
+
+Main file: 
+KiloHeaderFileTest.cpp
+The main file uses the other files to get the whole system working (the Zebro walking)
+
+Compilation code (in order to make the KiloHeaderFileTest.exe):
+
+g++ -Wall -o ./KiloHeaderFileTest ./Gaits.cpp ./Decisions.cpp ./Supporting.cpp ./Communications.cpp ./MaxPlusCalc.cpp ./KiloHeaderFileTest.cpp -lwiringPi -lncurses  -std=c++11
+
+
+For the compilation, multiple different files are used, here are some short summaries:
+
+Communications.(cpp/h) C++/header file. 
+Uses the options given by WiringPi to communicate using I2C commands. Needs cleanup.
+
+Decisions.(cpp/h) C++/header file. 
+Makes decisions about gaits that need to be used, currently dummy function.
+
+Gaits.(cpp/h) C++/header file. 
+Defines the Max-Plus gait matrices, as well as the calculations done to define the A-matrix
+
+MaxPlusCalc.(cpp/h) C++/header file. 
+Supplies the Max-Plus calculation algorithms used by Gaits and the Main File.
+
+Supporting.(cpp/h) C++/header file. 
+Supplies the back-up programs that make sure the code runs. Also for programs without category
+
+
+
+
+
+
