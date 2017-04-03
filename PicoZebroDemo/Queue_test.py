@@ -3,7 +3,7 @@ import queue
 import threading
 
 
-@functools.total_ordering
+#@functools.total_ordering
 class Job:
 
     def __init__(self, priority, description):

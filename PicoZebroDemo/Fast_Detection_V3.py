@@ -43,13 +43,70 @@ rawCapture = PiRGBArray(camera, size=(1648, 928))
 # allow the camera to warmup.
 time.sleep(0.1)
 
+class UART_Thread(threading.Thread):
+    def __init__(self,q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main):
+        ''' Constructor. of UART Thread '''
+        threading.Thread.__init__(self)
+
+        self.daemon = True
+        self.q_Control_Serial_Write = q_Control_Serial_Write
+        self.q_Data_is_Send = q_Data_is_Send
+        self.q_Control_Uart_Main = q_Control_Uart_Main
+
+        self.start()
+
+    def run(self):
+        while True:
+            Sended_Data = 0
+            
+            if (self.q_Control_Serial_Write.empty() == False) or (Sended_Data == 1):
+                Sended_Data = 1
+                Serial = self.q_Control_Serial_Write.get(block=False)
+                print(Serial)
+                
+                if Serial[1][0] == "Main":
+                    Writing_To = Serial[1][1]
+                    Writing_To = Writing_To.encode('utf-8')
+                    
+                    Writing = Serial[1][2]
+                    Writing = Writing.encode('utf-8')
+
+                    #ser.write(Writing_To+Writing)
+                    ser.write(Writing_To)
+                    ser.write(Writing)
+                    Sended_Data = 0
+                    print("Main_Writing")
+                    
+                    #Data_is_Send_Token = 1
+                    #self.q_Data_is_Send.put(Data_is_Send_Token)
+                    
+                elif Serial[1][0] == "Pico_N1":
+                    Writing_To = Serial[1][1]
+                    Writing_To = Writing_To.encode('utf-8')
+                    
+                    Writing = Serial[1][2]
+                    Writing = Writing.encode('utf-8')
+
+                    #ser.write(Writing_To+Writing)
+                    ser.write(Writing_To)
+                    ser.write(Writing)
+                    Sended_Data = 0
+                    print("Pico_Zebro_1_Writing")
+                    
+                elif (Sended_Data == 1):
+                    Sended_Data = 0
+
 class Control_Zebro_Thread(threading.Thread):
-    def __init__(self,Serial_Lock, Zebro, q_PicoZebro, q_Pico_Direction, q_Pico_Angle):
+    def __init__(self,q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main, Zebro, q_PicoZebro, q_Pico_Direction, q_Pico_Angle):
         ''' Constructor. of Control Thread '''
         threading.Thread.__init__(self)
 
         self.daemon = True
-        self.Serial_Lock = Serial_Lock
+
+        self.q_Control_Serial_Write = q_Control_Serial_Write
+        self.q_Data_is_Send = q_Data_is_Send
+        self.q_Control_Uart_Main = q_Control_Uart_Main
+
         self.Zebro = Zebro  #Name of the Zebro
 
         self.q_PicoZebro = q_PicoZebro
@@ -63,29 +120,27 @@ class Control_Zebro_Thread(threading.Thread):
         Connected = 0
         Sleep = 0
         Last_Movement = "Stop"
-        #time.sleep(2)
+
+        Middle_point_x = 0
+        Middle_point_y = 0
+        Movement_Blocked = 0
+        DONT_Send = 0
+        Blocked_Direction = []
+        Current_Direction = ""
         while True:
             if Connected == 0:
                 Last_Movement = "Stop"
 
                 Connected_Devices = []
-                
-                # Obtain Serial condition
-                self.Serial_Lock.acquire(blocking=True, timeout=-1)
-                #self.Serial_Lock.acquire(blocking=True, timeout=None)
-                #self.Serial_Lock.mutex.acquire()
-                print(self.Zebro+" acquired Lock")
 
-                Writing = "Connected_devices"
-                Writing = Writing.encode('utf-8')
-                ser.write(Writing)
-                time.sleep(0.2)   # Wait for sending of data (depends on Arduino)
-                Connected_Devices = ser.readline()
-                Connected_Devices = Connected_Devices.decode('utf8')
-                
+                while (self.q_Control_Uart_Main.empty() == False): #Wait untill you are allowed to write again.
+                    pass
+                        
+                if (self.q_Control_Uart_Main.empty() == True):
+                    Writing = (self.Zebro,self.Zebro, "Connected_Devices")        
+                    self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
                 print(self.Zebro+" Released Lock")
-                #self.Serial_Lock.mutex.release()
-                self.Serial_Lock.release()
+
                 
                 # Release serial Connection
                 for Connected_D in Connected_Devices:
@@ -105,12 +160,12 @@ class Control_Zebro_Thread(threading.Thread):
                         Connected = 0
                         Sleep = 1
                 print(Connected_Devices)
-                if Connected_Devices == "":
+                if not Connected_Devices:
                     Sleep = 1
                     
                 if Sleep == 1:
                     print("SLEEEPING")
-                    #time.sleep(60) # only here is sleeping allowed considering it is not connected anyway and only every 60 seconds needs to check
+                    time.sleep(60) # only here is sleeping allowed considering it is not connected anyway and only every 60 seconds needs to check
                     Sleep = 0
                 
             if Connected == 1:
@@ -229,41 +284,29 @@ class Control_Zebro_Thread(threading.Thread):
                             DONT_Send = 1
                             
                     if DONT_Send == 1:
-                        # Obtain Serial Write
-                        #self.Serial_Lock.mutex.acquire()
-                        self.Serial_Lock.acquire(blocking=True, timeout=-1)
-                        #self.Serial_Lock.acquire(blocking=True, timeout=None)
-                        print(self.Zebro+" acquired Lock")
+                        #Check if Main is writing in Uart. If so wait untill main is finished
+                        while (self.q_Control_Uart_Main.empty() == False): #Wait untill you are allowed to write again.
+                            pass
                         
-                        Writing = (self.Zebro + " Stop")
-                        Writing = Writing.encode('utf-8')
-                        ser.write(Writing)
-
-                        print(self.Zebro+" Released Lock")
-                        self.Serial_Lock.release()
-                        #self.Serial_Lock.mutex.release()
-                        # Release Serial Write
+                        if self.q_Control_Uart_Main.empty() == True:
+                            Writing = (self.Zebro,self.Zebro, "Stop")
+                            
+                            self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
+                            print(Writing)
                     else:
-                        # Obtain Serial Write
-                        #self.Serial_Lock.mutex.acquire()
-                        self.Serial_Lock.acquire(blocking=True, timeout=-1)
-                        #self.Serial_Lock.acquire(blocking=True, timeout=None)
-                        print(self.Zebro+" acquired Lock")
+                        #Check if Main is writing in Uart. If so wait untill main is finished
+                        while (self.q_Control_Uart_Main.empty() == False): #Wait untill you are allowed to write again.
+                            pass
                         
-                        Writing = (self.Zebro + Movement)
-                        Writing = Writing.encode('utf-8')
-                        ser.write(Writing)
+                        if self.q_Control_Uart_Main.empty() == True:
+                            Writing = (self.Zebro,self.Zebro, Movement)
+                            self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
+                            print(Writing)
                         
-                        print(self.Zebro+" Released Lock")
-                        self.Serial_Lock.release()
-                        #self.Serial_Lock.mutex.release()
-                        # Release Serial Write
                         Last_Movement = Movement
                         Current_Direction = Direction
                         
                     DONT_Send = 0
-                    
-
 
 # Functions For looking for Pico Zebro
 def Image_Difference(Image):
@@ -333,7 +376,8 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):
 
 
 
-def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_PicoZebro_5,q_PicoZebro_6,q_PicoZebro_7,q_PicoZebro_8,q_PicoZebro_9,q_PicoZebro_10,
+def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,
+         q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_PicoZebro_5,q_PicoZebro_6,q_PicoZebro_7,q_PicoZebro_8,q_PicoZebro_9,q_PicoZebro_10,
          q_PicoZebro_11,q_PicoZebro_12,q_PicoZebro_13,q_PicoZebro_14,q_PicoZebro_15,q_PicoZebro_16,q_PicoZebro_17,q_PicoZebro_18,q_PicoZebro_19,q_PicoZebro_20,
          q_Pico_Direction_1,q_Pico_Direction_2,q_Pico_Direction_3,q_Pico_Direction_4,q_Pico_Direction_5,q_Pico_Direction_6,q_Pico_Direction_7,q_Pico_Direction_8,q_Pico_Direction_9,q_Pico_Direction_10,
          q_Pico_Direction_11,q_Pico_Direction_12,q_Pico_Direction_13,q_Pico_Direction_14,q_Pico_Direction_15,q_Pico_Direction_16,q_Pico_Direction_17,q_Pico_Direction_18,q_Pico_Direction_19,q_Pico_Direction_20,
@@ -364,16 +408,33 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
             #Like this with condition. With I am writing now on the serial Bus. The rest needs to wait for me. (So all zebro Thread wait with sending next movement.)
             #Release condition only at end so the Zebro Treads cannot interfere, This is at Picture 4.
 
-            Serial_Lock.acquire(blocking=True, timeout=-1)
-            #Serial_Lock.acquire(blocking=True, timeout=None)
-            #Serial_Lock.mutex.acquire()
-            print("MAIN Acquired LOCK")
-            Writing_0 = ("Global Stop")
-            Writing_0 = Writing_0.encode('utf-8')
-            ser.write(Writing_0)
-            Writing_1 = ("Global Leds_off")
-            Writing_1 = Writing_1.encode('utf-8')
-            ser.write(Writing_1)
+            if q_Control_Uart_Main.empty() == True:   #if the queue is empty fill it 
+                Main_Control_Uart = 1
+                print("MAIN Acquired LOCK")
+                q_Control_Uart_Main.put((1), Main_Control_Uart)
+                
+            elif q_Control_Uart_Main.empty() == False: #else empty it before filling it again with the next data.
+                Main_Control_Uart = 1
+                q_Control_Uart_Main.mutex.acquire()
+                q_Control_Uart_Main.queue.clear()
+                q_Control_Uart_Main.all_tasks_done.notify_all()
+                q_Control_Uart_Main.unfinished_tasks = 0
+                q_Control_Uart_Main.mutex.release()
+                q_Control_Uart_Main.put(1, Main_Control_Uart)
+ 
+            if q_Control_Serial_Write.empty() == False: #empty all data and let the Pico Zebro's redo their stuff
+                q_Control_Serial_Write.mutex.acquire()
+                q_Control_Serial_Write.queue.clear()
+                q_Control_Serial_Write.all_tasks_done.notify_all()
+                q_Control_Serial_Write.unfinished_tasks = 0
+                q_Control_Serial_Write.mutex.release()
+
+            Writing = ("Main","Global", "Stop")
+            q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
+            print("writing to serial")
+                
+            Writing = ("Main","Global", "Leds_off")            
+            q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
             
             time.sleep(0.001)
             Zebro_1_Middle_x = 0
@@ -438,7 +499,7 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
             PicoZebro_20 = []
             
             cv2.imwrite("Image%s.jpg"%Picture, image)   # Save a picture to Image1.jpg
-            time.sleep(10)
+            #time.sleep(10)
             Original = cv2.imread("Image1.jpg")     # This is the original picture where the diferences will be compared with.
         
         if Picture == 2:    # Make Picture 2 for taking Picture 2 with Led 1 on.
@@ -447,35 +508,32 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
             Devices_Serial = Devices + 1
 
             #If Correctly done we still have the lock of Serial Write/read
-            Writing_2 = ("PicoN%s Led1_on" % Devices_Serial)
-            Writing_2 = Writing_2.encode('utf-8')
-            ser.write(Writing_2)
+            Writing = ("Main","PicoN%s"% Devices_Serial, "Led1_on")            
+            q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
 
             time.sleep(0.001)
             #Wait until said back in register it is turned on for certain time (Now it is a hard wait)
             
             cv2.imwrite("Image%s.jpg"%Picture, image)   # Take the second picture with led 1 on. Which is
-            time.sleep(10)
+
             #If Correctly done we still have the lock of Serial Write/read
-            Writing_3 = ("PicoN%s Leds_off\n" % Devices_Serial)
-            Writing_3 = Writing_3.encode('utf-8')
-            ser.write(Writing_3) # Turn led 1 of again
+            Writing = ("Main","PicoN%s"% Devices_Serial, "Leds_off") # Turn led 1 of again         
+            q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
 
          #Again do some other stuff
         if Picture == 3:
             print("Picture %d"%Picture)
+
             #If Correctly done we still have the lock of Serial Write/read
-            Writing_4 = ("PicoN%s Led3_on\n" % Devices_Serial)
-            Writing_4 = Writing_4.encode('utf-8')
-            ser.write(Writing_4) # Turn led 3 on
+            Writing = ("Main","PicoN%s"% Devices_Serial, "Led3_on") # Turn led 3 on            
+            q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
 
             #Wait until said back in register it is turned on for certain time (Now it is a hard wait)
             time.sleep(0.001)
             cv2.imwrite("Image%s.jpg"%Picture, image)
-            time.sleep(10)
-            Writing_5 = ("PicoN%s Leds_off\n" % Devices_Serial)
-            Writing_5 = Writing_5.encode('utf-8')
-            ser.write(Writing_5) # Turn led 1 of again
+
+            Writing = ("Main","PicoN%s"% Devices_Serial, "Leds_off") # Turn led 3 of again         
+            q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
             
         if Picture == 4:
             print("Picture %d"%Picture)
@@ -707,7 +765,7 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
         if Picture == 5:
             Devices = 0
             #once every value for every possible Zebro is determind then
-            for Zebros in range(19): # total of maximum of 20 Zebro's so 0-19 is 20 Zebro's
+            for Zebros in range(20): # total of maximum of 20 Zebro's so 0-19 is 20 Zebro's
                 Blocking_Zebro = []   #Here will be the blocking in
                 if Zebros == 0:
                     Blocking_Zebro = Block.Block_1(Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
@@ -1282,21 +1340,32 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
                         q_Pico_Direction_20.unfinished_tasks = 0
                         q_Pico_Direction_20.mutex.release()
                         q_Pico_Direction_20.put(Direction_Zebro_20)
+
+                        
                     #PicoZebro_20[Zebro_20_Middle_x , Zebro_20_Middle_y, Blocking_Zebro, Direction_Zebro_20, Angle_Zebro_20]
-                    Writing_6 = ("Global Leds_off")
-                    Writing_6 = Writing_6.encode('utf-8')
-                    ser.write(Writing_6) # Turn led 1 of again
-                    
-                    Writing_7 = ("Global Led1_on")
-                    Writing_7 = Writing_7.encode('utf-8')
-                    ser.write(Writing_7)
-                    print ("My program took", time.time() - start_time, "to run")   #print how long it took
+                    print(PicoZebro_1)
+                    print(Direction_Zebro_1)
+                    Picture = 6
+                    Writing = ("Main","Global", "Leds_off")            
+                    q_Control_Serial_Write.put((1, Writing), block=True, timeout=None) # Turn leds of again
+
+                    Writing = ("Main","Global", "Led1_on")            
+                    q_Control_Serial_Write.put((1, Writing), block=True, timeout=None) # Turn led 1 on again
+
                     print("MAIN RELEASE SERIAL LOCK")
                     #Serial_Lock.mutex.release()
-                    Serial_Lock.release()
+                    #Serial_Lock.release()
+                    
+                    if q_Control_Uart_Main.empty() == False: #empty it so the pico can write again
+                        q_Control_Uart_Main.mutex.acquire()
+                        q_Control_Uart_Main.queue.clear()
+                        q_Control_Uart_Main.all_tasks_done.notify_all()
+                        q_Control_Uart_Main.unfinished_tasks = 0
+                        q_Control_Uart_Main.mutex.release()
+                        
                     # Release Condition Serial Write. (Now movement can start.)
                     Picture_1_start_time = time.time() # Testing Function for how long a part of a code takes.
-                    
+                    print(Picture_1_start_time)
         if Picture == 6:
             #Global Command Turn all leds off
             #Glabal Command turn all led 1 on.  #Do this once
@@ -1319,7 +1388,8 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
                 cnts = contours.sort_contours(cnts)[0]
             except ValueError:
                 pass
-                #print("There are no zebros")
+                print("There are no zebros")
+                time.sleep(1)
              
             # loop over the contours
             for (i, c) in enumerate(cnts):
@@ -1429,7 +1499,7 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
                     Zebro_20_Middle_y = y
                     print("This is Zebro 20")
                     cv2.putText(image, "#20", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-            for Zebros in range(19):
+            for Zebros in range(20):
                 Blocking_Zebro = []   #Here will be the blocking in
                 if Zebros == 0:
                     Blocking_Zebro = Block.Block_1(Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
@@ -1816,14 +1886,14 @@ if __name__ == '__main__':
         print("Couldnt open UART")
         sys.exit("aa! errors!")
 
-    maxconnections = 1
-    # ...
-    #pool_sema = BoundedSemaphore(value=maxconnections)
-    #Serial_Lock = BoundedSemaphore(value=maxconnections)
-    #Serial_Lock = threading.Semaphore(value=maxconnections)
-    #Serial_Lock = threading.Lock()
-    Serial_Lock = queue.PriorityQueue()
-    #Serial_Lock = queue.Queue()
+    q_Control_Uart_Main = queue.PriorityQueue(maxsize=1) # This is a 1 or 0 Determined by the main.
+    
+    q_Control_Serial_Write = queue.PriorityQueue(maxsize=1) # In here is the data for serial Write.
+    #q_Control_Serial_Write[0] = Which Device/thread is writing
+    #q_Control_Serial_Write[1] = To which Device is writing
+    #q_Control_Serial_Write[2] = Wat the data is
+    
+    q_Data_is_Send = queue.PriorityQueue(maxsize=1)
 
     # All Queue objects Constructor for a FIFO queue
     # These Queue objects are only data obtained by main loop and read by Pico Zebro loops.
@@ -1913,69 +1983,73 @@ if __name__ == '__main__':
     Pico_N18 = "Pico_N18"
     Pico_N19 = "Pico_N19"
     Pico_N20 = "Pico_N20"
+
+    # Start Uart Thread
+    UART_Thread_1 = UART_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main)
+    UART_Thread_1.setName('UART_Thread')
     
     # Start all Pico Zebro Threads.
-    Pico_Zebro_1 = Control_Zebro_Thread(Serial_Lock,Pico_N1,q_PicoZebro_1,q_Pico_Direction_1,q_Pico_Angle_1)
+    Pico_Zebro_1 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N1,q_PicoZebro_1,q_Pico_Direction_1,q_Pico_Angle_1)
     Pico_Zebro_1.setName('Pico_Zebro_1')
 
-    Pico_Zebro_2 = Control_Zebro_Thread(Serial_Lock,Pico_N2,q_PicoZebro_2,q_Pico_Direction_2,q_Pico_Angle_2)
+    Pico_Zebro_2 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N2,q_PicoZebro_2,q_Pico_Direction_2,q_Pico_Angle_2)
     Pico_Zebro_2.setName('Pico_Zebro_2')
 
-    Pico_Zebro_3 = Control_Zebro_Thread(Serial_Lock,Pico_N3,q_PicoZebro_3,q_Pico_Direction_3,q_Pico_Angle_3)
+    Pico_Zebro_3 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N3,q_PicoZebro_3,q_Pico_Direction_3,q_Pico_Angle_3)
     Pico_Zebro_3.setName('Pico_Zebro_3')
     
-    Pico_Zebro_4 = Control_Zebro_Thread(Serial_Lock,Pico_N4,q_PicoZebro_4,q_Pico_Direction_4,q_Pico_Angle_4)
+    Pico_Zebro_4 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N4,q_PicoZebro_4,q_Pico_Direction_4,q_Pico_Angle_4)
     Pico_Zebro_4.setName('Pico_Zebro_4')
     
-    Pico_Zebro_5 = Control_Zebro_Thread(Serial_Lock,Pico_N5,q_PicoZebro_5,q_Pico_Direction_5,q_Pico_Angle_5)
+    Pico_Zebro_5 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N5,q_PicoZebro_5,q_Pico_Direction_5,q_Pico_Angle_5)
     Pico_Zebro_5.setName('Pico_Zebro_5')
     
-    Pico_Zebro_6 = Control_Zebro_Thread(Serial_Lock,Pico_N6,q_PicoZebro_6,q_Pico_Direction_6,q_Pico_Angle_6)
+    Pico_Zebro_6 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N6,q_PicoZebro_6,q_Pico_Direction_6,q_Pico_Angle_6)
     Pico_Zebro_6.setName('Pico_Zebro_6')
     
-    Pico_Zebro_7 = Control_Zebro_Thread(Serial_Lock,Pico_N7,q_PicoZebro_7,q_Pico_Direction_7,q_Pico_Angle_7)
+    Pico_Zebro_7 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N7,q_PicoZebro_7,q_Pico_Direction_7,q_Pico_Angle_7)
     Pico_Zebro_7.setName('Pico_Zebro_7')
     
-    Pico_Zebro_8 = Control_Zebro_Thread(Serial_Lock,Pico_N8,q_PicoZebro_8,q_Pico_Direction_8,q_Pico_Angle_8)
+    Pico_Zebro_8 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N8,q_PicoZebro_8,q_Pico_Direction_8,q_Pico_Angle_8)
     Pico_Zebro_8.setName('Pico_Zebro_8')
     
-    Pico_Zebro_9 = Control_Zebro_Thread(Serial_Lock,Pico_N9,q_PicoZebro_9,q_Pico_Direction_9,q_Pico_Angle_9)
+    Pico_Zebro_9 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N9,q_PicoZebro_9,q_Pico_Direction_9,q_Pico_Angle_9)
     Pico_Zebro_9.setName('Pico_Zebro_9')
     
-    Pico_Zebro_10 = Control_Zebro_Thread(Serial_Lock,Pico_N10,q_PicoZebro_10,q_Pico_Direction_10,q_Pico_Angle_10)
+    Pico_Zebro_10 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N10,q_PicoZebro_10,q_Pico_Direction_10,q_Pico_Angle_10)
     Pico_Zebro_10.setName('Pico_Zebro_10')
     
-    Pico_Zebro_11 = Control_Zebro_Thread(Serial_Lock,Pico_N11,q_PicoZebro_11,q_Pico_Direction_11,q_Pico_Angle_11)
+    Pico_Zebro_11 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N11,q_PicoZebro_11,q_Pico_Direction_11,q_Pico_Angle_11)
     Pico_Zebro_11.setName('Pico_Zebro_11')
     
-    Pico_Zebro_12 = Control_Zebro_Thread(Serial_Lock,Pico_N12,q_PicoZebro_12,q_Pico_Direction_12,q_Pico_Angle_12)
+    Pico_Zebro_12 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N12,q_PicoZebro_12,q_Pico_Direction_12,q_Pico_Angle_12)
     Pico_Zebro_12.setName('Pico_Zebro_12')
     
-    Pico_Zebro_13 = Control_Zebro_Thread(Serial_Lock,Pico_N13,q_PicoZebro_13,q_Pico_Direction_13,q_Pico_Angle_13)
+    Pico_Zebro_13 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N13,q_PicoZebro_13,q_Pico_Direction_13,q_Pico_Angle_13)
     Pico_Zebro_13.setName('Pico_Zebro_13')
     
-    Pico_Zebro_14 = Control_Zebro_Thread(Serial_Lock,Pico_N14,q_PicoZebro_14,q_Pico_Direction_14,q_Pico_Angle_14)
+    Pico_Zebro_14 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N14,q_PicoZebro_14,q_Pico_Direction_14,q_Pico_Angle_14)
     Pico_Zebro_14.setName('Pico_Zebro_14')
     
-    Pico_Zebro_15 = Control_Zebro_Thread(Serial_Lock,Pico_N15,q_PicoZebro_15,q_Pico_Direction_15,q_Pico_Angle_15)
+    Pico_Zebro_15 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N15,q_PicoZebro_15,q_Pico_Direction_15,q_Pico_Angle_15)
     Pico_Zebro_15.setName('Pico_Zebro_15')
     
-    Pico_Zebro_16 = Control_Zebro_Thread(Serial_Lock,Pico_N16,q_PicoZebro_16,q_Pico_Direction_16,q_Pico_Angle_16)
+    Pico_Zebro_16 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N16,q_PicoZebro_16,q_Pico_Direction_16,q_Pico_Angle_16)
     Pico_Zebro_16.setName('Pico_Zebro_16')
     
-    Pico_Zebro_17 = Control_Zebro_Thread(Serial_Lock,Pico_N17,q_PicoZebro_17,q_Pico_Direction_17,q_Pico_Angle_17)
+    Pico_Zebro_17 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N17,q_PicoZebro_17,q_Pico_Direction_17,q_Pico_Angle_17)
     Pico_Zebro_17.setName('Pico_Zebro_17')
     
-    Pico_Zebro_18 = Control_Zebro_Thread(Serial_Lock,Pico_N18,q_PicoZebro_18,q_Pico_Direction_18,q_Pico_Angle_18)
+    Pico_Zebro_18 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N18,q_PicoZebro_18,q_Pico_Direction_18,q_Pico_Angle_18)
     Pico_Zebro_18.setName('Pico_Zebro_18')
     
-    Pico_Zebro_19 = Control_Zebro_Thread(Serial_Lock,Pico_N19,q_PicoZebro_19,q_Pico_Direction_19,q_Pico_Angle_19)
+    Pico_Zebro_19 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N19,q_PicoZebro_19,q_Pico_Direction_19,q_Pico_Angle_19)
     Pico_Zebro_19.setName('Pico_Zebro_19')
     
-    Pico_Zebro_20 = Control_Zebro_Thread(Serial_Lock,Pico_N20,q_PicoZebro_20,q_Pico_Direction_20,q_Pico_Angle_20)
+    Pico_Zebro_20 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N20,q_PicoZebro_20,q_Pico_Direction_20,q_Pico_Angle_20)
     Pico_Zebro_20.setName('Pico_Zebro_20')
     
-    main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_PicoZebro_5,q_PicoZebro_6,q_PicoZebro_7,q_PicoZebro_8,q_PicoZebro_9,q_PicoZebro_10,
+    main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_PicoZebro_5,q_PicoZebro_6,q_PicoZebro_7,q_PicoZebro_8,q_PicoZebro_9,q_PicoZebro_10,
          q_PicoZebro_11,q_PicoZebro_12,q_PicoZebro_13,q_PicoZebro_14,q_PicoZebro_15,q_PicoZebro_16,q_PicoZebro_17,q_PicoZebro_18,q_PicoZebro_19,q_PicoZebro_20,
          q_Pico_Direction_1,q_Pico_Direction_2,q_Pico_Direction_3,q_Pico_Direction_4,q_Pico_Direction_5,q_Pico_Direction_6,q_Pico_Direction_7,q_Pico_Direction_8,q_Pico_Direction_9,q_Pico_Direction_10,
          q_Pico_Direction_11,q_Pico_Direction_12,q_Pico_Direction_13,q_Pico_Direction_14,q_Pico_Direction_15,q_Pico_Direction_16,q_Pico_Direction_17,q_Pico_Direction_18,q_Pico_Direction_19,q_Pico_Direction_20,

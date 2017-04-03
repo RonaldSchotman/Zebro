@@ -43,6 +43,69 @@ rawCapture = PiRGBArray(camera, size=(1648, 928))
 # allow the camera to warmup.
 time.sleep(0.1)
 
+class UART_Thread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+        self.daemon = True
+
+        self.Serial_Lock = Serial_Lock
+        
+        self.start()
+
+    def run(self):
+        Sended_Data = 0
+        Serial = Serial_Lock.get(blocking=False)
+        
+        if (self.Serial_Lock.empty() == False) or (Sended_Data == 1):
+            Sended_Data = 1
+            
+            if Serial[0] == "Main":
+                Writing_To = Serial[1]
+                Writing_To = Writing_To.encode('utf-8')
+                
+                Writing = Serial[2]
+                Writing = Writing.encode('utf-8')
+
+                #ser.write(Writing_To+Writing)
+                ser.write(Writing_To)
+                ser.write(Writing)
+                Sended_Data = 0
+                print("Main_Writing")
+                Data_is_Send_Token = 1
+                Data_is_Send.put(Data_is_Send_Token)
+                
+            elif Serial[0] == "P1":
+                Writing_To = Serial[1]
+                Writing_To = Writing_To.encode('utf-8')
+                
+                Writing = Serial[2]
+                Writing = Writing.encode('utf-8')
+
+                #ser.write(Writing_To+Writing)
+                ser.write(Writing_To)
+                ser.write(Writing)
+                Sended_Data = 0
+                print("Pico_Zebro_1_Writing")
+                
+                
+        elif Serial.empty()== True:
+            time.sleep(0.01)
+
+
+
+            if q_PicoZebro_1.empty() == True:   #if the queue is empty fill it
+                        q_PicoZebro_1.put(PicoZebro_1)
+                    elif q_PicoZebro_1.empty() == False: #else empty it before filling it again with the next data.
+                        q_PicoZebro_1.mutex.acquire()
+                        q_PicoZebro_1.queue.clear()
+                        q_PicoZebro_1.all_tasks_done.notify_all()
+                        q_PicoZebro_1.unfinished_tasks = 0
+                        q_PicoZebro_1.mutex.release()
+                        q_PicoZebro_1.put(PicoZebro_1)
+                        
+        
+        
 class Control_Zebro_Thread(threading.Thread):
     def __init__(self,Serial_Lock, Zebro, q_PicoZebro, q_Pico_Direction, q_Pico_Angle):
         ''' Constructor. of Control Thread '''
