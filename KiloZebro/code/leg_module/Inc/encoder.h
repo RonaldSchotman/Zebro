@@ -33,7 +33,7 @@ void encoder_write_to_vregs(void);
 int16_t encoder_get_position(void);
 void encoder_reset_position(void);
 //void TIM3_IRQHandler(void);
-//void encoder_set_position_mid(void);
+void encoder_set_position_mid(void);
 uint8_t encoder_get_direction(void);
 
 #endif /* __ENCODER_H__ */

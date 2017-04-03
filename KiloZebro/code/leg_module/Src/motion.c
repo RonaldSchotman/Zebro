@@ -19,6 +19,7 @@
  * 06-03-2017		Floris Rouwen		florisrouwen@outlook.com
  */
 
+#include "stm32f0xx_hal.h"
 #include "stdint.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,7 +47,7 @@ static uint16_t lift_off_position = 0;
 static uint16_t last_known_position = 0;
 static uint8_t side_of_zebro = 0;
 //static uint32_t increasing_delay = 0;
-static uint8_t kp = 0, ki = 0, kd = 0;
+static uint8_t kp = 150, ki = 180, kd = 30;
 /* current setpoint. This is a setpoint between -2^15 and 2^15 */
 static int32_t current_setpoint;
 static int16_t position_setpoint;
@@ -147,38 +148,41 @@ void motion_control_position(void) {
 	dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically */
 	time_prev = time17_get_time();
 	error_position = position_setpoint - encoder_get_position(); /* there are 910 pulses in one circle, the error will typically be 1/14th of that is our guess = 65 ticks*/
-	error_integral += (dt * error_position) / (48000000>>15);
+	error_integral += (dt * error_position) / (48000000 >> 15);
 	if (counter == 10) {
-		error_derivative = ((error_position - error_position_prev)); /* to little accuracy on the encoder for real d. The max value is 1. */
+		error_derivative = ((error_position - error_position_prev)); /* to little accuracy on the encoder for real d. The max value is 2 or 3. */
 		error_position_prev = error_position;
 		counter = 0;
-//		dt_d = 0;
 	} else {
-//		dt_d += dt;
 		counter++;
 	}
 	/* current setpoint. This is a setpoint between -2^15 and 2^15 */
-	current_setpoint = ((kp * error_position) + (ki * (error_integral>>15))
-			+ (kd * error_derivative));
+	current_setpoint = ((kp * error_position) + (ki * (error_integral >> 13))
+			+ (kd * 40 * error_derivative));
 
 	/* max current_setpoint is INT16_MAX*/
-	if (current_setpoint > INT16_MAX) {
-		current_setpoint = INT16_MAX;
-		if (((kp * error_position)) < INT16_MAX) {
-			error_integral = ((((INT16_MAX) - (kp * error_position))<<15) / ki);
+	if (current_setpoint > MOTION_CURRENT_SETPOINT_MAX) {
+		current_setpoint = MOTION_CURRENT_SETPOINT_MAX;
+		if (((kp * error_position)) < MOTION_CURRENT_SETPOINT_MAX) {
+			error_integral = ((((MOTION_CURRENT_SETPOINT_MAX)
+					- (kp * error_position)) / ki) << 13);
 		} else {
 			error_integral = 0;
 		}
-	} else if (current_setpoint < INT16_MIN) {
-		current_setpoint = INT16_MIN;
-		if (((kp * error_position) >> 6) > (INT16_MIN)) {
-			error_integral = (((((INT16_MIN)) - (kp * error_position))<<15) / ki);
+	} else if (current_setpoint < MOTION_CURRENT_SETPOINT_MIN) {
+		current_setpoint = MOTION_CURRENT_SETPOINT_MIN;
+		if (((kp * error_position)) > (MOTION_CURRENT_SETPOINT_MIN)) {
+			error_integral = ((((MOTION_CURRENT_SETPOINT_MIN)
+					- (kp * error_position)) / ki) << 13);
 		} else {
 			error_integral = 0;
 		}
 	}
 
 #ifdef DEBUG_VREGS
+	vregs_write(VREGS_POSITION_CONTROL_KP, motion_position_control_get_kp());
+	vregs_write(VREGS_POSITION_CONTROL_KI, motion_position_control_get_ki());
+	vregs_write(VREGS_POSITION_CONTROL_KD, motion_position_control_get_kd());
 	if (error_position > 0) {
 		vregs_write(VREGS_POSITION_CONTROL_E_POS, (uint8_t) (error_position));
 		vregs_write(VREGS_POSITION_CONTROL_E_NEG, (uint8_t) (0));
@@ -188,11 +192,12 @@ void motion_control_position(void) {
 		vregs_write(VREGS_POSITION_CONTROL_E_POS, (uint8_t) (0));
 	}
 	if (error_integral > 0) {
-		vregs_write(VREGS_POSITION_CONTROL_EI_POS, (uint8_t) (error_integral>>15));
+		vregs_write(VREGS_POSITION_CONTROL_EI_POS,
+				(uint8_t) (error_integral >> 15));
 		vregs_write(VREGS_POSITION_CONTROL_EI_NEG, (uint8_t) (0));
 	} else {
 		vregs_write(VREGS_POSITION_CONTROL_EI_NEG,
-				(uint8_t) ((abs(error_integral))>>15));
+				(uint8_t) ((abs(error_integral)) >> 15));
 		vregs_write(VREGS_POSITION_CONTROL_EI_POS, (uint8_t) (0));
 	}
 	if (error_derivative > 0) {
@@ -204,7 +209,7 @@ void motion_control_position(void) {
 				(uint8_t) (abs(error_derivative)));
 		vregs_write(VREGS_POSITION_CONTROL_ED_POS, (uint8_t) (0));
 	}
-	vregs_write(VREGS_POSITION_CONTROL_DT, (uint8_t) (dt/48));
+	vregs_write(VREGS_POSITION_CONTROL_DT, (uint8_t) (dt / 48));
 	vregs_write(VREGS_POSITION_SETPOINT, (uint8_t) (position_setpoint));
 	vregs_write(VREGS_POSITION_MEASURED, (uint8_t) (encoder_get_position()));
 #endif
@@ -250,9 +255,7 @@ uint8_t motion_position_control_get_kd(void) {
  * 		2: Rotate the leg forward and collect hall-sensor samples. Store these in an array.
  * 		3: Reset the peak_detected array.
  * 		4: Rotate the leg backward until the 3rd hall-sensor is found and set the encoder value to zero.
- * 		5: Calibration completed, calculate the arrival time for the leg to stand position.
- * 		6: Rotate the leg forward until the stand position is reached.
- * 		7:
+ * 		5: Calibration completed
  */
 int32_t motion_drive_h_bridge() {
 	int32_t return_value = 0;
@@ -282,6 +285,7 @@ int32_t motion_drive_h_bridge() {
 	vregs_write(VREGS_MOTION_STD_DEV_B, (uint8_t) (get_std_var() >> 8));
 	vregs_write(VREGS_FSM_FLAG, (uint8_t) fsm_flag);
 	vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) calibrate);
+	vregs_write(VREGS_DEBUG_FLAG_2, (uint8_t) (ADC1->CR & ADC_CR_ADSTART));
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_A,
 			(uint8_t) last_known_position);
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_B,
@@ -306,9 +310,28 @@ int32_t motion_drive_h_bridge() {
 		if (fsm_flag == 0) {
 			/* Set calibrate to 1 to enable reading adc-data of the hall-sensors */
 			set_calibrate(1);
+			/* Set AD_STOP to 1 to stop measuring on the ADC. */
+			ADC1->CR |= ADC_CR_ADSTP;
+			/* wait for adstart to become 0 */
+			if ((ADC1->CR & ADC_CR_ADSTART) == 0) {
+				interrupts_disable();
+				DMA1_Channel1->CCR &= ~DMA_CCR_EN;
+				/* Select the channels to convert. */
+				ADC1->CHSELR = (1 << ADC_HAL_1_CH) | (1 << ADC_HAL_2_CH)
+						| (1 << ADC_HAL_3_CH) | (1 << ADC_ID_RESISTOR_CH)
+						| (1 << ADC_BATTERY_CH) | (1 << ADC_MOTOR_CURRENT_CH)
+						| (1 << ADC_TEMP_CH);
+				/* set size of transfer */
+				DMA1_Channel1->CNDTR = ADC_NUM_OF_CHANNELS;
+				/* enable the DMA channel */
+				DMA1_Channel1->CCR |= DMA_CCR_EN;
+				/* Write AD_START to 1 to start conversions. */
+				ADC1->CR |= ADC_CR_ADSTART;
+				fsm_flag = 1;
+				interrupts_enable();
+			}
 			/* Set the encoder value somewhere in the middle of its range to prevent wrapping around immediately. */
 //			encoder_set_position_mid();
-			fsm_flag = 1;
 		}
 		if (fsm_flag == 1) {
 			if (side_of_zebro == 0) {
@@ -339,7 +362,7 @@ int32_t motion_drive_h_bridge() {
 //				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
 			}
 			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
-				adc_data[n] = adc_get_value(2); /* We're only interested in the value of the 3rd hall sensor */
+				adc_data[n] = adc_get_value(ADC_HAL_2_INDEX); /* We're only interested in the value of the 3rd hall sensor */
 				n = n + 1;
 			}
 			if (n >= ARRAY_SIZE) {
@@ -378,13 +401,35 @@ int32_t motion_drive_h_bridge() {
 //				current_setpoint = 0;
 				encoder_reset_position();
 				last_known_position = encoder_get_position();
-				set_calibrate(0);
-				motion_stop();
-				/* Do we need to free the adc_data memory? We don't need this array after this. */
+				fsm_flag = 5;
+			}
+			/* Do we need to free the adc_data memory? We don't need this array after this. */
 //				for (i = 0; i < (ARRAY_SIZE - 1); i++) {
 //					free(&adc_data[i]);
 //					adc_data[i] = 0;
 //				}
+		}
+		/* wait for adstart to become 0 */
+		if (fsm_flag == 5) {
+			if ((ADC1->CR & ADC_CR_ADSTART) != 0) {
+				/* Set AD_STOP to 1 to stop measuring on the ADC. */
+				ADC1->CR |= ADC_CR_ADSTP;
+			}
+			if ((ADC1->CR & ADC_CR_ADSTART) == 0) {
+				interrupts_disable();
+				DMA1_Channel1->CCR &= ~DMA_CCR_EN;
+				/* Select the channels to convert. */
+				ADC1->CHSELR = (1 << ADC_BATTERY_CH)
+						| (1 << ADC_MOTOR_CURRENT_CH) | (1 << ADC_TEMP_CH);
+				/* set size of transfer */
+				DMA1_Channel1->CNDTR = ADC_NUM_OF_CHANNELS - 4;
+				/* enable the DMA channel */
+				DMA1_Channel1->CCR |= DMA_CCR_EN;
+				/* Write AD_START to 1 to start conversions. */
+				ADC1->CR |= ADC_CR_ADSTART;
+				set_calibrate(0);
+				motion_stop();
+				interrupts_enable();
 			}
 		}
 
