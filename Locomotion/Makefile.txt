@@ -1,6 +1,8 @@
 In order to compile this beauty:
 
 The ncurses and the wiringPi libraries need to be installed. 
+Ncurses: sudo apt-get install libncurses5-dev libncursesw5-dev
+wiringPi: git://git.drogon.net/wiringPi , cd ~/wiringPi, ./build , gpio load i2c //mayneed to enable i2c busses
 
 Main file: 
 KiloHeaderFileTest.cpp
