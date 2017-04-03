@@ -25,6 +25,7 @@
 #include "interrupts.h"
 #include "uart1.h"
 #include "globals.h"
+#include "motion.h"
 
 volatile static uint16_t adc_data_dump[ADC_NUM_OF_CHANNELS];
 static uint8_t kp = 28, ki = 150;
@@ -81,6 +82,8 @@ int32_t adc_init() {
 	ADC1->CFGR1 |= ADC_CFGR1_EXTEN_1 | ADC_CFGR1_EXTEN_0;
 	/* enable overwriting data when overrun occurs */
 	ADC1->CFGR1 |= ADC_CFGR1_OVRMOD;
+	/* set scanning direction to 18->0 */
+	ADC1->CFGR1 |= ADC_CFGR1_SCANDIR;
 	/* enable used channels */
 	ADC1->CHSELR = (1 << ADC_HAL_1_CH) | (1 << ADC_HAL_2_CH)
 			| (1 << ADC_HAL_3_CH) | (1 << ADC_ID_RESISTOR_CH)
@@ -149,8 +152,9 @@ void ADC1_IRQHandler(void) {
 			;
 		DMA1->IFCR |= DMA_IFCR_CTCIF1;
 		/* measured current is 10 bits left aligned. */
-		adc_control_motor_current(get_current_setpoint(), (adc_data_dump[5]));
-		adc_check_motor_current((adc_data_dump[5]));
+		adc_control_motor_current(get_current_setpoint(),
+				(adc_data_dump[ADC_MOTOR_CURRENT_INDEX]));
+		adc_check_motor_current((adc_data_dump[ADC_MOTOR_CURRENT_INDEX]));
 		ADC1->CR |= ADC_CR_ADSTART;
 	}
 	interrupts_enable();
@@ -161,24 +165,37 @@ void ADC1_IRQHandler(void) {
  */
 void adc_write_data_to_vregs(void) {
 	uint32_t current_measured;
-#ifdef DEBUG_VREGS
-	vregs_write(VREGS_ADC_DATA0A, (uint8_t) (adc_data_dump[0] >> 14)); //hall1a
-	vregs_write(VREGS_ADC_DATA1A, (uint8_t) (adc_data_dump[1] >> 14)); //hall2a
-	vregs_write(VREGS_ADC_DATA2A, (uint8_t) (adc_data_dump[2] >> 14)); //hall3a
-	vregs_write(VREGS_ADC_DATA3A, (uint8_t) (adc_data_dump[3] >> 14)); //ID resistor
-	vregs_write(VREGS_ADC_DATA4A, (uint8_t) (adc_data_dump[4] >> 14)); //Battery
-	vregs_write(VREGS_ADC_DATA5A, (uint8_t) (adc_data_dump[5] >> 14)); //motor current
-	vregs_write(VREGS_ADC_DATA6A, (uint8_t) (adc_data_dump[6] >> 14)); //internal temp
+	uint8_t i = 0;
+	uint8_t num_of_channels = 0;
+	if (get_calibrate() == 1) {
+		num_of_channels = ADC_NUM_OF_CHANNELS;
+	} else {
+		num_of_channels = ADC_NUM_OF_CHANNELS - 4;
+	}
 
-	vregs_write(VREGS_ADC_DATA0B, (uint8_t) (adc_data_dump[0] >> 6)); //hall1b
-	vregs_write(VREGS_ADC_DATA1B, (uint8_t) (adc_data_dump[1] >> 6)); //hall2b
-	vregs_write(VREGS_ADC_DATA2B, (uint8_t) (adc_data_dump[2] >> 6)); //hall3b
-	vregs_write(VREGS_ADC_DATA3B, (uint8_t) (adc_data_dump[3] >> 6)); //ID resistor
-	vregs_write(VREGS_ADC_DATA4B, (uint8_t) (adc_data_dump[4] >> 6)); //Battery
-	vregs_write(VREGS_ADC_DATA5B, (uint8_t) (adc_data_dump[5] >> 6)); //motor current
-	vregs_write(VREGS_ADC_DATA6B, (uint8_t) (adc_data_dump[6] >> 6)); //internal temp
+#ifdef DEBUG_VREGS
+	for (i = 0; i < num_of_channels; i++) {
+		vregs_write((VREGS_ADC_DATA0A + (2*i)), (uint8_t) (adc_data_dump[i] >> 14)); //internal temp, motor current, Battery, ID resistor, hall3b, hall2b, hall1b
+		vregs_write((VREGS_ADC_DATA0B + (2*i)), (uint8_t) (adc_data_dump[i] >> 6)); //internal temp, motor current, Battery, ID resistor, hall3b, hall2b, hall1b
+	}
+//	vregs_write(VREGS_ADC_DATA0A, (uint8_t) (adc_data_dump[0] >> 14)); //internal temp
+//	vregs_write(VREGS_ADC_DATA1A, (uint8_t) (adc_data_dump[1] >> 14)); //motor current
+//	vregs_write(VREGS_ADC_DATA2A, (uint8_t) (adc_data_dump[2] >> 14)); //Battery
+//	vregs_write(VREGS_ADC_DATA3A, (uint8_t) (adc_data_dump[3] >> 14)); //ID resistor
+//	vregs_write(VREGS_ADC_DATA4A, (uint8_t) (adc_data_dump[4] >> 14)); //hall3b
+//	vregs_write(VREGS_ADC_DATA5A, (uint8_t) (adc_data_dump[5] >> 14)); //hall2b
+//	vregs_write(VREGS_ADC_DATA6A, (uint8_t) (adc_data_dump[6] >> 14)); //hall1b
+//
+//	vregs_write(VREGS_ADC_DATA0B, (uint8_t) (adc_data_dump[0] >> 6)); //internal temp
+//	vregs_write(VREGS_ADC_DATA1B, (uint8_t) (adc_data_dump[1] >> 6)); //motor current
+//	vregs_write(VREGS_ADC_DATA2B, (uint8_t) (adc_data_dump[2] >> 6)); //Battery
+//	vregs_write(VREGS_ADC_DATA3B, (uint8_t) (adc_data_dump[3] >> 6)); //ID resistor
+//	vregs_write(VREGS_ADC_DATA4B, (uint8_t) (adc_data_dump[4] >> 6)); //hall3b
+//	vregs_write(VREGS_ADC_DATA5B, (uint8_t) (adc_data_dump[5] >> 6)); //hall2b
+//	vregs_write(VREGS_ADC_DATA6B, (uint8_t) (adc_data_dump[6] >> 6)); //hall1b
 #endif
-	current_measured = abs(((adc_data_dump[5])) - ADC_MID_RANGE_COUNT);
+	current_measured = abs(
+			((adc_data_dump[ADC_MOTOR_CURRENT_INDEX])) - ADC_MID_RANGE_COUNT);
 	current_measured = (current_measured * ADC_FULL_RANGE_MILLIVOLT)
 			/ ADC_FULL_RANGE_COUNT;
 	/* convert to A */
@@ -202,8 +219,8 @@ int32_t adc_get_temperature(void) {
 	volatile int32_t temperature;
 	int32_t temp_30 = (int32_t) ((*TEMP30_CAL_ADDR) << 4);
 
-	temperature = (((int32_t) adc_data_dump[6] * VDD_APPLI / VDD_CALIB)
-			- temp_30);
+	temperature = (((int32_t) adc_data_dump[ADC_TEMP_INDEX] * VDD_APPLI
+			/ VDD_CALIB) - temp_30);
 	temperature = temperature * (int32_t) (110 - 30);
 	temperature = temperature / (int32_t) (TEMP110_CAL_ADDR - temp_30);
 	temperature = temperature + 30; // +30
@@ -235,15 +252,16 @@ void adc_control_motor_current(int32_t current_setpoint,
 		dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically 108/109 ticks*/
 		time_prev = time17_get_time();
 		error_current = current_setpoint - current_measured_cast;
-		error_integral = (error_integral + (((error_current * dt)) / (48000000 >> 10))); /* Divide by 48e6 because this is the clock freq. Shift because of integer division*/
-		duty_cycle = (((kp * error_current) + ((ki * (error_integral >> 8)))) >> 6); /* shift 6 because of 10 bits adc left aligned. It is engineered to nicely be the order of magnitude of the dutycycle. */
+		error_integral = (error_integral
+				+ (((error_current * dt)) / (48000000 >> 10))); /* Divide by 48e6 because this is the clock freq. Shift because of integer division*/
+		duty_cycle = (((kp * error_current) + ((ki * (error_integral >> 8))))
+				>> 6); /* shift 6 because of 10 bits adc left aligned. It is engineered to nicely be the order of magnitude of the dutycycle. */
 		/* max dutycycle is ~1000 because otherwise the interrupt cannot finish. If dutycycle is 1020 there is 6 ticks of time to do the interrupt. This is to little. */
 		if (duty_cycle > H_BRIDGE_MAX_DUTYCYCLE) {
 			duty_cycle = H_BRIDGE_MAX_DUTYCYCLE;
 			if (((kp * error_current) >> 6) < H_BRIDGE_MAX_DUTYCYCLE) {
-				error_integral =
-						((((H_BRIDGE_MAX_DUTYCYCLE << 6) - (kp * error_current)) << 8)
-								/ ki);
+				error_integral = ((((H_BRIDGE_MAX_DUTYCYCLE << 6)
+						- (kp * error_current)) << 8) / ki);
 			} else {
 				error_integral = 0;
 			}
@@ -267,13 +285,17 @@ void adc_control_motor_current(int32_t current_setpoint,
 	}
 
 #ifdef DEBUG_VREGS
+	vregs_write(VREGS_CURRENT_CONTROL_KP, adc_current_control_get_kp());
+	vregs_write(VREGS_CURRENT_CONTROL_KI, adc_current_control_get_ki());
 	vregs_write(VREGS_CURRENT_MEASURED,
 			(uint8_t) ((current_measured - ADC_MID_RANGE_COUNT) >> 3));
 	if (error_current > 0) {
-		vregs_write(VREGS_CURRENT_CONTROL_E_POS, (uint8_t) (error_current >> 6));
+		vregs_write(VREGS_CURRENT_CONTROL_E_POS,
+				(uint8_t) (error_current >> 6));
 		vregs_write(VREGS_CURRENT_CONTROL_E_NEG, (uint8_t) (0));
 	} else {
-		vregs_write(VREGS_CURRENT_CONTROL_E_NEG, (uint8_t) ((abs(error_current)) >> 6));
+		vregs_write(VREGS_CURRENT_CONTROL_E_NEG,
+				(uint8_t) ((abs(error_current)) >> 6));
 		vregs_write(VREGS_CURRENT_CONTROL_E_POS, (uint8_t) (0));
 	}
 	if (error_integral > 0) {
@@ -286,7 +308,8 @@ void adc_control_motor_current(int32_t current_setpoint,
 		vregs_write(VREGS_CURRENT_CONTROL_EI_POS, (uint8_t) (0));
 	}
 	vregs_write(VREGS_CURRENT_CONTROL_DT, (dt >> 7));
-	vregs_write(VREGS_CURRENT_SETPOINT_A, (uint8_t) ((abs(current_setpoint)) >> 8));
+	vregs_write(VREGS_CURRENT_SETPOINT_A,
+			(uint8_t) ((abs(current_setpoint)) >> 8));
 	vregs_write(VREGS_CURRENT_SETPOINT_B, (uint8_t) ((abs(current_setpoint))));
 #endif
 

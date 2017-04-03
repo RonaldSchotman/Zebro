@@ -9,13 +9,13 @@
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
 			<item value="current_setpoint"/>
+			<item value="adc_data_dump"/>
 			<item value="error"/>
 			<item value="adc_trigger"/>
 			<item value="interrupt"/>
 			<item value="I2C1-&gt;CR2"/>
 			<item value="ack"/>
 			<item value="adc_request_conversion"/>
-			<item value="disable"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>
@@ -25,7 +25,7 @@
 		<item value="285" key="DIALOG_WIDTH"/>
 		<item value="1|Sans|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
 		<item value="372" key="DIALOG_HEIGHT"/>
-		<item value="629" key="DIALOG_X_ORIGIN"/>
-		<item value="456" key="DIALOG_Y_ORIGIN"/>
+		<item value="907" key="DIALOG_X_ORIGIN"/>
+		<item value="147" key="DIALOG_Y_ORIGIN"/>
 	</section>
 </section>
