@@ -24,6 +24,8 @@
 #include "../inc/uart1.h"
 #include "../inc/hbridge.h"
 #include "../inc/errors.h"
+#include "../inc/address.h"
+#include "../inc/zebrobus.h"
 
 int main (void)
 {
@@ -48,6 +50,8 @@ int main (void)
 		interrupts_enable();
 		leds_set_LD1();
 		hbridge_init();
+		address_init();
+		zebrobus_slave_init();
 		hbridge_sign_magnitude(1, (0xFE));
 			
 	

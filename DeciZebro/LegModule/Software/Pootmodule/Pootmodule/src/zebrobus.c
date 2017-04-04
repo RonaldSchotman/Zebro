@@ -16,13 +16,15 @@
  */
 
 #include <stdint.h>
-#include <avr.io.h>
+#include <avr/io.h>
 
-#include "zebrobus.h"
-#include "vregs.h"
-#include "address.h"
-#include "interrupts.h"
-#include "errors.h"
+#include "../inc/zebrobus.h"
+#include "../inc/vregs.h"
+#include "../inc/address.h"
+#include "../inc/interrupts.h"
+#include "../inc/errors.h"
+#include "../inc/time.h"
+#include "../inc/motion.h"
 
 static int8_t zebrobus_is_master = 0;
 static int8_t state = ZEBROBUS_STATE_IDLE;
@@ -60,7 +62,7 @@ int8_t zebrobus_put_write_request(uint32_t address, uint8_t data){
  * Get a write request from the queue, this function should only be called
  * by the task code, and is *not* reentrant.
  */
-struct zebrobus_write_request zebrobus_get_write_request(){
+struct zebrobus_write_request zebrobus_get_write_request(void){
 	struct zebrobus_write_request return_struct;
 
 	interrupts_disable();
@@ -89,7 +91,7 @@ struct zebrobus_write_request zebrobus_get_write_request(){
 /**
  * Initialise the ZebroBus (TWIE) interface in slave mode.
  */
-int8_t zebrobus_slave_init(){
+int8_t zebrobus_slave_init(void){
 	//GPIO_InitTypeDef  GPIO_InitStruct;
 
 	zebrobus_is_master = 0;
@@ -101,18 +103,15 @@ int8_t zebrobus_slave_init(){
 	ZEBROBUS_PORT.DIRSET = ZEBROBUS_SDA_PIN | ZEBROBUS_SCL_PIN;
 	ZEBROBUS_PORT.ZEBROBUS_SDA_PINCTRL |= PORT_OPC_WIREDANDPULL_gc;
 	ZEBROBUS_PORT.ZEBROBUS_SCL_PINCTRL |= PORT_OPC_WIREDANDPULL_gc;
-
+	
 	/* enable the ISR in the NVIC, give it a low priority */
+	
+	TWIE.SLAVE.CTRLB |= TWI_SLAVE_INTLVL_LO_gc;
 	//NVIC_EnableIRQ(I2C1_IRQn);
 	//NVIC_SetPriority(I2C1_IRQn, 3);
 
-	/* enable clock to peripheral */
-	//__HAL_RCC_I2C1_CLK_ENABLE();
-
-	/* enable and set the slave address */
-	I2C1->TIMINGR = (uint32_t)0x20303e5d;
-	I2C1->OAR1 = I2C_OAR1_OA1EN | (address_get_zebrobus_address() << 1);
-	I2C1->OAR2 = I2C_OAR2_OA2EN | (ADDRESS_BROADCAST_ADDRESS << 1);
+	/*set the slave address, enable general call address 0x00 */
+	TWIE.SLAVE.ADDR = ZEBROBUS_GENERAL_CALL_ENABLE | (address_get_zebrobus_address() << 1);
 
 	vregs_write(VREGS_ZEBROBUS_ADDRESS, address_get_zebrobus_address());
 
@@ -123,51 +122,53 @@ int8_t zebrobus_slave_init(){
 	 * * Stop bit
 	 * *
 	 */
-	I2C1->CR1 = I2C_CR1_PE | I2C_CR1_ADDRIE | I2C_CR1_RXIE
-			|I2C_CR1_TXIE | I2C_CR1_STOPIE;
-
+	TWIE.SLAVE.CTRLA |= TWI_SLAVE_DIEN_bm | TWI_SLAVE_APIEN_bm | TWI_SLAVE_PIEN_bm;
+	
+	/*Enable the TWI slave */
+	TWIE.SLAVE.CTRLB |= TWI_SLAVE_ENABLE_bm;
+	
 	return 0;
 }
 
 /**
  * The interrupt handler for ZebroBus (I2C1)
  */
-void I2C1_IRQHandler(){
-	uint32_t status_register;
+ISR(TWIE_TWIS_vect){
+	uint8_t status_register;
 
 	//todo: error checking
 
 	/* get a copy of the status register */
-	status_register = I2C1->ISR;
+	status_register = TWIE.SLAVE.STATUS;
 
 	/* on stop condition, reset state machine */
-	if(status_register & I2C_ISR_STOPF){
+	if((status_register & TWI_SLAVE_APIF_bm) && !(status_register & TWI_SLAVE_AP_bm)){
 		request_address = request_address_base;
-		I2C1->ICR |= I2C_ICR_STOPCF;
+		/* Clear flag */
+		TWIE.SLAVE.STATUS |= TWI_SLAVE_APIF_bm;
+		/* Complete transaction */
+		TWIE.SLAVE.CTRLB |= TWI_SLAVE_CMD_COMPTRANS_gc;
 		state = ZEBROBUS_STATE_IDLE;
 		return;
 	}
 
 	/* on address match */
-	if(status_register & I2C_ISR_ADDR){
-		I2C1->ICR |= I2C_ICR_ADDRCF;
+	if((status_register & TWI_SLAVE_APIF_bm) && (status_register & TWI_SLAVE_AP_bm)){
+		/* Clear flag */
+		TWIE.SLAVE.STATUS |= TWI_SLAVE_APIF_bm;
 		/* If we are about to receive some data, return.
 		 * We will come back when the data has been transfered.
 		 * On the other hand, if we have to transmit, we will have
 		 * to prepare data to be transmitted.
 		 */
-		if(!(status_register & I2C_ISR_DIR)){
-			I2C1->ICR |= I2C_ICR_ADDRCF;
-			return;
-		}
+		TWIE.SLAVE.CTRLB |= TWI_SLAVE_CMD_RESPONSE_gc;
 	}
 
 	/* if we are to transmit data */
-	if(status_register & I2C_ISR_DIR){
+	if(status_register & TWI_SLAVE_DIF_bm){
 		/* transmit the byte, and increment the vreg address to read from */
-		I2C1->ISR |= I2C_ISR_TXE;
-		I2C1->TXDR = vregs_read_buffer((uint8_t) request_address++);
-	//	if(status_register & I2C_ISR_ADDR) I2C1->ICR |= I2C_ICR_ADDRCF;
+		TWIE.SLAVE.DATA = vregs_read_buffer((uint8_t) request_address++);
+		TWIE.SLAVE.CTRLB |= TWI_SLAVE_CMD_RESPONSE_gc;
 		/* the vregs are circular */
 		if(request_address) request_address %= VREGS_FILE_SIZE;
 	}
@@ -178,15 +179,17 @@ void I2C1_IRQHandler(){
 		/* the first byte we receive is the address of the read / write */
 		case ZEBROBUS_STATE_IDLE:
 			state = ZEBROBUS_STATE_RECEIVED_ADDR;
-			request_address_base = I2C1->RXDR;
+			request_address_base = TWIE.SLAVE.DATA;
 			request_address = request_address_base;
+			TWIE.SLAVE.CTRLB |= TWI_SLAVE_CMD_RESPONSE_gc;
 			break;
 
 		/* in case of a write, the second byte is the data to be written,
 		 * when more bytes are written, they are written to the next position
 		 * in the vregs */
 		case ZEBROBUS_STATE_RECEIVED_ADDR:
-			zebrobus_put_write_request(request_address++, I2C1->RXDR);
+			zebrobus_put_write_request(request_address++, TWIE.SLAVE.DATA);
+			TWIE.SLAVE.CTRLB |= TWI_SLAVE_CMD_RESPONSE_gc;
 			/* the vregs are circular */
 			if(request_address) request_address %= VREGS_FILE_SIZE;
 			break;
@@ -198,7 +201,7 @@ void I2C1_IRQHandler(){
  * Process the write requests from ZebroBus.
  * Should be called from task code, is not reentrant
  */
-int32_t zebrobus_process_write_requests(){
+int32_t zebrobus_process_write_requests(void){
 	int32_t safety_counter;
 	for(safety_counter = 0; safety_counter < ZEBROBUS_SIZE_OF_QUEUE;
 			safety_counter++){

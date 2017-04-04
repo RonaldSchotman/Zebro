@@ -300,6 +300,9 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="inc\address.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="inc\clock.h">
       <SubType>compile</SubType>
     </Compile>
@@ -321,6 +324,12 @@
     <Compile Include="inc\leds.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="inc\motion.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="inc\time.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="inc\uart1.h">
       <SubType>compile</SubType>
     </Compile>
@@ -330,7 +339,16 @@
     <Compile Include="inc\zebrobus.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\address.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\ASF\xmega\drivers\ac\ac.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\motion.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\time.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\zebrobus.c">

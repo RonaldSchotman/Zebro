@@ -42,6 +42,22 @@
 
 #define GLOBALS_MOTOR_VOLTAGE 6
 
+/* LEG ADDRESSES: FOR NOW TO BE FLASHED CORRECTLY
+ *			 Front
+ *		 --------------
+ *	    0				6
+ *      |				|
+ *      |				|
+ * Left 1				7  Right
+ *      |				|
+ *      |				|
+ *	    2				8
+ *		 --------------
+ *			Rear
+ */
+#define GLOBALS_ADDRESS 0
+
+
 /* Define the line bellow to disable the following:
  *  - The watchdog timer
  *  - The emergency break when no clock ticks have been received over

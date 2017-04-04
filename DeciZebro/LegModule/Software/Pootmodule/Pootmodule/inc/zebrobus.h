@@ -34,14 +34,16 @@
 #define ZEBROBUS_SIZE_OF_QUEUE 50
 #define ZEBROBUS_QUEUE_FULL 1
 
+#define ZEBROBUS_GENERAL_CALL_ENABLE 0x01
+
 struct zebrobus_write_request{
      uint32_t address;
 	 uint8_t data;
 };
 
-int8_t zebrobus_slave_init();
+int8_t zebrobus_slave_init(void);
 int8_t zebrobus_put_write_request(uint32_t address, uint8_t data);
-struct zebrobus_write_request zebrobus_get_write_request();
-int32_t zebrobus_process_write_requests();
+struct zebrobus_write_request zebrobus_get_write_request(void);
+int32_t zebrobus_process_write_requests(void);
 
 #endif /* __ZEBROBUS_H__ */

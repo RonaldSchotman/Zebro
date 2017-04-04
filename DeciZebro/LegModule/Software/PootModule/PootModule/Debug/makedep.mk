@@ -2,7 +2,13 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
+src\address.c
+
 src\ASF\xmega\drivers\ac\ac.c
+
+src\motion.c
+
+src\time.c
 
 src\zebrobus.c
 

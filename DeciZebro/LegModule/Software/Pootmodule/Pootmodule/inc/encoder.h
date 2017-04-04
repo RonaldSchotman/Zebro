@@ -18,9 +18,13 @@
 
 #define ENCODER_PULSES_PER_ROTATION
 
+#define ENCODER_HALL_PORT PORTB
+#define ENCODER_HALL_PIN  PIN2_bm
+#define ENCODER_HALL_PINCTRL PIN2CTRL
+
 void encoder_init(void);
 //int32_t encoder_get_position(void);
-
+uint8_t encoder_get_hall_state(void);
 
 
 #endif /* __ENCODER_H_ */
