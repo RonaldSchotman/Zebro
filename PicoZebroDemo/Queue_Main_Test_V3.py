@@ -86,6 +86,7 @@ class UART_Thread(threading.Thread):                                        # UA
                     if Serial[1][1] == 'Global':                            # If it has to be send to each device
                         if Serial[1][2] == 'Leds_off':                      # if the global command is leds off.
                             for x in range(1):                              # Go over each Zebro and set it the leds to 0
+                                print(x)
                                 setLed(connectionID=x, ledNr=0, value=0)    # Set led top left  back  OFF(1)
                                 setLed(connectionID=x, ledNr=1, value=0)    # Set led top left  front OFF(1)
                                 setLed(connectionID=x, ledNr=2, value=0)    # Set led top right back  OFF(1)
@@ -148,6 +149,10 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
 
     def run(self):
         print(self.Zebro)                                                   # Say which Zebro thread has started
+
+        if self.Zebro == 'Pico_N1':                                         # Elif for every Zebro + 1
+            Connected_To = 0
+        
         Connected = 0                                                       # At the start Connection is always 0
         Sleep = 0                                                           # Also doesn't Need to sleep at the start
         Last_Movement = "Stop"                                              # At start Movement is always stop.
@@ -177,37 +182,36 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
 
                 print(Connected_Devices)                                    # Extra check for which devices are connected
                 
-                for Connected_D in Connected_Devices:                       # Go Check for every possible Zebro and if it is Connected Devices 
-                    if Connected_D == [0]:                                  # self.Zebro:   # Needs to be Pico_Nx
-                        print(self.Zebro+" Will be Connected")              # Yes it is in Connected Devices
+                if Connected_Devices[Connected_To] == 1:                    # self.Zebro:   # Needs to be Pico_Nx
+                    print(self.Zebro+" Will be Connected")                  # Yes it is in Connected Devices
                         
-                        PicoZebro = self.q_PicoZebro.get(block=True, timeout=None)
+                    PicoZebro = self.q_PicoZebro.get(block=True, timeout=None)
                     
-                        Middle_point_x = PicoZebro[0]                       # Obtain first found middle Point X , Y and Blocked Direction
-                        Middle_point_y = PicoZebro[1]
-                        Blocked_Direction = PicoZebro[2]
+                    Middle_point_x = PicoZebro[0]                           # Obtain first found middle Point X , Y and Blocked Direction
+                    Middle_point_y = PicoZebro[1]
+                    Blocked_Direction = PicoZebro[2]
                         
-                        Current_Direction = self.q_Pico_Direction.get(block=True, timeout=None) # Also obtain current Direction
+                    Current_Direction = self.q_Pico_Direction.get(block=True, timeout=None) # Also obtain current Direction
                         
-                        Connected = 1                                       # Connected wil be made 1
-                        Sleep = 0
+                    Connected = 1                                           # Connected wil be made 1
+                    Sleep = 0
                         
-                    else:                                                   # Send the Pico Zebro thread to sleep if it isn't connected
-                        #print("Go to SLEEP")
-                        #time.sleep(0.2)
-                        Connected = 0
-                        Sleep = 1
+                else:                                                       # Send the Pico Zebro thread to sleep if it isn't connected
+                    #print("Go to SLEEP")
+                    #time.sleep(0.2)
+                    Connected = 0
+                    Sleep = 1
                 
                 if not Connected_Devices:                                   # Extra check if there are no devices connected.
                     Sleep = 1
                     
                 if Sleep == 1:
                     print("SLEEEPING "+self.Zebro)
-                    time.sleep(60)                                          # Sleep so that the Pico Zebro thread will not overhead the CPU (if this becomes a problem)
+                    time.sleep(30)                                          # Sleep so that the Pico Zebro thread will not overhead the CPU (if this becomes a problem)
                     Sleep = 0
                 
             if Connected == 1:
-                if connectedArray[0] == 1:                                  # Extra check if the Pico Zebro is stil connected
+                if Connected_Devices[Connected_To] == 1:                    # Extra check if the Pico Zebro is stil connected
                     print("Still have Connections")
                     #Connected = 1
                 else:
@@ -476,6 +480,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             Writing = ("Main","Global", "Stop")                             # Send to Uart Thread stop all Pico Zebro's
             q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
             print("writing to serial")
+            time.sleep(1)
                 
             Writing = ("Main","Global", "Leds_off")                         # Send to Uart Thread all Leds_off for every Pico Zebro's
             q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
@@ -526,6 +531,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
             Writing = ("Main","Pico_N%s"% Devices_Serial, "Leds_off")       # Turn led 3 off again         
             q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
+            time.sleep(1)
             
         if Picture == 6:
             print("Picture %d"%Picture)                                     # Debug print for saying where the code is
@@ -719,6 +725,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     pass
                 
         Picture = Picture + 1                                               # Go to the next step after taking a new frame
+
+        getConnected()                                                      # Update the list with connected devices every frame 
         
         # show the frame
         key = cv2.waitKey(1) & 0xFF
