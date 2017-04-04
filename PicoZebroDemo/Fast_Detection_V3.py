@@ -23,7 +23,7 @@ import math                             # mathematical functions library
 
 import random                           # Library for Random numbers for determing where to go
 
-import sys
+#import sys
 
 # import the necessary packages for tracking
 from imutils import contours
