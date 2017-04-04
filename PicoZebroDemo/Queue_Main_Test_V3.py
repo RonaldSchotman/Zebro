@@ -714,15 +714,15 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_PicoZebro_1.unfinished_tasks = 0
                         q_PicoZebro_1.mutex.release()
                         q_PicoZebro_1.put(PicoZebro_1)
-                Picture = 7                                                 # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
+            Picture = 7                                                 # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
 
-                if ((time.time() - Picture_1_start_time) > 600):            # Check if 10 mins has passed
-                    Picture = 0                                             # Restart code
-                    print(Picture)
-                    Picture_1_start_time = time.time()
-                    print("Restarting program reinit")
-                    print((time.time() - Picture_1_start_time))
-                    pass
+            if ((time.time() - Picture_1_start_time) > 600):            # Check if 10 mins has passed
+                Picture = 0                                             # Restart code
+                print(Picture)
+                Picture_1_start_time = time.time()
+                print("Restarting program reinit")
+                print((time.time() - Picture_1_start_time))
+                pass
                 
         Picture = Picture + 1                                               # Go to the next step after taking a new frame
 
