@@ -412,7 +412,7 @@ def main():
             
             #Add led 1 and 3 together for Testing purposes
             LEDS_Image = cv2.addWeighted(Difference_led_1,1,Difference_led_3,1,0)
-            cv2.imshow("LEds together", LEDS_Image)
+            #cv2.imshow("LEds together", LEDS_Image)
             cv2.imwrite("Leds_Tog1.jpg", LEDS_Image)
 
             (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3)

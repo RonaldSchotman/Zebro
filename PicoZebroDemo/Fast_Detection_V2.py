@@ -7,18 +7,21 @@
 
 # Everything is being tested from 120 cm height.
 
-# import the necessary packages
+# import the necessary packages fo Vision
 from picamera.array import PiRGBArray   # Pi camera Libary capture BGR video
 from picamera import PiCamera           # PiCamera liberary
 import time                             # For real time video (using openCV)
 import numpy as np                      # Optimized library for numerical operations
-import cv2                              # Include OpenCV library (Most important one)
+import cv2                              # Include OpenCV library (Most important one in terms of recognition)
+
+#import packages for multi thread control.
 import queue                            # Library for Queueing sharing variables between threads
 import threading                        # Library for Multithreading
+
 import serial                           # Import serial uart library for raspberry pi
 import math                             # mathematical functions library
 
-import random
+import random                           # Library for Random numbers for determing where to go
 
 import sys
 
@@ -60,7 +63,7 @@ class Control_Zebro_Thread(threading.Thread):
         Connected = 0
         Sleep = 0
         Last_Movement = "Stop"
-        #time.sleep(60)
+        #time.sleep(2)
         while True:
             if Connected == 0:
                 Last_Movement = "Stop"
@@ -69,8 +72,10 @@ class Control_Zebro_Thread(threading.Thread):
                 
                 # Obtain Serial condition
                 self.Serial_Lock.acquire(blocking=True, timeout=-1)
+                #self.Serial_Lock.acquire(blocking=True, timeout=None)
                 #self.Serial_Lock.mutex.acquire()
                 print(self.Zebro+" acquired Lock")
+
                 Writing = "Connected_devices"
                 Writing = Writing.encode('utf-8')
                 ser.write(Writing)
@@ -105,7 +110,7 @@ class Control_Zebro_Thread(threading.Thread):
                     
                 if Sleep == 1:
                     print("SLEEEPING")
-                    time.sleep(60) # only here is sleeping allowed considering it is not connected anyway and only every 60 seconds needs to check
+                    #time.sleep(60) # only here is sleeping allowed considering it is not connected anyway and only every 60 seconds needs to check
                     Sleep = 0
                 
             if Connected == 1:
@@ -227,9 +232,14 @@ class Control_Zebro_Thread(threading.Thread):
                         # Obtain Serial Write
                         #self.Serial_Lock.mutex.acquire()
                         self.Serial_Lock.acquire(blocking=True, timeout=-1)
+                        #self.Serial_Lock.acquire(blocking=True, timeout=None)
+                        print(self.Zebro+" acquired Lock")
+                        
                         Writing = (self.Zebro + " Stop")
                         Writing = Writing.encode('utf-8')
                         ser.write(Writing)
+
+                        print(self.Zebro+" Released Lock")
                         self.Serial_Lock.release()
                         #self.Serial_Lock.mutex.release()
                         # Release Serial Write
@@ -237,9 +247,14 @@ class Control_Zebro_Thread(threading.Thread):
                         # Obtain Serial Write
                         #self.Serial_Lock.mutex.acquire()
                         self.Serial_Lock.acquire(blocking=True, timeout=-1)
+                        #self.Serial_Lock.acquire(blocking=True, timeout=None)
+                        print(self.Zebro+" acquired Lock")
+                        
                         Writing = (self.Zebro + Movement)
                         Writing = Writing.encode('utf-8')
                         ser.write(Writing)
+                        
+                        print(self.Zebro+" Released Lock")
                         self.Serial_Lock.release()
                         #self.Serial_Lock.mutex.release()
                         # Release Serial Write
@@ -350,6 +365,7 @@ def main(Serial_Lock,q_PicoZebro_1,q_PicoZebro_2,q_PicoZebro_3,q_PicoZebro_4,q_P
             #Release condition only at end so the Zebro Treads cannot interfere, This is at Picture 4.
 
             Serial_Lock.acquire(blocking=True, timeout=-1)
+            #Serial_Lock.acquire(blocking=True, timeout=None)
             #Serial_Lock.mutex.acquire()
             print("MAIN Acquired LOCK")
             Writing_0 = ("Global Stop")
@@ -1800,7 +1816,13 @@ if __name__ == '__main__':
         print("Couldnt open UART")
         sys.exit("aa! errors!")
 
-    Serial_Lock = threading.Lock()
+    maxconnections = 1
+    # ...
+    #pool_sema = BoundedSemaphore(value=maxconnections)
+    #Serial_Lock = BoundedSemaphore(value=maxconnections)
+    #Serial_Lock = threading.Semaphore(value=maxconnections)
+    #Serial_Lock = threading.Lock()
+    Serial_Lock = queue.PriorityQueue()
     #Serial_Lock = queue.Queue()
 
     # All Queue objects Constructor for a FIFO queue

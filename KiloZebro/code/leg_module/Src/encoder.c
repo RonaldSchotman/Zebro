@@ -135,7 +135,7 @@ void encoder_reset_position(void) {
 ///**
 // * Sets the position counter back to 0x0000
 // */
-//void encoder_set_position_mid(void) {
-//	/* Set the encoder position to 455 */
-//	TIM3->CNT = 0x1C7;
-//}
+void encoder_set_position_mid(void) {
+	/* Set the encoder position to 455 */
+	TIM3->CNT = 0x1C7;
+}

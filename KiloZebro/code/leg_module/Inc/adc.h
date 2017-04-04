@@ -71,12 +71,12 @@ uint16_t adc_get_value(int32_t index);
 #define ADC_MOTOR_CURRENT_CH 15
 #define ADC_TEMP_CH 16
 
-#define ADC_HAL_1_INDEX 0
-#define ADC_HAL_2_INDEX 1
-#define ADC_HAL_3_INDEX 2
+#define ADC_HAL_1_INDEX 6
+#define ADC_HAL_2_INDEX 5
+#define ADC_HAL_3_INDEX 4
 #define ADC_ID_RESISTOR_INDEX 3
-#define ADC_BATTERY_INDEX 4
-#define ADC_MOTOR_CURRENT_INDEX 5
-#define ADC_TEMP_INDEX 6
+#define ADC_BATTERY_INDEX 2
+#define ADC_MOTOR_CURRENT_INDEX 1
+#define ADC_TEMP_INDEX 0
 
 #endif /* __ADC_H__ */
