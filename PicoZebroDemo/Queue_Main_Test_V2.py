@@ -15,7 +15,10 @@ import numpy as np                      # Optimized library for numerical operat
 import cv2                              # Include OpenCV library (Most important one)
 import queue                            # Library for Queueing sharing variables between threads
 import threading                        # Library for Multithreading
+
 import serial                           # Import serial uart library for raspberry pi
+import serial.tools.list_ports;
+
 import math                             # mathematical functions library
 
 import random
@@ -479,8 +482,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,
             
             cv2.imwrite("Image%s.jpg"%Picture, image)   # Save a picture to Image1.jpg
             
-            #Original = cv2.imread("Image1.jpg")     # This is the original picture where the diferences will be compared with.
-            Original = cv2.imread("Leds_off.jpg")
+            Original = cv2.imread("Image1.jpg")     # This is the original picture where the diferences will be compared with.
+            #Original = cv2.imread("Leds_off.jpg")
         
         if Picture == 2:    # Make Picture 2 for taking Picture 2 with Led 1 on.
             Devices_Serial = Devices + 1
@@ -513,10 +516,10 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,
         if Picture == 4:
             print("Picture %d"%Picture)
             # Take both pictures with the leds.
-            Led_1 = cv2.imread("Led1_on.jpg")
-            Led_3 = cv2.imread("Led3_on.jpg")
-            #Led_1 = cv2.imread("Image2.jpg")
-            #Led_3 = cv2.imread("Image3.jpg")
+            #Led_1 = cv2.imread("Led1_on.jpg")
+            #Led_3 = cv2.imread("Led3_on.jpg")
+            Led_1 = cv2.imread("Image2.jpg")
+            Led_3 = cv2.imread("Image3.jpg")
 
             New_image_Led_1 = abs(Original - Led_1)
             New_image_Led_3 = abs(Original - Led_3)
@@ -720,6 +723,40 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,
             ser.close()
             cv2.destroyAllWindows()
             break
+
+# Call this function before anything else!
+def initialize_serial():
+    global arduino
+    global connectedArray
+    global lastCommand
+
+    # Scan for all available ports
+    allPorts = serial.tools.list_ports.comports()                   # Get all the available ports on the system
+    usablePorts = [
+        port[0]
+            for port in allPorts
+                if port[2] != 'n/a' and port[2].find("2341") != -1  # Filter out all non-arduino and empty items
+    ]
+    
+    if len(usablePorts) == 0:                                       # Check if there are usable ports
+        print("ARDUINO ERROR: ARDUINO_NOT_FOUND")                   # Print error message
+        exit(); ################################################### # !!!!!!!!! Exit the program because we cant do anything. IMPLEMENT THIS IN BY YOUR OWN LIKINGS!!!!!!!!!
+        
+    # Initalize some variables
+    lastCommand = [0, 0, 0, 0, 255]                                 # For the first getState so that there wont be an error (zebroID, read(0) or write(1), address, value)
+    connectedArray = bytearray(
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]                   # Just initialize this so you wont have to check for the array to be filled
+    ) 
+
+    # Setup the Serial interface with the first found port
+    arduino = serial.Serial()                                       # Get a serial object to work with
+    arduino.baudrate = 38400                                        # 38400 is a limitation by the BLE module (locked in firmware, and firmware update could fix this)
+    arduino.port = usablePorts[0]                                   # '/dev/ttyUSB0' or 'COM9'
+    arduino.open()                                                  # Open the connection, this throws an error if the device is in use
+    print("ARDUINO FOUND AT: ", usablePorts[0])
+    
+    getResult()                                                     # Wait for arduino to initialize
+
 
 if __name__ == '__main__':
     #The Serial write mutex lock.

@@ -100,12 +100,26 @@ def previewTestCase():
         if connectedArray[0] == 1:                                  # Is the Zebro connected?
             for i in range(0, 3):                                   # Loop through 3 leds
                 setLed(connectionID=0, ledNr=0, value=4)            # Set led top left front OFF(1) for connection 0
+                setLed(connectionID=0, ledNr=1, value=4)            # Set led top left front OFF(1) for connection 0
+                setLed(connectionID=0, ledNr=2, value=4)            # Set led top left front OFF(1) for connection 0
+                setLed(connectionID=0, ledNr=3, value=4)            # Set led top left front OFF(1) for connection 0
                 time.sleep(0.2)                                     # Wait some time to make it visible for the naked eye
                 setLed(connectionID=0, ledNr=0, value=0)            # Set led top left front ON(0) for connection 0
+                setLed(connectionID=0, ledNr=1, value=0)            # Set led top left front OFF(1) for connection 0
+                setLed(connectionID=0, ledNr=2, value=0)            # Set led top left front OFF(1) for connection 0
+                setLed(connectionID=0, ledNr=3, value=0)            # Set led top left front OFF(1) for connection 0
+
                 time.sleep(0.2)                                     # Wait some time to make it visible for the naked eye
+                
 
             setMovement(0, 1)
-            time.sleep(5) 
+            time.sleep(5)
+            #setMovement(0, 2)
+            #time.sleep(5)
+            #setMovement(0, 3)
+            #time.sleep(5)
+            #setMovement(0, 4)
+            #time.sleep(5)
             setMovement(0, 0)
             time.sleep(5)
             
