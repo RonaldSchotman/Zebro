@@ -64,7 +64,7 @@ src/main.d src/main.o: ../src/main.c \
  ../src/../inc/globals.h ../src/../inc/interrupts.h ../src/../inc/leds.h \
  ../src/../inc/vregs.h ../src/../inc/uart1.h ../src/../inc/hbridge.h \
  ../src/../inc/errors.h ../src/../inc/address.h ../src/../inc/zebrobus.h \
- ../src/../inc/zebrobus.h
+ ../src/../inc/zebrobus.h ../src/../inc/encoder.h ../src/../inc/motion.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\4.9.2\include\stdint.h:
 
@@ -225,3 +225,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 ../src/../inc/zebrobus.h:
 
 ../src/../inc/zebrobus.h:
+
+../src/../inc/encoder.h:
+
+../src/../inc/motion.h:

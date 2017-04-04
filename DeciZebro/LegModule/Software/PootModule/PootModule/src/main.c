@@ -26,6 +26,8 @@
 #include "../inc/errors.h"
 #include "../inc/address.h"
 #include "../inc/zebrobus.h"
+#include "../inc/encoder.h"
+#include "../inc/motion.h"
 
 int main (void)
 {
@@ -46,20 +48,21 @@ int main (void)
 		leds_init();
 		
 		vregs_init();
-		uart1_init();
+		uart1_init_dma();
 		interrupts_enable();
 		leds_set_LD1();
 		hbridge_init();
 		address_init();
 		zebrobus_slave_init();
-		hbridge_sign_magnitude(1, (0xFE));
+		encoder_init();
+		motion_init();
 			
 	
 	while (1){
 		//UART_Transmit(0xAA);
 		//UART1_TX_PORT.OUTTGL |= UART1_TX_PIN;
-		uart1_send_raw(0xAA);
-		delay_ms(1);
-		
+		zebrobus_process_write_requests();
+		motion_drive_h_bridge();
+		uart1_trigger_dma_once();
 	}
 }

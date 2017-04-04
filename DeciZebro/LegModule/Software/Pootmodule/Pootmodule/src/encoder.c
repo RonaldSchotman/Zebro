@@ -38,6 +38,7 @@ void encoder_init(void){
 	//ACA.AC0CTRL |= AC_HYSMODE_LARGE_gc;
 	///* Enable Analog Comparator */
 	//ACA.AC0CTRL |= AC_ENABLE_bm;
+}
 
 /*
  * get state of the hall sensor
@@ -46,5 +47,5 @@ void encoder_init(void){
  */	
 uint8_t encoder_get_hall_state(void){
 	return ((ENCODER_HALL_PORT.IN & ENCODER_HALL_PIN) == ENCODER_HALL_PIN);
+	//return 0;
 }	
-}

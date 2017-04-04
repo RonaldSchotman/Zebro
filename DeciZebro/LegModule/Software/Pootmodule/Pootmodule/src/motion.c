@@ -26,6 +26,7 @@
 #include "../inc/address.h"
 #include "../inc/time.h"
 #include "../inc/encoder.h"
+#include "../inc/leds.h"
 
 
 static struct motion_state state = {0,0,0,0,0};
@@ -41,6 +42,7 @@ static int8_t side_of_zebro;
 static uint8_t walk_state = 0;
 static uint8_t next_walk_state = 0;
 static uint8_t parity = 0;
+uint8_t hall_state = 0;
 
 /**
  * Process data send to any of the addresses in the motion control range.
@@ -101,13 +103,12 @@ int8_t motion_new_zebrobus_data(uint32_t address, uint8_t data){
 /**
  * Write the values of the given state to the vregs
  */
-int8_t motion_write_state_to_vregs(struct motion_state motion_state){
-	vregs_write(VREGS_MOTION_MODE, motion_state.mode);
-	vregs_write(VREGS_MOTION_SPEED, (uint8_t)(motion_state.speed));
-	vregs_write(VREGS_MOTION_PHASE, motion_state.phase);
-	vregs_write(VREGS_MOTION_EXTRA, motion_state.extra);
+int8_t motion_write_state_to_vregs(struct motion_state motion_state){	
 	vregs_write(VREGS_MOTION_CRC, motion_state.crc);
-
+	vregs_write(VREGS_MOTION_EXTRA, motion_state.extra);
+	vregs_write(VREGS_MOTION_MODE, motion_state.mode);
+	vregs_write(VREGS_MOTION_PHASE, motion_state.phase);
+	vregs_write(VREGS_MOTION_SPEED, (uint8_t)(motion_state.speed));
 	return 0;
 }
 
@@ -127,82 +128,106 @@ int8_t motion_validate_state(struct motion_state motion_state){
  */
 int8_t motion_drive_h_bridge(void){
 	timestamp = time_get_time_ms();
+	hall_state = encoder_get_hall_state();
+	if (hall_state)
+	{
+		leds_set_LD1();
+	}
+	else{
+		leds_clear_LD1();
+	}
+	
 	switch (state.mode){
-	case MOTION_MODE_STOP:
-		hbridge_disable();
-	case MOTION_MODE_STAND_UP:
-		if(encoder_get_hall_state()){
-			hbridge_sign_magnitude(side_of_zebro, (1<<15));
-			walk_state = MOTION_WALK_STATE_UNKNOWN;
-		}
-		else{
+		case MOTION_MODE_STOP:
 			hbridge_disable();
-			walk_state = MOTION_WALK_STATE_READY_TO_WALK;
-		}
-	case MOTION_MODE_WALK:
+			break;
 		
-		switch(walk_state){
-		case MOTION_WALK_STATE_UNKNOWN:
-			hbridge_disable();
-			next_walk_state = MOTION_WALK_STATE_UNKNOWN;
-		case MOTION_WALK_STATE_READY_TO_WALK:
-			if (parity){
-				if (timestamp < 500){
-					hbridge_sign_magnitude(side_of_zebro, (1<<15));
-					next_walk_state = MOTION_WALK_STATE_WALK;
-				}
-				else{
-					next_walk_state = MOTION_WALK_STATE_READY_TO_WALK;
-				}
+		case MOTION_MODE_STAND_UP:
+			if(hall_state){
+				hbridge_sign_magnitude(side_of_zebro, (1<<15));
+				walk_state = MOTION_WALK_STATE_UNKNOWN;
 			}
 			else{
-				if (timestamp > 500){
-					hbridge_sign_magnitude(side_of_zebro, (1<<15));
-					next_walk_state = MOTION_WALK_STATE_WALK;
-				}
-				else{
-					next_walk_state = MOTION_WALK_STATE_READY_TO_WALK;
-				}
-			}
-		case MOTION_WALK_STATE_WALK:
-			if (encoder_get_hall_state()){
 				hbridge_disable();
-				next_walk_state = MOTION_WALK_STATE_READY_TO_ROTATE;
+				walk_state = MOTION_WALK_STATE_READY_TO_WALK;
 			}
-			else {
-				next_walk_state = MOTION_WALK_STATE_WALK;
-			}
-		case MOTION_WALK_STATE_READY_TO_ROTATE:
-		if (parity){
-			if (timestamp > 500){
-				hbridge_sign_magnitude(side_of_zebro, (1<<15));
-				next_walk_state = MOTION_WALK_STATE_ROTATE;
-			}
-			else{
-				next_walk_state = MOTION_WALK_STATE_READY_TO_ROTATE;
-			}
-		}
-		else{
-			if (timestamp < 500){
-				hbridge_sign_magnitude(side_of_zebro, (1<<15));
-				next_walk_state = MOTION_WALK_STATE_ROTATE;
-			}
-			else{
-				next_walk_state = MOTION_WALK_STATE_READY_TO_ROTATE;
-			}
-		}
-		case MOTION_WALK_STATE_ROTATE:
-		if (encoder_get_hall_state()){
-			next_walk_state = MOTION_WALK_STATE_ROTATE;
-		}
-		else {
-			hbridge_disable();
-			next_walk_state = MOTION_WALK_STATE_READY_TO_WALK;
-		}
-							 	
-		}
-		walk_state = next_walk_state;
+			break;
 		
+		case MOTION_MODE_WALK:
+		
+			switch(walk_state){
+			
+				case MOTION_WALK_STATE_UNKNOWN:
+					hbridge_disable();
+					next_walk_state = MOTION_WALK_STATE_UNKNOWN;
+					break;
+				
+				case MOTION_WALK_STATE_READY_TO_WALK:
+					if (parity){
+						if (timestamp < 500){
+							hbridge_sign_magnitude(side_of_zebro, (1<<15));
+							next_walk_state = MOTION_WALK_STATE_WALK;
+						}
+						else{
+							next_walk_state = MOTION_WALK_STATE_READY_TO_WALK;
+						}
+					}
+					else{
+						if (timestamp > 500){
+							hbridge_sign_magnitude(side_of_zebro, (1<<15));
+							next_walk_state = MOTION_WALK_STATE_WALK;
+						}
+						else{
+							next_walk_state = MOTION_WALK_STATE_READY_TO_WALK;
+						}
+					}
+					break;
+				
+				case MOTION_WALK_STATE_WALK:
+					if (hall_state){
+						hbridge_disable();
+						next_walk_state = MOTION_WALK_STATE_READY_TO_ROTATE;
+					}
+					else {
+						next_walk_state = MOTION_WALK_STATE_WALK;
+					}
+					break;
+				
+				case MOTION_WALK_STATE_READY_TO_ROTATE:
+					if (parity){
+						if (timestamp > 500){
+							hbridge_sign_magnitude(side_of_zebro, (1<<15));
+							next_walk_state = MOTION_WALK_STATE_ROTATE;
+						}
+						else{
+							next_walk_state = MOTION_WALK_STATE_READY_TO_ROTATE;
+						}
+					}
+					else{
+						if (timestamp < 500){
+							hbridge_sign_magnitude(side_of_zebro, (1<<15));
+							next_walk_state = MOTION_WALK_STATE_ROTATE;
+						}
+						else{
+							next_walk_state = MOTION_WALK_STATE_READY_TO_ROTATE;
+						}
+					}
+					break;
+				
+				case MOTION_WALK_STATE_ROTATE:
+					if (hall_state){
+						next_walk_state = MOTION_WALK_STATE_ROTATE;
+					}
+					else {
+						hbridge_disable();
+						next_walk_state = MOTION_WALK_STATE_READY_TO_WALK;
+					}
+					break;
+							 	
+			}
+		
+			walk_state = next_walk_state;
+			break;
 	}
 	
 	return 0;

@@ -13,7 +13,7 @@ src/motion.d src/motion.o: ../src/motion.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\lock.h \
  ../src/../inc/motion.h ../src/../inc/vregs.h ../src/../inc/hbridge.h \
  ../src/../inc/address.h ../src/../inc/zebrobus.h ../src/../inc/time.h \
- ../src/../inc/encoder.h
+ ../src/../inc/encoder.h ../src/../inc/leds.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\4.9.2\include\stdint.h:
 
@@ -52,3 +52,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 ../src/../inc/time.h:
 
 ../src/../inc/encoder.h:
+
+../src/../inc/leds.h:
