@@ -86,16 +86,25 @@ class UART_Thread(threading.Thread):                                        # UA
                     if Serial[1][1] == 'Global':                            # If it has to be send to each device
                         if Serial[1][2] == 'Leds_off':                      # if the global command is leds off.
                             for x in range(1):                              # Go over each Zebro and set it the leds to 0
-                                print(x)
+                                #print(x)
                                 setLed(connectionID=x, ledNr=0, value=0)    # Set led top left  back  OFF(1)
+                                time.sleep(0.01)
                                 setLed(connectionID=x, ledNr=1, value=0)    # Set led top left  front OFF(1)
+                                time.sleep(0.01)
                                 setLed(connectionID=x, ledNr=2, value=0)    # Set led top right back  OFF(1)
+                                time.sleep(0.01)
                                 setLed(connectionID=x, ledNr=3, value=0)    # Set led top right front OFF(1)
+                                time.sleep(0.01)
                                 setLed(connectionID=x, ledNr=4, value=0)    # Set led Front left   OFF(1)
+                                time.sleep(0.01)
                                 setLed(connectionID=x, ledNr=5, value=0)    # Set led Front right  OFF(1)
-                        if Serial[1][2] == 'Stop':                          # if the global command is Stop
+                                time.sleep(0.01)
+                        elif Serial[1][2] == 'Stop':                        # if the global command is Stop
                             for x in range(1):                              # Make every Zebro stop
                                 setMovement(x, 0)                           # Set movement to IDLE = Stop.
+                        elif Serial[1][2] == 'Led1_on':                        # if the global command is Led1_on
+                            for x in range(1):                              # Make every Zebro turn Led1_on
+                                setLed(connectionID=0, ledNr=3, value=7)    # Turn led 1 on
                     elif Serial[1][1] == 'Pico_N1':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
                         if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on
                             setLed(connectionID=0, ledNr=3, value=7)        # Led3_on and Leds_off 
@@ -103,6 +112,7 @@ class UART_Thread(threading.Thread):                                        # UA
                             setLed(connectionID=0, ledNr=2, value=7)
                         elif Serial[1][2] == 'Leds_off':
                             setLed(connectionID=0, ledNr=3, value=0)
+                            time.sleep(0.01)
                             setLed(connectionID=0, ledNr=2, value=0)
                     Sended_Data = 0                                         # Data is send
                     print("Main_Wrote")
@@ -120,6 +130,12 @@ class UART_Thread(threading.Thread):                                        # UA
                             setMovement(connection_Pico_1, 3)
                     else:
                         print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                elif Serial[1][0] == "Global":
+                    if Serial[1][1] == "Connect":
+                        try:
+                            getConnected()                                      # Update the list with connected devices every frame
+                        except serial.serialutil.SerialException:
+                            pass
                     
                     Sended_Data = 0
                     print("Pico_Zebro_1_Wrote")
@@ -177,6 +193,8 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                     pass
                         
                 if (self.q_Control_Uart_Main.empty() == True):              # Obtain which Zebro has connected
+                    Writing = ("Global","Connect", "Devices")     # The change this can go wrong is extremly small but possible.
+                    self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
                     Connected_Devices = connectedArray                      # in the global Variable connectedArray must stand which devices are connected
                     print(self.Zebro+" Checked Devices")
 
@@ -190,6 +208,7 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                     Middle_point_x = PicoZebro[0]                           # Obtain first found middle Point X , Y and Blocked Direction
                     Middle_point_y = PicoZebro[1]
                     Blocked_Direction = PicoZebro[2]
+                    print(PicoZebro)
                         
                     Current_Direction = self.q_Pico_Direction.get(block=True, timeout=None) # Also obtain current Direction
                         
@@ -213,6 +232,9 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
             if Connected == 1:
                 if Connected_Devices[Connected_To] == 1:                    # Extra check if the Pico Zebro is stil connected
                     print("Still have Connections")
+                    Writing = ("Global","Connect", "Devices")               
+                    self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
+                    Connected_Devices = connectedArray                      # in the global Variable connectedArray must stand which devices are connected
                     #Connected = 1
                 else:
                     Connected = 0
@@ -231,6 +253,7 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                     Middle_point_y = Middle_point_y
                     Blocked_Direction = Blocked_Direction
                     print("No new Data")
+                    print(Middle_point_x)
                     
                 # The current Direction
                 try:
@@ -242,6 +265,8 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                 # if the Zebro is connected but not foundt the middle point = 0.
                 if (Middle_point_x == 0) or (Middle_point_y == 0):
                     Last_Movement == "Stop"
+                    Writing = (self.Zebro,self.Zebro, Last_Movement)     # The change this can go wrong is extremly small but possible.
+                    self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
                     
                 else:
                     # Extra function for checking if the blocked direction comes over with last direction.
@@ -343,7 +368,8 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                             Writing = (self.Zebro,self.Zebro, "Stop")
                             
                             self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
-                            print(Writing + "The Zebro has been stopped")
+                            print("The Zebro has been stopped")
+                            print(Writing)
                             #Release Serial Write
                     else:
                         # Obtain Serial Write
@@ -439,6 +465,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
     # Initialize Picture to 0 for the first time when program starts.
     Picture = 0
     Devices = 0
+    Counter = 0
+    Pico_1 = 1
     
     # capture frames from the camera
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):  # BGR is the standard way for OpenCV
@@ -449,9 +477,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
         # Take current day for testing purposes.
         Timetest = time.strftime("%d-%m-%Y")
         # Show the current view for debugging and for ending the program savely
-        cv2.imshow("original %s" % Timetest,image)
-
-        getConnected()                                                      # Update the list with connected devices every frame 
+        cv2.imshow("original %s" % Timetest,image) 
 
         # Take original Picture minimal after first loop for the first frame to avoid weird pictures.
         if Picture == 1:
@@ -646,10 +672,11 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     Picture = 8                                             # This has to be 8 for going to the next step for the last Zebro for every other one does not need to be assigned
                     Writing = ("Main","Global", "Leds_off")                 # Making sure all leds are turned off
                     q_Control_Serial_Write.put((1, Writing), block=True, timeout=None) # Turn leds of again
-
+                    time.sleep(4)
+                    print("Turning LEd 1 on")
                     Writing = ("Main","Global", "Led1_on")            
                     q_Control_Serial_Write.put((1, Writing), block=True, timeout=None) # Turn led 1 on for following the Pico Zebro's
-
+                    time.sleep(4)
                     print("MAIN RELEASE SERIAL LOCK")
                     
                     if q_Control_Uart_Main.empty() == False: #empty it so the pico can write again
@@ -668,7 +695,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             blurred = cv2.GaussianBlur(gray, (11, 11), 0)                   # Blur image for noise reduction
             # threshold the image to reveal light regions in the
             # blurred image
-            thresh = cv2.threshold(blurred, 240, 250, cv2.THRESH_BINARY)[1]
+            thresh = cv2.threshold(blurred, 230, 250, cv2.THRESH_BINARY)[1]
             # perform a series of erosions and dilations to remove
             # any small blobs of noise from the thresholded image
             thresh = cv2.erode(thresh, None, iterations=2)
@@ -681,12 +708,14 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             try:
                 cnts = contours.sort_contours(cnts)[0]
             except ValueError:
+                Counter = Counter + 1
                 pass
-                #print("There are no zebros")
+                print("There are no zebros")
              
             # loop over the contours
             for (i, c) in enumerate(cnts):
                 # draw the bright spot on the image
+                
                 (x, y, w, h) = cv2.boundingRect(c)
                 x_compare_1 = x + 80
                 y_compare_1 = y + 50
@@ -696,15 +725,26 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     #cv2.putText(image, "#1", (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2) # debug for showing on image
                     Zebro_1_Middle_x = x
                     Zebro_1_Middle_y = y
-                    #print("This is Zebro 1")
-                    
+                    Pico_1 = 1
+                    print("This is Zebro 1")
+
+            if Pico_1 == 1:
+                Zebro_1_Middle_x = Zebro_1_Middle_x
+                Zebro_1_Middle_y = Zebro_1_Middle_y
+                
+            elif Pico_1 == 2:
+                Zebro_1_Middle_x = 0
+                Zebro_1_Middle_x = 0
+                print("WE LOST PICO 1 MAYDAY MAYDAY SOS")
+                
             for Zebros in range(1):
                 Blocking_Zebro = []   #Here will be the blocking in
                 if Zebros == 0:
                     Blocking_Zebro = Block.Block_2(Zebro_1_Middle_x,Zebro_1_Middle_y)
                     
                     PicoZebro_1 = [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro]
-                    
+                    print(PicoZebro_1)
+                    print("Pico 1")
                     if q_PicoZebro_1.empty() == True:                       # if the queue is empty fill it
                         q_PicoZebro_1.put(PicoZebro_1)
                     elif q_PicoZebro_1.empty() == False:                    # else empty it before filling it again with the next data.
@@ -716,6 +756,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_PicoZebro_1.put(PicoZebro_1)
             Picture = 7                                                 # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
 
+            Pico_1 = 2
+            
             if ((time.time() - Picture_1_start_time) > 600):            # Check if 10 mins has passed
                 Picture = 0                                             # Restart code
                 print(Picture)
@@ -726,7 +768,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 
         Picture = Picture + 1                                               # Go to the next step after taking a new frame
 
-        getConnected()                                                      # Update the list with connected devices every frame 
+        #getConnected()                                                      # Update the list with connected devices every frame 
         
         # show the frame
         key = cv2.waitKey(1) & 0xFF
@@ -797,6 +839,8 @@ if __name__ == '__main__':
     #Serial connection init 
     initialize_serial()
     time.sleep(10)
+    getConnected()                                                  # Update the list with connected devices every frame
+    time.sleep(5)
     q_Control_Uart_Main = queue.PriorityQueue(maxsize=1) # This is a 1 or 0 Determined by the main.
     
     q_Control_Serial_Write = queue.PriorityQueue(maxsize=1) # In here is the data for serial Write.

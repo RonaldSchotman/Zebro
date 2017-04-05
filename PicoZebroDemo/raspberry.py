@@ -19,7 +19,7 @@ def initialize_serial():
     
     if len(usablePorts) == 0:                                       # Check if there are usable ports
         print("ARDUINO ERROR: ARDUINO_NOT_FOUND")                   # Print error message
-        exit(); ################################################### # !!!!!!!!! Exit the program because we cant do anything. IMPLEMENT THIS IN BY YOUR OWN LIKINGS!!!!!!!!!
+        exit();                                                     # !!!!!!!!! Exit the program because we cant do anything. IMPLEMENT THIS IN BY YOUR OWN LIKINGS!!!!!!!!!
         
     # Initalize some variables
     lastCommand = [0, 0, 0, 0, 255]                                 # For the first getState so that there wont be an error (zebroID, read(0) or write(1), address, value)

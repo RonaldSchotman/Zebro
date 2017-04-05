@@ -1841,15 +1841,15 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,
                         q_PicoZebro_20.unfinished_tasks = 0
                         q_PicoZebro_20.mutex.release()
                         q_PicoZebro_20.put(PicoZebro_20)
-                Picture = 5
+            Picture = 5
                 
-                if (time.time() - Picture_1_start_time) > 600:
-                    Picture = 0
-                    print(Picture)
-                    Picture_1_start_time = time.time()
-                    print("Restarting program reinit")
-                    print((time.time() - Picture_1_start_time))
-                    pass
+            if (time.time() - Picture_1_start_time) > 600:
+                Picture = 0
+                print(Picture)
+                Picture_1_start_time = time.time()
+                print("Restarting program reinit")
+                print((time.time() - Picture_1_start_time))
+                pass
 
         Picture = Picture + 1
         
