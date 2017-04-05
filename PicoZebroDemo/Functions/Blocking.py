@@ -6,7 +6,6 @@ class Blocking:
     #Check if any of the x and y values are close to each other.
     #or if any of the x or y values are to close to the edge which is
     # if x == 0 or x == 1600 or y = 0 or y == 920 
-    #So a gigantic multiple if statement. which becomes smaller and smaller
     def Block_1(self, Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
                 Zebro_11_Middle_x, Zebro_12_Middle_x, Zebro_13_Middle_x, Zebro_14_Middle_x, Zebro_15_Middle_x, Zebro_16_Middle_x, Zebro_17_Middle_x, Zebro_18_Middle_x, Zebro_19_Middle_x, Zebro_20_Middle_x,
                 Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y,
@@ -145,12 +144,12 @@ class Blocking:
     
     def Block_3(self, Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x, Zebro_9_Middle_x, Zebro_10_Middle_x,
                 Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y, Zebro_9_Middle_y, Zebro_10_Middle_y):
-        Blocking = []   #Here will be the blocking in
+        Blocking = []                                               # Here will be the blocked Directions in
         
-        Blocking_x_2 = abs(Zebro_1_Middle_x - Zebro_2_Middle_x)
-        Blocking_y_2 = abs(Zebro_1_Middle_y - Zebro_2_Middle_y)
-        Blocking_x_3 = abs(Zebro_1_Middle_x - Zebro_3_Middle_x)
-        Blocking_y_3 = abs(Zebro_1_Middle_y - Zebro_3_Middle_y)
+        Blocking_x_2 = abs(Zebro_1_Middle_x - Zebro_2_Middle_x)     # For determing the blocked Direction for the Pico Zebro it needs to be determined if any of the other Pico Zebro's are close by
+        Blocking_y_2 = abs(Zebro_1_Middle_y - Zebro_2_Middle_y)     # With its absolute value in distance this can be stermined. 
+        Blocking_x_3 = abs(Zebro_1_Middle_x - Zebro_3_Middle_x)     # Then needs to be checked where the blocking is comming from onces that is determined the blocked Directions can be determined
+        Blocking_y_3 = abs(Zebro_1_Middle_y - Zebro_3_Middle_y)     # Also no matter how many zebro's you have always check if the Zebro is reaching the edges.
         Blocking_x_4 = abs(Zebro_1_Middle_x - Zebro_4_Middle_x)
         Blocking_y_4 = abs(Zebro_1_Middle_y - Zebro_4_Middle_y)
         Blocking_x_5 = abs(Zebro_1_Middle_x - Zebro_5_Middle_x)
@@ -165,7 +164,8 @@ class Blocking:
         Blocking_y_9 = abs(Zebro_1_Middle_y - Zebro_9_Middle_y)
         Blocking_x_10 = abs(Zebro_1_Middle_x - Zebro_10_Middle_x)
         Blocking_y_10 = abs(Zebro_1_Middle_y - Zebro_10_Middle_y)
-            
+
+        # In here every zebro will compare with each other for each Zebro an Block functions needs to be called to determine this. 
         if (((0 < Blocking_x_2 < 80) and (0 < Blocking_y_2 < 80)) or ((0 < Blocking_x_3 < 80) and (0 < Blocking_y_3 < 80)) or ((0 < Blocking_x_4 < 80) and (0 < Blocking_y_4 < 80))
             or ((0 < Blocking_x_5 < 80) and (0 < Blocking_y_5 < 80)) or ((0 < Blocking_x_6 < 80) and (0 < Blocking_y_6 < 80)) or ((0 < Blocking_x_7 < 80) and (0 < Blocking_y_7 < 80))
             or ((0 < Blocking_x_8 < 80) and (0 < Blocking_y_8 < 80)) or ((0 < Blocking_x_9 < 80) and (0 < Blocking_y_9 < 80)) or ((0 < Blocking_x_10 < 80) and (0 < Blocking_y_10 < 80)) ):
@@ -197,7 +197,7 @@ class Blocking:
                     Block = "North"
                     Blocking.append(Block)
                     Block = None
-                    
+        # Here is the checking if the Pico Zebro is closing on the edge of the camera. 
         if ((Zebro_1_Middle_y < 80) or (Zebro_1_Middle_y > 850) or (Zebro_1_Middle_x > 1500) or (Zebro_1_Middle_x < 80)):
             if ((Zebro_1_Middle_x > 1500) or (Zebro_1_Middle_y < 80)):
                 Block = "East"
