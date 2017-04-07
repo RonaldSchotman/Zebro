@@ -578,25 +578,28 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             Led_1 = cv2.imread("Image2.jpg")                                # Take the picture with Led 1 on
             Led_3 = cv2.imread("Image3.jpg")                                # Take the picture with Led 3 on
 
-            New_image_Led_1 = abs(Original - Led_1)                     
-            New_image_Led_3 = abs(Original - Led_3)
-            Difference_led_1 = Image_Difference(New_image_Led_1)            # Make only the led 1 visible which should be the only difference in the picture
-            Difference_led_3 = Image_Difference(New_image_Led_3)            # Make only the led 3 visible
+            gray_Led_1 = cv2.cvtColor(Led_1, cv2.COLOR_BGR2GRAY)            # Take a gray picture
+            blurred_Led_1 = cv2.GaussianBlur(gray_Led_1, (11, 11), 0)       # Blur image for noise reduction
+            gray_Led_3 = cv2.cvtColor(Led_3, cv2.COLOR_BGR2GRAY)            # Take a gray picture
+            blurred_Led_3 = cv2.GaussianBlur(gray_Led_3, (11, 11), 0)       # Blur image for noise reduction
+            # threshold the image to reveal light regions in the
+            # blurred image
+            thresh_Led_1 = cv2.threshold(blurred_Led_1, 230, 250, cv2.THRESH_BINARY)[1]
+            thresh_Led_3 = cv2.threshold(blurred_Led_3, 230, 250, cv2.THRESH_BINARY)[1]
+            # perform a series of erosions and dilations to remove
+            # any small blobs of noise from the thresholded image
+            thresh_Led_1 = cv2.erode(thresh_Led_1, None, iterations=2)
+            thresh_Led_1 = cv2.dilate(thresh_Led_1, None, iterations=4)
+            
+            thresh_Led_3 = cv2.erode(thresh_Led_3, None, iterations=2)
+            thresh_Led_3 = cv2.dilate(thresh_Led_3, None, iterations=4)
 
-            Finding_Canny_Led_1 = cv2.Canny(Difference_led_1, 15, 200)      # cv2,Canny find all edges in a images
-            Finding_Canny_Led_3 = cv2.Canny(Difference_led_3, 15, 200)      # Which finds the original edges of led1 and led3
-                    
-            Finding_Canny_Led_1 = cv2.morphologyEx(Finding_Canny_Led_1, cv2.MORPH_CLOSE, np.ones((8,8),np.uint8)) # To make sure only led 1 and
-            Finding_Canny_Led_3 = cv2.morphologyEx(Finding_Canny_Led_3, cv2.MORPH_CLOSE, np.ones((8,8),np.uint8)) # Led 3 are detected fill up the canny's so it becomes one big one
-
-            Finding_Canny_Led_1 = cv2.Canny(Finding_Canny_Led_1, 100, 200)  # Some techniques to make sure it is only 1 led which is seen.
-            Finding_Canny_Led_3 = cv2.Canny(Finding_Canny_Led_3, 100, 200)  # Some techniques to make sure it is only 1 led which is seen.
-
-            (_, contours_Led_1, _) = cv2.findContours(Finding_Canny_Led_1.copy(), cv2.RETR_EXTERNAL,
+            (_, contours_Led_1, _) = cv2.findContours(thresh_Led_1.copy(), cv2.RETR_EXTERNAL,
                                                       cv2.CHAIN_APPROX_NONE) # Find the contours of Led 1
-            (_, contours_Led_3, _) = cv2.findContours(Finding_Canny_Led_3.copy(), cv2.RETR_EXTERNAL,
+            (_, contours_Led_3, _) = cv2.findContours(thresh_Led_3.copy(), cv2.RETR_EXTERNAL,
                                                       cv2.CHAIN_APPROX_NONE) # Find the contours of Led 3
-            x_Led_1 = 0                                                      # Reset the values so Pico 1 will not be confused with Pico 2 etc.
+
+            x_Led_1 = 0                                                     # Reset the values so Pico 1 will not be confused with Pico 2 etc.
             y_Led_1 = 0                                                     # For finding Led 1 of the specific Pico Zebro
             w_Led_1 = 0
             h_Led_1 = 0
@@ -605,7 +608,10 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             y_Led_3 = 0
             w_Led_3 = 0
             h_Led_3 = 0 
-                
+
+            Led_1_off = 0
+            Led_3_off = 0
+            
             areaArray_Led_1 = []                                            # For putting all found contours in a list
             areaArray_Led_3 = []                                            # By doing this only the largest which should be the led will be detected 
                 
@@ -624,15 +630,27 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 Largest_contour_led_1 = sorteddata_Led_1[0][1]              # Take the largest contour of Led 1
                 [x_Led_1,y_Led_1,w_Led_1,h_Led_1] = cv2.boundingRect(Largest_contour_led_1) # And find the top left coordinates of the led with x and y and the width and height of the led 
             except (IndexError, cv2.error) as e:                            # In case there is no led a cv2,error will occur.
-                print("Nothing Found")
+                Led_1_off = 1 
+                print("Nothing Found for led 1")
                 pass
 
             try:
                 Largest_contour_led_3 = sorteddata_Led_3[0][1]              # Take the largest contour of Led 3
                 [x_Led_3,y_Led_3,w_Led_3,h_Led_3] = cv2.boundingRect(Largest_contour_led_3)
             except (IndexError, cv2.error) as e:                            # In case there is no led a cv2,error will occur.
+                Led_3_off = 1
                 print("Nothing Found")
                 pass
+            
+            if (Led_3_off == 1) and (Led_1_off == 0):
+                print("Only led 1 was found will think it faces South")
+                x_Led_3 = x_Led_1 + 10
+                y_Led_3 = y_Led_1 + 10
+            elif (Led_3_off == 0) and (Led_1_off == 1):
+                print("Only led 3 was found will think it faces North")
+                x_Led_1 = x_Led_3 + 10
+                y_Led_1 = y_Led_3 + 10
+            
             LEDS_Image = cv2.addWeighted(Difference_led_1,1,Difference_led_3,1,0) # Debug for showing the picture is taken correctly
             cv2.imwrite("Leds_Tog1.jpg", LEDS_Image)                        # it will be written to Leds_Tog1.jpg
             
@@ -740,10 +758,10 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 x_compare_2 = x - 80
                 y_compare_2 = y - 50
 
-                x_compare_3 = x + 30                                        # This is the check fo determing orientation if this works the upper method is not neccessary
-                y_compare_3 = y + 20
-                x_compare_4 = x - 30
-                y_compare_4 = y - 20
+                x_compare_3 = x + 40                                        # This is the check fo determing orientation if this works the upper method is not neccessary
+                y_compare_3 = y + 30
+                x_compare_4 = x - 40
+                y_compare_4 = y - 30
                 
                 if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):   # For re deteming the middle point
                     Zebro_1_Middle_x = x
