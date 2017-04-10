@@ -732,7 +732,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             blurred = cv2.GaussianBlur(gray, (11, 11), 0)                   # Blur image for noise reduction
             # threshold the image to reveal light regions in the
             # blurred image
-            thresh = cv2.threshold(blurred, 230, 250, cv2.THRESH_BINARY)[1]
+            thresh = cv2.threshold(blurred, 200, 250, cv2.THRESH_BINARY)[1]
             # perform a series of erosions and dilations to remove
             # any small blobs of noise from the thresholded image
             thresh = cv2.erode(thresh, None, iterations=2)
