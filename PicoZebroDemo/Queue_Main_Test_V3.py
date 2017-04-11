@@ -59,7 +59,7 @@ def setMovement(connectionID, value):                                       # Se
     print("setMovement:", getResult())                                      # Wait for the arduino to finish the command
 
 class Check_Connected_thread(threading.Thread):
-    def __init__(self,q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main): # initialize UART thread for communication between BLE and Raspberry pi 
+    def __init__(self,q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main): # initialize checking Connection
         ''' Constructor. of Connected Thread '''
         threading.Thread.__init__(self) 
 
@@ -98,7 +98,7 @@ class UART_Thread(threading.Thread):                                        # UA
             if (self.q_Control_Serial_Write.empty() == False) or (Sended_Data == 1): # Check if there is data to send.
                 Sended_Data = 1                                             # if Yes set Sended_Data to 1 untill data is send.
                 Serial = self.q_Control_Serial_Write.get(block=False)       # Try to obtain next Queue variable for sending command 
-                print(Serial)                                               # Say what has the be send and if the main or a Pico Zebro thread is sending it.
+                #print(Serial)                                               # Say what has the be send and if the main or a Pico Zebro thread is sending it.
                 #Serial is obtained as follows:
                 #Serial[0] = priority of Queue, Serial[1][0] = Which Pico Zebro thread or Main is sending the Data
                 #Serial[1][1] = Which device or devices need the command needs to be send to, Serial[1][2] = The actual command
@@ -139,7 +139,7 @@ class UART_Thread(threading.Thread):                                        # UA
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
                             setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off 
                     Sended_Data = 0                                         # Data is send
-                    print("Main_Wrote")                                     # For debug, for showing which thread was the last to try to write over Uart
+                    #print("Main_Wrote")                                     # For debug, for showing which thread was the last to try to write over Uart
                     
                 # For Each Pico such an elif:    
                 elif Serial[1][0] == "Pico_N1":                             # if Pico_N1 has to send data for now only four commands
@@ -156,7 +156,7 @@ class UART_Thread(threading.Thread):                                        # UA
                     else:
                         print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
                     Sended_Data = 0
-                    print("Pico_Zebro_1_Wrote")
+                    #print("Pico_Zebro_1_Wrote")
                         
                 elif Serial[1][0] == "Global":                              # A Command which every Pico Zebro can send but not the main. 
                     if Serial[1][1] == "Connect":                           # To check if the specific Pico Zebro is connected to the bluetooth module
@@ -259,7 +259,7 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                     #self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None) # obtain new data of which devices are connected
                     Connected_Devices = connectedArray                      # in the global Variable connectedArray must stand which devices are connected
                     #Connected = 1
-                else:
+                elif Connected_Devices[Connected_To] == 0:
                     Connected = 0                                           # just as the print says The connection has been lost with the Pico so stop trying to control it
                     print("Lost Connection")
                     
@@ -401,8 +401,8 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                             Writing = (self.Zebro,self.Zebro, "Stop")
                             
                             self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
-                            print("The Zebro has been stopped")
-                            print(Writing)
+                            #print("The Zebro has been stopped")
+                            #print(Writing)
                             #Release Serial Write
                     else:
                         # Obtain Serial Write
@@ -413,8 +413,9 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                         if self.q_Control_Uart_Main.empty() == True:        # if the main doesn't have control send next movement otherwise you already should have been stuck before
                             Writing = (self.Zebro,self.Zebro, Movement)     # The change this can go wrong is extremly small but possible.
                             self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
-                            print(Writing)
-
+                            #print("Zebro is moving")
+                            #print(Writing)
+                            
                         Last_Movement = Movement
                         #Current_Direction = Direction
                         
@@ -499,7 +500,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
     Picture = 0                                                             # Picture is the variable which determines which step the main is at. Now there are 8 steps where some steps will be done multiple times
     Devices = 0                                                             # This is for checking every possible Pico Zebro
     Pico_1 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
-    Pico_Led_1 = 0
+    
+    Pico_Led_1 = 0                                                          # At the start no leds are found
     Pico_Led_3 = 0
     
     # capture frames from the camera
@@ -711,7 +713,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_Pico_Direction_1.put(Direction_Zebro_1)
                     print(PicoZebro_1)
                     print(Direction_Zebro_1)
-                    Picture = 8                                             # This has to be 8 for going to the next step for the last Zebro for every other one does not need to be assigned
+                    #Picture = 8                                             # This has to be 8 for going to the next step for the last Zebro for every other one does not need to be assigned
                     Writing = ("Main","Global", "Leds_off")                 # Making sure all leds are turned off
                     q_Control_Serial_Write.put((1, Writing), block=True, timeout=None) # Turn leds of again
                     time.sleep(2)
@@ -735,19 +737,19 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     Picture_1_start_time = time.time() # Take current time so the main reset at Picture 1 every 10 mins
 
         if Picture == 8:
-            
+            print("Checking every zebro current location")
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)                  # Take a gray picture
             blurred = cv2.GaussianBlur(gray, (11, 11), 0)                   # Blur image for noise reduction
             # threshold the image to reveal light regions in the
             # blurred image
             cv2.imwrite("thresh0.jpg",blurred)
-            thresh = cv2.threshold(blurred, 220, 254, cv2.THRESH_BINARY)[1]
+            thresh = cv2.threshold(blurred, 215, 254, cv2.THRESH_BINARY)[1]
             cv2.imwrite("thresh1.jpg",thresh)
             # perform a series of erosions and dilations to remove
             # any small blobs of noise from the thresholded image
             #thresh = cv2.erode(thresh, None, iterations=1)
             #cv2.imwrite("thresh2.jpg",thresh)
-            thresh = cv2.dilate(thresh, None, iterations=3)
+            thresh = cv2.dilate(thresh, None, iterations=4)
             cv2.imwrite("thresh3.jpg",thresh)
             # find the contours in the mask, then sort them from left to
             # right
@@ -784,18 +786,22 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     Zebro_1_x_Led_1 = x
                     Zebro_1_y_Led_1 = y
                     Pico_Led_1 = 1
+                    print("Found LEd 1")
+                    Pico_1 = 1
 
                 if (x_compare_4 < Zebro_1_x_Led_3 < x_compare_3) and (y_compare_4 < Zebro_1_y_Led_3 < y_compare_3):
                     Zebro_1_x_Led_3 = x
                     Zebro_1_y_Led_3 = y
                     Pico_Led_3 = 1
+                    Pico_1 = 1
+                    print("Found LEd 3")
                     
                 if (Pico_Led_1 == 1) and (Pico_Led_3 == 1):
                     (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(Zebro_1_x_Led_1,Zebro_1_x_Led_3,Zebro_1_y_Led_1,Zebro_1_y_Led_3) # Find the orientation of the Pico Zebro live
                     Direction_Zebro_1 = Direction                           # The current direction the Pico Zebro is going
                     Zebro_1_Middle_x = Zebro_Middle_x
                     Zebro_1_Middle_y = Zebro_Middle_y
-                    print(Direction)
+                    
                     Pico_Led_1 = 0
                     Pico_Led_3 = 0
                     Pico_1 = 1
@@ -807,6 +813,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             elif Pico_1 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 10 mins again
                 Zebro_1_Middle_x = 0
                 Zebro_1_Middle_y = 0
+                print("Lost Pico 1")
                 
             for Zebros in range(1):
                 Blocking_Zebro = []                                         # Here will be the blocked Directions in
@@ -814,7 +821,9 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     Blocking_Zebro = Block.Block_2(Zebro_1_Middle_x,Zebro_1_Middle_y) # For calculating the Blocked Directions with 1 Pico Zebro Block_2 is used
                     
                     PicoZebro_1 = [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro]
-                    #print(PicoZebro_1)
+                    Direction_Zebro_1 = Direction_Zebro_1 
+                    print(PicoZebro_1)
+                    print(Direction_Zebro_1)
                     if q_PicoZebro_1.empty() == True:                       # if the queue is empty fill it
                         q_PicoZebro_1.put(PicoZebro_1)
                     elif q_PicoZebro_1.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
@@ -838,6 +847,9 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             Picture = 7                                                     # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
 
             Pico_1 = 2
+            
+            Pico_Led_1 = 0
+            Pico_Led_3 = 0
             
             if ((time.time() - Picture_1_start_time) > 600):                # Check if 10 mins has passed
                 Picture = 0                                                 # Restart code and redetermine which Pico Zebro is which 

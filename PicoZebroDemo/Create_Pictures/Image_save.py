@@ -18,9 +18,9 @@ import time                             # For real time video
 import cv2                              # Include OpenCV library (Most important one)
 import numpy as np                      # Optimized library for numerical operations for OpenCV
 
-import zbarlight
-import bluetooth
-import threading 
+#import zbarlight
+#import bluetooth
+#import threading 
  
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
