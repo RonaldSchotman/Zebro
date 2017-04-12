@@ -79,8 +79,7 @@ class Check_Connected_thread(threading.Thread):
             if self.q_Control_Uart_Main.empty() == True:        # if the main doesn't have control send next movement otherwise you already should have been stuck before
                 Writing = ("Global","Connect", "Devices")     
                 self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
-                print("checked Devices")
-            time.sleep(10)
+                time.sleep(10)
 
 class UART_Thread(threading.Thread):                                        # UART Thread
     def __init__(self,q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main): # initialize UART thread for communication between BLE and Raspberry pi 
@@ -140,9 +139,71 @@ class UART_Thread(threading.Thread):                                        # UA
                         elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
                             setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                    elif Serial[1][1] == 'Pico_N2':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
+                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                        if Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
+                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                        elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
+                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                    elif Serial[1][1] == 'Pico_N3':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
+                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                        if Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
+                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                        elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
+                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                    elif Serial[1][1] == 'Pico_N4':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
+                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                        if Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
+                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                        elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
+                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                    elif Serial[1][1] == 'Pico_N5':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
+                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                        if Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
+                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                        elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
+                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                    elif Serial[1][1] == 'Pico_N6':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
+                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                        if Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
+                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                        elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
+                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                    elif Serial[1][1] == 'Pico_N7':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
+                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                        if Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
+                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                        elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
+                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                    elif Serial[1][1] == 'Pico_N8':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
+                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                        if Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
+                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                        elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
+                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
                             setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off 
                     Sended_Data = 0                                         # Data is send
-                    #print("Main_Wrote")                                     # For debug, for showing which thread was the last to try to write over Uart
                     
                 # For Each Pico such an elif:    
                 elif Serial[1][0] == "Pico_N1":                             # if Pico_N1 has to send data for now only four commands
@@ -159,8 +220,116 @@ class UART_Thread(threading.Thread):                                        # UA
                     else:
                         print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
                     Sended_Data = 0
-                    #print("Pico_Zebro_1_Wrote")
-                        
+                    
+                # For Each Pico such an elif:    
+                elif Serial[1][0] == "Pico_N2":                             # if Pico_N1 has to send data for now only four commands
+                    if Serial[1][1] == "Pico_N2":                           # This should be Pico_Nx or the wrong pico is writing to it.
+                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
+                            setMovement(connection_Pico_1, 0)
+                        elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
+                            setMovement(connection_Pico_1, 1)
+                        elif Serial[1][2] == "Right":                       # Let Pico Zebro 2 Move Right
+                            setMovement(connection_Pico_1, 4)
+                        elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
+                            setMovement(connection_Pico_1, 3)
+                    else:
+                        print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                    Sended_Data = 0
+
+                # For Each Pico such an elif:    
+                elif Serial[1][0] == "Pico_N3":                             # if Pico_N1 has to send data for now only four commands
+                    if Serial[1][1] == "Pico_N3":                           # This should be Pico_Nx or the wrong pico is writing to it.
+                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
+                            setMovement(connection_Pico_1, 0)
+                        elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
+                            setMovement(connection_Pico_1, 1)
+                        elif Serial[1][2] == "Right":                       # Let Pico Zebro 2 Move Right
+                            setMovement(connection_Pico_1, 4)
+                        elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
+                            setMovement(connection_Pico_1, 3)
+                    else:
+                        print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                    Sended_Data = 0
+                # For Each Pico such an elif:    
+                elif Serial[1][0] == "Pico_N4":                             # if Pico_N1 has to send data for now only four commands
+                    if Serial[1][1] == "Pico_N4":                           # This should be Pico_Nx or the wrong pico is writing to it.
+                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
+                            setMovement(connection_Pico_1, 0)
+                        elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
+                            setMovement(connection_Pico_1, 1)
+                        elif Serial[1][2] == "Right":                       # Let Pico Zebro 2 Move Right
+                            setMovement(connection_Pico_1, 4)
+                        elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
+                            setMovement(connection_Pico_1, 3)
+                    else:
+                        print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                    Sended_Data = 0
+                # For Each Pico such an elif:    
+                elif Serial[1][0] == "Pico_N5":                             # if Pico_N1 has to send data for now only four commands
+                    if Serial[1][1] == "Pico_N5":                           # This should be Pico_Nx or the wrong pico is writing to it.
+                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
+                            setMovement(connection_Pico_1, 0)
+                        elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
+                            setMovement(connection_Pico_1, 1)
+                        elif Serial[1][2] == "Right":                       # Let Pico Zebro 2 Move Right
+                            setMovement(connection_Pico_1, 4)
+                        elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
+                            setMovement(connection_Pico_1, 3)
+                    else:
+                        print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                    Sended_Data = 0
+                    
+                # For Each Pico such an elif:    
+                elif Serial[1][0] == "Pico_N6":                             # if Pico_N1 has to send data for now only four commands
+                    if Serial[1][1] == "Pico_N6":                           # This should be Pico_Nx or the wrong pico is writing to it.
+                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
+                            setMovement(connection_Pico_1, 0)
+                        elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
+                            setMovement(connection_Pico_1, 1)
+                        elif Serial[1][2] == "Right":                       # Let Pico Zebro 2 Move Right
+                            setMovement(connection_Pico_1, 4)
+                        elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
+                            setMovement(connection_Pico_1, 3)
+                    else:
+                        print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                    Sended_Data = 0
+                    
+                # For Each Pico such an elif:    
+                elif Serial[1][0] == "Pico_N7":                             # if Pico_N1 has to send data for now only four commands
+                    if Serial[1][1] == "Pico_N7":                           # This should be Pico_Nx or the wrong pico is writing to it.
+                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
+                            setMovement(connection_Pico_1, 0)
+                        elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
+                            setMovement(connection_Pico_1, 1)
+                        elif Serial[1][2] == "Right":                       # Let Pico Zebro 2 Move Right
+                            setMovement(connection_Pico_1, 4)
+                        elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
+                            setMovement(connection_Pico_1, 3)
+                    else:
+                        print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                    Sended_Data = 0
+                # For Each Pico such an elif:    
+                elif Serial[1][0] == "Pico_N8":                             # if Pico_N1 has to send data for now only four commands
+                    if Serial[1][1] == "Pico_N8":                           # This should be Pico_Nx or the wrong pico is writing to it.
+                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
+                            setMovement(connection_Pico_1, 0)
+                        elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
+                            setMovement(connection_Pico_1, 1)
+                        elif Serial[1][2] == "Right":                       # Let Pico Zebro 2 Move Right
+                            setMovement(connection_Pico_1, 4)
+                        elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
+                            setMovement(connection_Pico_1, 3)
+                    else:
+                        print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
+                    Sended_Data = 0
+                    
                 elif Serial[1][0] == "Global":                              # A Command which every Pico Zebro can send but not the main. 
                     if Serial[1][1] == "Connect":                           # To check if the specific Pico Zebro is connected to the bluetooth module
                         try:
@@ -198,6 +367,20 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
 
         if self.Zebro == 'Pico_N1':                                         # Elif for every Zebro + 1
             Connected_To = 0                                                # Connected_To for Pico_N2 is then: 1
+        if self.Zebro == 'Pico_N2':                                         # Elif for every Zebro + 1
+            Connected_To = 1                                                # Connected_To for Pico_N2 is then: 1
+        if self.Zebro == 'Pico_N3':                                         # Elif for every Zebro + 1
+            Connected_To = 2                                                # Connected_To for Pico_N2 is then: 1
+        if self.Zebro == 'Pico_N4':                                         # Elif for every Zebro + 1
+            Connected_To = 3                                                # Connected_To for Pico_N2 is then: 1
+        if self.Zebro == 'Pico_N5':                                         # Elif for every Zebro + 1
+            Connected_To = 4                                                # Connected_To for Pico_N2 is then: 1
+        if self.Zebro == 'Pico_N6':                                         # Elif for every Zebro + 1
+            Connected_To = 5                                                # Connected_To for Pico_N2 is then: 1
+        if self.Zebro == 'Pico_N7':                                         # Elif for every Zebro + 1
+            Connected_To = 6                                                # Connected_To for Pico_N2 is then: 1
+        if self.Zebro == 'Pico_N8':                                         # Elif for every Zebro + 1
+            Connected_To = 7                                                # Connected_To for Pico_N2 is then: 1
         
         Connected = 0                                                       # At the start Connection is always 0
         Sleep = 0                                                           # Also doesn't Need to sleep at the start
@@ -224,9 +407,6 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                         
                 if (self.q_Control_Uart_Main.empty() == True):              # Obtain which Zebro has connected
                     Connected_Devices = connectedArray                      # in the global Variable connectedArray must stand which devices are connected
-                    #print(self.Zebro+" Checked Devices")
-
-                #print(Connected_Devices)                                    # Extra check for which devices are connected
                 
                 if Connected_Devices[Connected_To] == 1:                    # self.Zebro:   # Needs to be Pico_Nx
                     print(self.Zebro+" Will be Connected")                  # Yes it is in Connected Devices
@@ -257,9 +437,6 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                 
             if Connected == 1:
                 if Connected_Devices[Connected_To] == 1:                    # Extra check if the Pico Zebro is stil connected
-                    #print("Still have Connections")                         # Debug print to see if the device is still connected
-                    #Writing = ("Global","Connect", "Devices")               # See UART Thread for explanation command
-                    #self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None) # obtain new data of which devices are connected
                     Connected_Devices = connectedArray                      # in the global Variable connectedArray must stand which devices are connected
                     #Connected = 1
                 elif Connected_Devices[Connected_To] == 0:
@@ -406,7 +583,6 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                             
                             self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
                             print("The Zebro has been stopped")
-                            #print(Writing)
                             #Release Serial Write
                     else:
                         # Obtain Serial Write
@@ -417,8 +593,6 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                         if self.q_Control_Uart_Main.empty() == True:        # if the main doesn't have control send next movement otherwise you already should have been stuck before
                             Writing = (self.Zebro,self.Zebro, Movement)     # The change this can go wrong is extremly small but possible.
                             self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
-                            #print("Zebro is moving")
-                            #print(Writing)
                             
                         Last_Movement = Movement
                         #Current_Direction = Direction
@@ -441,8 +615,6 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):                      # A 
     y_middle = 0
     Angle = 0
     Direction = None
-    # Angle Calculation is not correct yet.
-    #print(x_Led_1,x_Led_3,y_Led_1,y_Led_3)
 
     #No points Found
     if(x_Led_1 or x_Led_3 or y_Led_1 or y_Led_3) == 0:
@@ -501,17 +673,22 @@ def getConnected():
         connectedArray = res[1:]                                            # Remove the status byte from the front
 
 def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # The main in here for every possible Zebro the Direction, Angle and middlepoint queue needs to be given
-         q_PicoZebro_1,
-         q_Pico_Direction_1,
-         q_Pico_Angle_1):
+         q_PicoZebro_1, q_Pico_Direction_1, q_Pico_Angle_1,q_PicoZebro_2, q_Pico_Direction_2, q_Pico_Angle_2,
+         q_PicoZebro_3, q_Pico_Direction_3, q_Pico_Angle_3,q_PicoZebro_4, q_Pico_Direction_4, q_Pico_Angle_4,q_PicoZebro_5, q_Pico_Direction_5, q_Pico_Angle_5,
+         q_PicoZebro_6, q_Pico_Direction_6, q_Pico_Angle_6,q_PicoZebro_7, q_Pico_Direction_7, q_Pico_Angle_7,q_PicoZebro_8, q_Pico_Direction_8, q_Pico_Angle_8):
     
     # Initialize Picture to 0 for the first time when program starts.
     Picture = 0                                                             # Picture is the variable which determines which step the main is at. Now there are 8 steps where some steps will be done multiple times
     Devices = 0                                                             # This is for checking every possible Pico Zebro
     Pico_1 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
+    Pico_2 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
+    Pico_3 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
+    Pico_4 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
+    Pico_5 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
+    Pico_6 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
+    Pico_7 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
+    Pico_8 = 1                                                              # Pico_1 = for checking if a Zebro is lost.
     
-    Pico_Led_1 = 0                                                          # At the start no leds are found
-    Pico_Led_3 = 0
     Pico_1_Lost = 0                                                         # for checking multiple frames
     New_Zebro_1_Middle_x = 0
     New_Zebro_1_Middle_y = 0
@@ -519,6 +696,62 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
     Old_Direction_Pico_1 = None
     Old_Zebro_1_Middle_x = 0
     Old_Zebro_1_Middle_y = 0
+
+    Pico_2_Lost = 0                                                         # for checking multiple frames
+    New_Zebro_2_Middle_x = 0
+    New_Zebro_2_Middle_y = 0
+    New_Direction_Pico_2 = None
+    Old_Direction_Pico_2 = None
+    Old_Zebro_2_Middle_x = 0
+    Old_Zebro_2_Middle_y = 0
+
+    Pico_3_Lost = 0                                                         # for checking multiple frames
+    New_Zebro_3_Middle_x = 0
+    New_Zebro_3_Middle_y = 0
+    New_Direction_Pico_3 = None
+    Old_Direction_Pico_3 = None
+    Old_Zebro_3_Middle_x = 0
+    Old_Zebro_3_Middle_y = 0
+
+    Pico_4_Lost = 0                                                         # for checking multiple frames
+    New_Zebro_4_Middle_x = 0
+    New_Zebro_4_Middle_y = 0
+    New_Direction_Pico_4 = None
+    Old_Direction_Pico_4 = None
+    Old_Zebro_4_Middle_x = 0
+    Old_Zebro_4_Middle_y = 0
+
+    Pico_5_Lost = 0                                                         # for checking multiple frames
+    New_Zebro_5_Middle_x = 0
+    New_Zebro_5_Middle_y = 0
+    New_Direction_Pico_5 = None
+    Old_Direction_Pico_5 = None
+    Old_Zebro_5_Middle_x = 0
+    Old_Zebro_5_Middle_y = 0
+
+    Pico_6_Lost = 0                                                         # for checking multiple frames
+    New_Zebro_6_Middle_x = 0
+    New_Zebro_6_Middle_y = 0
+    New_Direction_Pico_6 = None
+    Old_Direction_Pico_6 = None
+    Old_Zebro_6_Middle_x = 0
+    Old_Zebro_6_Middle_y = 0
+
+    Pico_7_Lost = 0                                                         # for checking multiple frames
+    New_Zebro_7_Middle_x = 0
+    New_Zebro_7_Middle_y = 0
+    New_Direction_Pico_7 = None
+    Old_Direction_Pico_7 = None
+    Old_Zebro_7_Middle_x = 0
+    Old_Zebro_7_Middle_y = 0
+
+    Pico_8_Lost = 0                                                         # for checking multiple frames
+    New_Zebro_8_Middle_x = 0
+    New_Zebro_8_Middle_y = 0
+    New_Direction_Pico_8 = None
+    Old_Direction_Pico_8 = None
+    Old_Zebro_8_Middle_x = 0
+    Old_Zebro_8_Middle_y = 0
     
     
     # capture frames from the camera
@@ -577,15 +810,11 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             
         # Take original Picture minimal after first loop for the first frame to avoid weird pictures.
         if Picture == 1:                                                    # Step 1 for Pico Control is taking the original picture and taking control of thread UART Control
-                                                               # Give the command some time to finish with turning all leds off.
-            Zebro_1_x_Led_1 = 0                                             # Reset led values for determing orientation of Pico Zebro.
-            Zebro_1_x_Led_3 = 0                                             # With the x and y coordinates of the picture.
-            Zebro_1_y_Led_1 = 0
-            Zebro_1_y_Led_3 = 0
-            
+                                                                            # Give the command some time to finish with turning all leds off.
             Zebro_1_Middle_x = 0                                            # Reset all values for calculations. This needs to be done for every Zebro
             Zebro_1_Middle_y = 0
             PicoZebro_1 = []
+            Direction_Zebro_1 = None
             
             cv2.imwrite("Image%s.jpg"%Picture, image)                       # Save a picture to Image1.jpg This will be the original picture
             
@@ -699,22 +928,74 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             
             if Devices == 0:                                                # For every Pico Zebro these values have to be assigned
                 #set data from PZ 1
-                Zebro_1_x_Led_1 = x_Led_1                                   # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
-                Zebro_1_x_Led_3 = x_Led_3
-                Zebro_1_y_Led_1 = y_Led_1
-                Zebro_1_y_Led_3 = y_Led_3
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
                 Zebro_1_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
                 Zebro_1_Middle_y = Zebro_Middle_y
                 Direction_Zebro_1 = Direction                               # The current direction the Pico Zebro is going
                 Angle_Zebro_1 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
+                Picture = 1                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+            elif Devices == 1:                                                # For every Pico Zebro these values have to be assigned
+                #set data from PZ 2
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
+                Zebro_2_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
+                Zebro_2_Middle_y = Zebro_Middle_y
+                Direction_Zebro_2 = Direction                               # The current direction the Pico Zebro is going
+                Angle_Zebro_2 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
+                Picture = 1                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+            elif Devices == 2:                                                # For every Pico Zebro these values have to be assigned
+                #set data from PZ 3
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
+                Zebro_3_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
+                Zebro_3_Middle_y = Zebro_Middle_y
+                Direction_Zebro_3 = Direction                               # The current direction the Pico Zebro is going
+                Angle_Zebro_3 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
+                Picture = 1                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+            elif Devices == 3:                                                # For every Pico Zebro these values have to be assigned
+                #set data from PZ 4
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
+                Zebro_4_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
+                Zebro_4_Middle_y = Zebro_Middle_y
+                Direction_Zebro_4 = Direction                               # The current direction the Pico Zebro is going
+                Angle_Zebro_4 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
+                Picture = 1                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+            elif Devices == 4:                                                # For every Pico Zebro these values have to be assigned
+                #set data from PZ 5
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
+                Zebro_5_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
+                Zebro_5_Middle_y = Zebro_Middle_y
+                Direction_Zebro_5 = Direction                               # The current direction the Pico Zebro is going
+                Angle_Zebro_5 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
+                Picture = 1                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+            elif Devices == 5:                                                # For every Pico Zebro these values have to be assigned
+                #set data from PZ 6
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
+                Zebro_6_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
+                Zebro_6_Middle_y = Zebro_Middle_y
+                Direction_Zebro_6 = Direction                               # The current direction the Pico Zebro is going
+                Angle_Zebro_6 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
+                Picture = 1                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+            elif Devices == 6:                                                # For every Pico Zebro these values have to be assigned
+                #set data from PZ 7
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
+                Zebro_7_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
+                Zebro_7_Middle_y = Zebro_Middle_y
+                Direction_Zebro_7 = Direction                               # The current direction the Pico Zebro is going
+                Angle_Zebro_7 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
+                Picture = 1                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+            elif Devices == 7:                                                # For every Pico Zebro these values have to be assigned
+                #set data from PZ 8
+                # The x and y coordinates of the leds for continue finding orientation of the Pico Zebro and
+                Zebro_8_Middle_x = Zebro_Middle_x                           # The middle point of the Pico Zebro
+                Zebro_8_Middle_y = Zebro_Middle_y
+                Direction_Zebro_8 = Direction                               # The current direction the Pico Zebro is going
+                Angle_Zebro_8 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
                 Picture = 7                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
-                
             Devices = Devices + 1                                           # Go to the next device
 
         if Picture == 7:
             Devices = 0                                                     # Reset Devices so for the next time it will start with Pico 1.
             #once every value for every possible Zebro is determind then
-            for Zebros in range(1):                                         # total of maximum of x Zebro's
+            for Zebros in range(8):                                         # total of maximum of x Zebro's
                 Blocking_Zebro = []                                         # Here will be the blocking in
                 if Zebros == 0:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
@@ -741,9 +1022,190 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_Pico_Direction_1.unfinished_tasks = 0
                         q_Pico_Direction_1.mutex.release()
                         q_Pico_Direction_1.put(Direction_Zebro_1)
-                    print(PicoZebro_1)
-                    print(Direction_Zebro_1)
-                    #Picture = 8                                             # This has to be 8 for going to the next step for the last Zebro for every other one does not need to be assigned
+
+                elif Zebros == 1:                                             # The comming step has to be done for every possible Zebro 
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
+                    Blocking_Zebro = Block.Block_4(Zebro_2_Middle_x,Zebro_2_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_2 needs to be adjusted accordingly
+                    
+                    PicoZebro_2 = [Zebro_2_Middle_x , Zebro_2_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
+                    
+                    if q_PicoZebro_2.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_2.put(PicoZebro_2)
+                    elif q_PicoZebro_2.empty() == False:                    # else empty it before filling it again with the next data.
+                        q_PicoZebro_2.mutex.acquire()                       # Which is the middle point and every blocked direction of the Pico Zebro
+                        q_PicoZebro_2.queue.clear()
+                        q_PicoZebro_2.all_tasks_done.notify_all()
+                        q_PicoZebro_2.unfinished_tasks = 0
+                        q_PicoZebro_2.mutex.release()
+                        q_PicoZebro_2.put(PicoZebro_2)
+
+                    if q_Pico_Direction_2.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_2.put(Direction_Zebro_2)
+                    elif q_Pico_Direction_2.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_2.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_2.queue.clear()
+                        q_Pico_Direction_2.all_tasks_done.notify_all()
+                        q_Pico_Direction_2.unfinished_tasks = 0
+                        q_Pico_Direction_2.mutex.release()
+                        q_Pico_Direction_2.put(Direction_Zebro_2)
+
+                elif Zebros == 2:                                             # The comming step has to be done for every possible Zebro 
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
+                    Blocking_Zebro = Block.Block_4(Zebro_3_Middle_x,Zebro_3_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_3 needs to be adjusted accordingly
+                    
+                    PicoZebro_3 = [Zebro_3_Middle_x , Zebro_3_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
+                    
+                    if q_PicoZebro_3.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_3.put(PicoZebro_3)
+                    elif q_PicoZebro_3.empty() == False:                    # else empty it before filling it again with the next data.
+                        q_PicoZebro_3.mutex.acquire()                       # Which is the middle point and every blocked direction of the Pico Zebro
+                        q_PicoZebro_3.queue.clear()
+                        q_PicoZebro_3.all_tasks_done.notify_all()
+                        q_PicoZebro_3.unfinished_tasks = 0
+                        q_PicoZebro_3.mutex.release()
+                        q_PicoZebro_3.put(PicoZebro_3)
+
+                    if q_Pico_Direction_3.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_3.put(Direction_Zebro_3)
+                    elif q_Pico_Direction_3.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_3.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_3.queue.clear()
+                        q_Pico_Direction_3.all_tasks_done.notify_all()
+                        q_Pico_Direction_3.unfinished_tasks = 0
+                        q_Pico_Direction_3.mutex.release()
+                        q_Pico_Direction_3.put(Direction_Zebro_3)
+
+                elif Zebros == 3:                                             # The comming step has to be done for every possible Zebro 
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
+                    Blocking_Zebro = Block.Block_4(Zebro_4_Middle_x,Zebro_4_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_4 needs to be adjusted accordingly
+                    
+                    PicoZebro_4 = [Zebro_4_Middle_x , Zebro_4_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
+                    
+                    if q_PicoZebro_4.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_4.put(PicoZebro_4)
+                    elif q_PicoZebro_4.empty() == False:                    # else empty it before filling it again with the next data.
+                        q_PicoZebro_4.mutex.acquire()                       # Which is the middle point and every blocked direction of the Pico Zebro
+                        q_PicoZebro_4.queue.clear()
+                        q_PicoZebro_4.all_tasks_done.notify_all()
+                        q_PicoZebro_4.unfinished_tasks = 0
+                        q_PicoZebro_4.mutex.release()
+                        q_PicoZebro_4.put(PicoZebro_4)
+
+                    if q_Pico_Direction_4.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_4.put(Direction_Zebro_4)
+                    elif q_Pico_Direction_4.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_4.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_4.queue.clear()
+                        q_Pico_Direction_4.all_tasks_done.notify_all()
+                        q_Pico_Direction_4.unfinished_tasks = 0
+                        q_Pico_Direction_4.mutex.release()
+                        q_Pico_Direction_4.put(Direction_Zebro_4)
+
+                elif Zebros == 4:                                             # The comming step has to be done for every possible Zebro 
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
+                    Blocking_Zebro = Block.Block_4(Zebro_5_Middle_x,Zebro_5_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_5 needs to be adjusted accordingly
+                    
+                    PicoZebro_5 = [Zebro_5_Middle_x , Zebro_5_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
+                    
+                    if q_PicoZebro_5.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_5.put(PicoZebro_5)
+                    elif q_PicoZebro_5.empty() == False:                    # else empty it before filling it again with the next data.
+                        q_PicoZebro_5.mutex.acquire()                       # Which is the middle point and every blocked direction of the Pico Zebro
+                        q_PicoZebro_5.queue.clear()
+                        q_PicoZebro_5.all_tasks_done.notify_all()
+                        q_PicoZebro_5.unfinished_tasks = 0
+                        q_PicoZebro_5.mutex.release()
+                        q_PicoZebro_5.put(PicoZebro_5)
+
+                    if q_Pico_Direction_5.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_5.put(Direction_Zebro_5)
+                    elif q_Pico_Direction_5.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_5.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_5.queue.clear()
+                        q_Pico_Direction_5.all_tasks_done.notify_all()
+                        q_Pico_Direction_5.unfinished_tasks = 0
+                        q_Pico_Direction_5.mutex.release()
+                        q_Pico_Direction_5.put(Direction_Zebro_5)
+
+                elif Zebros == 5:                                             # The comming step has to be done for every possible Zebro 
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
+                    Blocking_Zebro = Block.Block_4(Zebro_6_Middle_x,Zebro_6_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_6 needs to be adjusted accordingly
+                    
+                    PicoZebro_6 = [Zebro_6_Middle_x , Zebro_6_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
+                    
+                    if q_PicoZebro_6.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_6.put(PicoZebro_6)
+                    elif q_PicoZebro_6.empty() == False:                    # else empty it before filling it again with the next data.
+                        q_PicoZebro_6.mutex.acquire()                       # Which is the middle point and every blocked direction of the Pico Zebro
+                        q_PicoZebro_6.queue.clear()
+                        q_PicoZebro_6.all_tasks_done.notify_all()
+                        q_PicoZebro_6.unfinished_tasks = 0
+                        q_PicoZebro_6.mutex.release()
+                        q_PicoZebro_6.put(PicoZebro_6)
+
+                    if q_Pico_Direction_6.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_6.put(Direction_Zebro_6)
+                    elif q_Pico_Direction_6.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_6.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_6.queue.clear()
+                        q_Pico_Direction_6.all_tasks_done.notify_all()
+                        q_Pico_Direction_6.unfinished_tasks = 0
+                        q_Pico_Direction_6.mutex.release()
+                        q_Pico_Direction_6.put(Direction_Zebro_6)
+
+                elif Zebros == 6:                                             # The comming step has to be done for every possible Zebro 
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
+                    Blocking_Zebro = Block.Block_4(Zebro_7_Middle_x,Zebro_7_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_1 needs to be adjusted accordingly
+                    
+                    PicoZebro_7 = [Zebro_7_Middle_x , Zebro_7_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
+                    
+                    if q_PicoZebro_7.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_7.put(PicoZebro_7)
+                    elif q_PicoZebro_7.empty() == False:                    # else empty it before filling it again with the next data.
+                        q_PicoZebro_7.mutex.acquire()                       # Which is the middle point and every blocked direction of the Pico Zebro
+                        q_PicoZebro_7.queue.clear()
+                        q_PicoZebro_7.all_tasks_done.notify_all()
+                        q_PicoZebro_7.unfinished_tasks = 0
+                        q_PicoZebro_7.mutex.release()
+                        q_PicoZebro_7.put(PicoZebro_7)
+
+                    if q_Pico_Direction_7.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_7.put(Direction_Zebro_7)
+                    elif q_Pico_Direction_7.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_7.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_7.queue.clear()
+                        q_Pico_Direction_7.all_tasks_done.notify_all()
+                        q_Pico_Direction_7.unfinished_tasks = 0
+                        q_Pico_Direction_7.mutex.release()
+                        q_Pico_Direction_7.put(Direction_Zebro_7)
+
+                elif Zebros == 7:                                             # The comming step has to be done for every possible Zebro 
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
+                    Blocking_Zebro = Block.Block_4(Zebro_8_Middle_x,Zebro_8_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_8 needs to be adjusted accordingly
+                    
+                    PicoZebro_8 = [Zebro_8_Middle_x , Zebro_8_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
+                    
+                    if q_PicoZebro_8.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_8.put(PicoZebro_8)
+                    elif q_PicoZebro_8.empty() == False:                    # else empty it before filling it again with the next data.
+                        q_PicoZebro_8.mutex.acquire()                       # Which is the middle point and every blocked direction of the Pico Zebro
+                        q_PicoZebro_8.queue.clear()
+                        q_PicoZebro_8.all_tasks_done.notify_all()
+                        q_PicoZebro_8.unfinished_tasks = 0
+                        q_PicoZebro_8.mutex.release()
+                        q_PicoZebro_8.put(PicoZebro_8)
+
+                    if q_Pico_Direction_8.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_8.put(Direction_Zebro_8)
+                    elif q_Pico_Direction_8.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_8.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_8.queue.clear()
+                        q_Pico_Direction_8.all_tasks_done.notify_all()
+                        q_Pico_Direction_8.unfinished_tasks = 0
+                        q_Pico_Direction_8.mutex.release()
+                        q_Pico_Direction_8.put(Direction_Zebro_8)
+                        
+                    # This has to be 8 for going to the next step for the last Zebro for every other one does not need to be assigned
                     Writing = ("Main","Global", "Leds_off")                 # Making sure all leds are turned off
                     q_Control_Serial_Write.put((1, Writing), block=True, timeout=None) # Turn leds of again
                     time.sleep(2)
@@ -785,6 +1247,27 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             Old_Direction_Pico_1 = Direction_Zebro_1
             Old_Zebro_1_Middle_x = Zebro_1_Middle_x
             Old_Zebro_1_Middle_y = Zebro_1_Middle_y
+            Old_Direction_Pico_2 = Direction_Zebro_2
+            Old_Zebro_2_Middle_x = Zebro_2_Middle_x
+            Old_Zebro_2_Middle_y = Zebro_2_Middle_y
+            Old_Direction_Pico_3 = Direction_Zebro_3
+            Old_Zebro_3_Middle_x = Zebro_3_Middle_x
+            Old_Zebro_3_Middle_y = Zebro_3_Middle_y
+            Old_Direction_Pico_4 = Direction_Zebro_4
+            Old_Zebro_4_Middle_x = Zebro_4_Middle_x
+            Old_Zebro_4_Middle_y = Zebro_4_Middle_y
+            Old_Direction_Pico_5 = Direction_Zebro_5
+            Old_Zebro_5_Middle_x = Zebro_5_Middle_x
+            Old_Zebro_5_Middle_y = Zebro_5_Middle_y
+            Old_Direction_Pico_6 = Direction_Zebro_6
+            Old_Zebro_6_Middle_x = Zebro_6_Middle_x
+            Old_Zebro_6_Middle_y = Zebro_6_Middle_y
+            Old_Direction_Pico_7 = Direction_Zebro_7
+            Old_Zebro_7_Middle_x = Zebro_7_Middle_x
+            Old_Zebro_7_Middle_y = Zebro_7_Middle_y
+            Old_Direction_Pico_8 = Direction_Zebro_8
+            Old_Zebro_8_Middle_x = Zebro_8_Middle_x
+            Old_Zebro_8_Middle_y = Zebro_8_Middle_y
             
             # loop over the contours
             for (i, c) in enumerate(cnts):
@@ -799,27 +1282,11 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):   # For re deteming the middle point
                     New_Zebro_1_Middle_x = x
                     New_Zebro_1_Middle_y = y
-                    #print(New_Zebro_1_Middle_x)
-                    #print(New_Zebro_1_Middle_y)
-                    #print(Old_Zebro_1_Middle_x)
-                    #print(Old_Zebro_1_Middle_y)
-                    #print("Check values")
                     New_Direction_Pico_1 = None
                     
                     if Old_Direction_Pico_1 == "North":
                         if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "North"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
-
                         elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "North"
                         elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
@@ -832,17 +1299,6 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     elif Old_Direction_Pico_1 == "South":
                         if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
-
                         elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "North"
                         elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
@@ -855,17 +1311,6 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     elif Old_Direction_Pico_1 == "East":
                         if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "East"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
-
                         elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "North"
                         elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
@@ -878,17 +1323,6 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     elif Old_Direction_Pico_1 == "West":
                         if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "West"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
-
                         elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "North"
                         elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
@@ -898,11 +1332,61 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
                             New_Direction_Pico_1 = "East"          
                     Pico_1 = 1
-                    #print(New_Direction_Pico_1)
-                    #print(New_Zebro_1_Middle_x)
-                    #print(New_Zebro_1_Middle_y)
-                    #print("This is Zebro 1")
-
+                    
+                if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_1_Middle_x = x
+                    New_Zebro_1_Middle_y = y
+                    New_Direction_Pico_1 = None
+                    
+                    if Old_Direction_Pico_1 == "North":
+                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "North"
+                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "North"
+                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "South"
+                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "West"
+                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "East"
+                        
+                    elif Old_Direction_Pico_1 == "South":
+                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "South"
+                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "North"
+                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "South"
+                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "West"
+                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "East"
+                            
+                    elif Old_Direction_Pico_1 == "East":
+                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "East"
+                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "North"
+                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "South"
+                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "West"
+                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "East"
+                            
+                    elif Old_Direction_Pico_1 == "West":
+                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "West"
+                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "North"
+                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "South"
+                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "West"
+                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
+                            New_Direction_Pico_1 = "East"          
+                    Pico_1 = 1
+                    
             if Pico_1 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
                 Zebro_1_Middle_x = New_Zebro_1_Middle_x
                 Zebro_1_Middle_y = New_Zebro_1_Middle_y
@@ -962,9 +1446,6 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             Picture = 7                                                     # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
 
             Pico_1 = 2
-            
-            Pico_Led_1 = 0
-            Pico_Led_3 = 0
             
             if ((time.time() - Picture_1_start_time) > 600):                # Check if 10 mins has passed
                 Picture = 0                                                 # Restart code and redetermine which Pico Zebro is which 
@@ -1044,7 +1525,7 @@ def getResult():
 if __name__ == '__main__':
     #Serial connection init 
     initialize_serial()
-    time.sleep(10)
+    time.sleep(5)
     getConnected()                                                  # Update the list with connected devices every frame
     time.sleep(5)
     q_Control_Uart_Main = queue.PriorityQueue(maxsize=1) # This is a 1 or 0 Determined by the main.
@@ -1059,16 +1540,44 @@ if __name__ == '__main__':
     # All Queue objects Constructor for a FIFO queue
     # These Queue objects are only data obtained by main loop and read by Pico Zebro loops.
     q_PicoZebro_1 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_2 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_3 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_4 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_5 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_6 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_7 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_8 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
     # With a maximum of 1 list. so maxsize = 1.
 
     #In here will be the direection. Only at the start the main will put something in here afterwards for 10 mins the Zebro thread needs to put himself something in there with guessing.
     q_Pico_Direction_1 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
+    q_Pico_Direction_2 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
+    q_Pico_Direction_3 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
+    q_Pico_Direction_4 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
+    q_Pico_Direction_5 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
+    q_Pico_Direction_6 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
+    q_Pico_Direction_7 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
+    q_Pico_Direction_8 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1. etc for every zebro
 
     #If higher Precision with direction is required
     q_Pico_Angle_1 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_2 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_3 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_4 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_5 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_6 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_7 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_8 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
 
     #All Pico Zebro Names 1 - 20
     Pico_N1 = "Pico_N1"
+    Pico_N2 = "Pico_N2"
+    Pico_N3 = "Pico_N3"
+    Pico_N4 = "Pico_N4"
+    Pico_N5 = "Pico_N5"
+    Pico_N6 = "Pico_N6"
+    Pico_N7 = "Pico_N7"
+    Pico_N8 = "Pico_N8"
 
     UART_Thread_1 = UART_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main) # This call on the UArt thread will be the same no matter how many Pico's there are
     UART_Thread_1.setName('UART_Thread')
@@ -1081,6 +1590,29 @@ if __name__ == '__main__':
     Pico_Zebro_1 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N1,q_PicoZebro_1,q_Pico_Direction_1,q_Pico_Angle_1)
     Pico_Zebro_1.setName('Pico_Zebro_1')
 
+    Pico_Zebro_2 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N2,q_PicoZebro_2,q_Pico_Direction_2,q_Pico_Angle_2)
+    Pico_Zebro_2.setName('Pico_Zebro_2')
+
+    Pico_Zebro_3 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N3,q_PicoZebro_3,q_Pico_Direction_3,q_Pico_Angle_3)
+    Pico_Zebro_3.setName('Pico_Zebro_3')
+
+    Pico_Zebro_4 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N4,q_PicoZebro_4,q_Pico_Direction_4,q_Pico_Angle_4)
+    Pico_Zebro_4.setName('Pico_Zebro_4')
+
+    Pico_Zebro_5 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N5,q_PicoZebro_5,q_Pico_Direction_5,q_Pico_Angle_5)
+    Pico_Zebro_5.setName('Pico_Zebro_5')
+
+    Pico_Zebro_6 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N6,q_PicoZebro_6,q_Pico_Direction_6,q_Pico_Angle_6)
+    Pico_Zebro_6.setName('Pico_Zebro_6')
+
+    Pico_Zebro_7 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N7,q_PicoZebro_7,q_Pico_Direction_7,q_Pico_Angle_7)
+    Pico_Zebro_7.setName('Pico_Zebro_7')
+
+    Pico_Zebro_8 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N8,q_PicoZebro_8,q_Pico_Direction_8,q_Pico_Angle_8)
+    Pico_Zebro_8.setName('Pico_Zebro_8')
+
     # In the main every Pico value needs to be set So the more Pico the more values you have to give with the main.
-    main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,q_PicoZebro_1, q_Pico_Direction_1, q_Pico_Angle_1)
+    main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,q_PicoZebro_1, q_Pico_Direction_1, q_Pico_Angle_1,q_PicoZebro_2, q_Pico_Direction_2, q_Pico_Angle_2,
+         q_PicoZebro_3, q_Pico_Direction_3, q_Pico_Angle_3,q_PicoZebro_4, q_Pico_Direction_4, q_Pico_Angle_4,q_PicoZebro_5, q_Pico_Direction_5, q_Pico_Angle_5,
+         q_PicoZebro_6, q_Pico_Direction_6, q_Pico_Angle_6,q_PicoZebro_7, q_Pico_Direction_7, q_Pico_Angle_7,q_PicoZebro_8, q_Pico_Direction_8, q_Pico_Angle_8)
 
