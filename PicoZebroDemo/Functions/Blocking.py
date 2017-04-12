@@ -239,22 +239,22 @@ class Blocking:
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 440) and (Zebro_1_Middle_y < 130) and (Zebro_1_Middle_y > 80)):
+        if ( (Zebro_1_Middle_x < 480) and (Zebro_1_Middle_y < 160)):
                 Block = "North"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 440) and (Zebro_1_Middle_y < 900) and (Zebro_1_Middle_y > 800)):
+        if ( (Zebro_1_Middle_x < 480) and (Zebro_1_Middle_y > 800)):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y < 130) and (Zebro_1_Middle_y > 80)):
+        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y < 160)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y < 900) and (Zebro_1_Middle_y > 800)):
+        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y > 800)):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None

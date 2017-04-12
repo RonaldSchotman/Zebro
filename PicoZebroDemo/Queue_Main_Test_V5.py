@@ -310,11 +310,11 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                         if Last_Movement == "Forward":                      # And wont do anything at all
                             Last_Movement = "Right"
                         elif Last_Movement == "Right":                      # this means the Pico Zebro will not get stuck trying to move forward.
-                            Last_Movement = "Forward"                       # But instead tries to go with a higher change of going right instead.
+                            Last_Movement = "Stop"                          # But instead tries to go with a higher change of going right instead.
                         elif Last_Movement == "Left":                       # This is only so because it will have to be to make the Pico not standing still
-                            Last_Movement = "Forward"
+                            Last_Movement = "Stop"
                         elif Last_Movement == "Stop":
-                            Last_Movement = "Left"
+                            Last_Movement = "Right"
                         Movement_Blocked = 0
 
                     # This is for determing the next Movement with change. Except for Stop the Movement change will be determined with highest change of being the same as Last Movement 
@@ -342,24 +342,24 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
 
                     if Last_Movement == "Right":                            # Last movement was right so 50% change to keep going right
                         Random_N = random.randrange(1,100)
-                        if Random_N <= 30:                                  # 35% change to move Forward after moving right
+                        if Random_N <= 25:                                  # 25% change to move Forward after moving right
                             Movement = "Forward"
-                        elif Random_N > 35 and Random_N <= 45:              # 10% change to stop again
+                        elif Random_N > 25 and Random_N <= 35:              # 10% change to stop again
                             Movement = "Stop"
-                        elif Random_N > 45 and Random_N <= 95:              # 50% to keep moving right
+                        elif Random_N > 35 and Random_N <= 95:              # 60% to keep moving right
                             Movement = "Right"
                         elif Random_N > 95 and Random_N <= 100:             # 5% To go suddenly to left
                             Movement = "Left"
      
                     if Last_Movement == "Left":                             # Last movement was left so 50% to keep moving left
                         Random_N = random.randrange(1,100)
-                        if Random_N <= 35:                                  # 35% to go Forward
+                        if Random_N <= 25:                                  # 25% to go Forward
                             Movement = "Forward"    
-                        elif Random_N > 35 and Random_N <= 45:              # 10% to stop
+                        elif Random_N > 25 and Random_N <= 35:              # 10% to stop
                             Movement = "Stop"
-                        elif Random_N > 45 and Random_N <= 50:              # 5% to suddenly go right
+                        elif Random_N > 35 and Random_N <= 40:              # 5% to suddenly go right
                             Movement = "Right"
-                        elif Random_N > 50 and Random_N <= 100:             # 50% to keep moving right
+                        elif Random_N > 40 and Random_N <= 100:             # 60% to keep moving right
                             Movement = "Left"
                             
                     # If Direction works THIS can go away because direction keeps direction updated
@@ -763,7 +763,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
         if Picture == 8:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)                  # Take a gray picture
-            cv2.imwrite("gray.jpg",gray)
+            #cv2.imwrite("gray.jpg",gray)
             blurred = cv2.GaussianBlur(gray, (11, 11), 0)                   # Blur image for noise reduction
             # threshold the image to reveal light regions in the
             # blurred image
@@ -789,10 +789,10 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 # draw the bright spot on the image
                 
                 (x, y, w, h) = cv2.boundingRect(c)                          # For finding the x and y of the leds
-                x_compare_1 = x + 70                                        # The max x and y can have moved before checking again
-                y_compare_1 = y + 60
-                x_compare_2 = x - 70
-                y_compare_2 = y - 60
+                x_compare_1 = x + 80                                        # The max x and y can have moved before checking again
+                y_compare_1 = y + 70
+                x_compare_2 = x - 80
+                y_compare_2 = y - 70
                 
                 if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):   # For re deteming the middle point
                     New_Zebro_1_Middle_x = x
