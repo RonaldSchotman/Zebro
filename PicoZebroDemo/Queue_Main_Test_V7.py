@@ -20,7 +20,7 @@ import serial                                                               # Se
 import serial.tools.list_ports;                                             # Library for obtaining evry port on the raspberry Pi
 
 import random                                                               # Library so the Pico walks random in any direction without a pattern
-
+import math 
 # import the necessary packages for tracking
 from imutils import contours                                                # A library from http://www.pyimagesearch.com/2016/10/31/detecting-multiple-bright-spots-in-an-image-with-python-and-opencv/
 import imutils                                                              # For detecting bright spots in a image.
@@ -80,7 +80,8 @@ class Check_Connected_thread(threading.Thread):
                 Writing = ("Global","Connect", "Devices")     
                 self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
                 print("checked Devices")
-            time.sleep(10)
+            time.sleep(2)
+            print("check")
 
 class UART_Thread(threading.Thread):                                        # UART Thread
     def __init__(self,q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main): # initialize UART thread for communication between BLE and Raspberry pi 
@@ -129,6 +130,9 @@ class UART_Thread(threading.Thread):                                        # UA
                         elif Serial[1][2] == 'Led1_on':                     # if the global command is Led1_on
                             for x in range(1):                              # Make every Zebro turn Led1_on
                                 setLed(connectionID=0, ledNr=3, value=7)    # Turn led 1 on
+                        elif Serial[1][2] == "Led2_on":                     # An extra led if it possible to realtime find the Pico Zebro's
+                            for x in range(1):                              # A loop over every possible Zebro
+                                setLed(connectionID=0, ledNr=1, value=7)    # Turn led 3 on
                         elif Serial[1][2] == "Led3_on":                     # An extra led if it possible to realtime find the Pico Zebro's
                             for x in range(1):                              # A loop over every possible Zebro
                                 setLed(connectionID=0, ledNr=2, value=7)    # Turn led 3 on
@@ -137,8 +141,10 @@ class UART_Thread(threading.Thread):                                        # UA
                             setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
                         elif Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
                             setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+
                         elif Serial[1][2] == 'Led2_on':                       # For  when led needs to be turned on
                             setLed(connectionID=0, ledNr=1, value=7)        # Turn Led3_on
+
                         elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
                             setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
@@ -158,8 +164,6 @@ class UART_Thread(threading.Thread):                                        # UA
                             setMovement(connection_Pico_1, 4)
                         elif Serial[1][2] == "Left":                        # Let Pico Zebro Move Left
                             setMovement(connection_Pico_1, 3)
-                        elif Serial[1][2] == "Backward":
-                            setMovement(connection_Pico_1, 2)
                     else:
                         print("This is the wrong Pico")                     # Extra check for if it is send to the wrong Pico
                     Sended_Data = 0
@@ -320,20 +324,20 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                     #        self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
                     #        time.sleep(2)
                             
-                    for Names in Blocked_Direction:                         # Go over every possible blocked direction. 
-                        if Current_Direction == Names:
-                            Movement_Blocked = 1
+                    #for Names in Blocked_Direction:                         # Go over every possible blocked direction. 
+                    #    if Current_Direction == Names:
+                    #        Movement_Blocked = 1
                     
-                    if Movement_Blocked == 1:                               # If this is the case the last movement cannot be the next direction so we make the change smaller the zebro keeps stopping
-                        if Last_Movement == "Forward":                      # And wont do anything at all
-                            Last_Movement = "Right"
-                        elif Last_Movement == "Right":                      # this means the Pico Zebro will not get stuck trying to move forward.
-                            Last_Movement = "Stop"                          # But instead tries to go with a higher change of going right instead.
-                        elif Last_Movement == "Left":                       # This is only so because it will have to be to make the Pico not standing still
-                            Last_Movement = "Stop"
-                        elif Last_Movement == "Stop":
-                            Last_Movement = "Right"
-                        Movement_Blocked = 0
+                    #if Movement_Blocked == 1:                               # If this is the case the last movement cannot be the next direction so we make the change smaller the zebro keeps stopping
+                    #    if Last_Movement == "Forward":                      # And wont do anything at all
+                    #        Last_Movement = "Right"
+                    #    elif Last_Movement == "Right":                      # this means the Pico Zebro will not get stuck trying to move forward.
+                    #        Last_Movement = "Stop"                          # But instead tries to go with a higher change of going right instead.
+                    #    elif Last_Movement == "Left":                       # This is only so because it will have to be to make the Pico not standing still
+                    #        Last_Movement = "Stop"
+                    #    elif Last_Movement == "Stop":
+                    #        Last_Movement = "Right"
+                    #    Movement_Blocked = 0
 
                     # This is for determing the next Movement with change. Except for Stop the Movement change will be determined with highest change of being the same as Last Movement 
                     if Last_Movement == "Stop":
@@ -389,28 +393,28 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                         Direction = Current_Direction
                     elif Movement == "Right":
                         if Current_Direction == "North":
-                            Direction = "East"
+                            Direction = None
                         elif Current_Direction == "East":
-                            Direction = "South"
+                            Direction = None
                         elif Current_Direction == "South":
-                            Direction = "West"
+                            Direction = None
                         elif Current_Direction == "West":
-                            Direction = "North"
+                            Direction = None
                     elif Movement == "Left":
                         if Current_Direction == "North":
-                            Direction = "West"
+                            Direction = None
                         elif Current_Direction == "West":
-                            Direction = "South"
+                            Direction = None
                         elif Current_Direction == "South":
-                            Direction = "East"
+                            Direction = None
                         elif Current_Direction == "East":
-                            Direction = "North"
+                            Direction = None
                             
                     # After the next direction is determined then check one more time if the direction is blocked
                     for Names in Blocked_Direction:
                         if Direction == Names:
                             DONT_Send = 1
-                            
+                    print(Movement)        
                     if DONT_Send == 1: # If the direction is blocked make the Pico Zebro stop and try to figure out his next direction
                         # Obtain Serial Write
                         # Check if Main is writing in Uart. If so wait untill main is finished
@@ -472,7 +476,7 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):                      # A 
         y_Led_3 = 0
     
     #Facing North (dermine middle point)
-    elif (x_Led_1 < x_Led_3) and (y_Led_1 < y_Led_3):                      # This means north is upper left of the camera frame with 0.0 being the most north
+    elif (x_Led_1 <= x_Led_3) and (y_Led_1 <= y_Led_3):                      # This means north is upper left of the camera frame with 0.0 being the most north
         # Pico Zebro is facing North
         # Middle Point Zebro is:
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)                          # The calculations for finding the middle point of the Zebro
@@ -486,9 +490,9 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):                      # A 
         x_middle = ((x_Led_3 - x_Led_1) + x_Led_1)
         y_middle = ((y_Led_1 - y_Led_3) + y_Led_3)
         Angle = 0 + ((abs(x_Led_3 - x_Led_1))*1.384)                        # From 0-90 in degress is East which is the upper right
-        Direction = "East"
+        Direction = "West"
     
-    elif (x_Led_1 > x_Led_3) and (y_Led_1 > y_Led_3):
+    elif (x_Led_1 >= x_Led_3) and (y_Led_1 >= y_Led_3):
         # Pico Zebro is facing South
         # Middle Point Zebro is:
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
@@ -502,7 +506,7 @@ def Find_Orientation(x_Led_1,x_Led_3,y_Led_1,y_Led_3):                      # A 
         x_middle = ((x_Led_1 - x_Led_3) + x_Led_3)
         y_middle = ((y_Led_3 - y_Led_1) + y_Led_1)
         Angle = 270 - ((abs(x_Led_1 - x_Led_3))*1.384)                      # From 270-180 in degrees is West which is the lower left of the picture
-        Direction = "West"
+        Direction = "East"
 
     return x_middle, y_middle, Direction, Angle
 
@@ -536,7 +540,6 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
     Old_Zebro_1_Middle_x = 0
     Old_Zebro_1_Middle_y = 0
     
-    
     # capture frames from the camera
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):  # BGR is the standard way for OpenCV
         # grab the NumPy array representing the image, the initialize the timestamp
@@ -559,7 +562,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
         # Show the current view for debugging and for ending the program savetly
         cv2.imshow("original %s" % Timetest,image)
         
-        if Picture == 0:
+        if Picture == 1:
             if q_Control_Uart_Main.empty() == True:                         # if the queue is empty fill it 
                 Main_Control_Uart = 1                                       # Take control of UArt thread so the Pico Zebro threads will not intervere with distinction
                 print("MAIN Acquired LOCK")                                 # debug print for saying the Main has total control of the Pico Zebro now
@@ -592,7 +595,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             time.sleep(2)
             
         # Take original Picture minimal after first loop for the first frame to avoid weird pictures.
-        if Picture == 1:                                                    # Step 1 for Pico Control is taking the original picture and taking control of thread UART Control
+        if Picture == 2:                                                    # Step 1 for Pico Control is taking the original picture and taking control of thread UART Control
                                                                # Give the command some time to finish with turning all leds off.
             Zebro_1_x_Led_1 = 0                                             # Reset led values for determing orientation of Pico Zebro.
             Zebro_1_x_Led_3 = 0                                             # With the x and y coordinates of the picture.
@@ -603,11 +606,11 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             Zebro_1_Middle_y = 0
             PicoZebro_1 = []
             
-            cv2.imwrite("Image%s.jpg"%Picture, image)                       # Save a picture to Image1.jpg This will be the original picture
+            cv2.imwrite("Image1.jpg", image)                       # Save a picture to Image1.jpg This will be the original picture
             
             Original = cv2.imread("Image1.jpg")                             # This is the original picture where the diferences will be compared with.
             
-        if Picture == 2:                                                    # In order to make every step work it is devided in Picture steps. With after each step a new frame is taken
+        if Picture == 3:                                                    # In order to make every step work it is devided in Picture steps. With after each step a new frame is taken
             print("Picture %d"%Picture)                                     # Otherwise you set leds on but do it after the fram is already taken at the top.
             Devices_Serial = Devices + 1                                    # Devices_Serial says which Pico Zebro middle point will be calculated first.
             
@@ -616,17 +619,17 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
             time.sleep(1)                                                   # Give the Uart some time to turn it on
         
-        if Picture == 3:    # Make Picture 2 for taking Picture 2 with Led 1 on.
+        if Picture == 4:    # Make Picture 2 for taking Picture 2 with Led 1 on.
             print("Picture %d"%Picture)
 
             Picture_Write = Picture - 1
-            cv2.imwrite("Image%s.jpg"%Picture_Write, image)                 # Take the second picture with led 1 on.
+            cv2.imwrite("Image2.jpg", image)                 # Take the second picture with led 1 on.
             
             #If Correctly done we still have the lock of Serial Write/read
             Writing = ("Main","Pico_N%s"% Devices_Serial, "Leds_off")       # Turn led 1 off again         
             q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
             
-        if Picture == 4:
+        if Picture == 5:
             print("Picture %d"%Picture)
             
             #If Correctly done we still have the lock of Serial Write/read
@@ -635,17 +638,17 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             time.sleep(1)                                                   # Give the Uart some time to turn it on
 
          #Again do some other stuff
-        if Picture == 5:
+        if Picture == 6:
             print("Picture %d"%Picture)
             Picture_Write = Picture - 2                                     # For making sure only 3 picture keep getting taken.
             
-            cv2.imwrite("Image%s.jpg"%Picture_Write, image)                 # Take the the third picture with Led 3 on.
+            cv2.imwrite("Image3.jpg", image)                 # Take the the third picture with Led 3 on.
 
             Writing = ("Main","Pico_N%s"% Devices_Serial, "Leds_off")       # Turn led 3 off again         
             q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
             time.sleep(1)                                                   # Give the Uart some time to turn all leds off
             
-        if Picture == 6:
+        if Picture == 7:
             print("Picture %d"%Picture)                                     # Debug print for saying where the code is
             # Take both pictures with the leds.
             
@@ -723,11 +726,11 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 Zebro_1_Middle_y = Zebro_Middle_y
                 Direction_Zebro_1 = Direction                               # The current direction the Pico Zebro is going
                 Angle_Zebro_1 = Angle                                       # For when a higher precision is needed the angle (Which is not correctly calculated yet
-                Picture = 7                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
+                Picture = 8                                                 # For the last Pico Zebro this has to be 7 for every other one it is 1.
                 
             Devices = Devices + 1                                           # Go to the next device
 
-        if Picture == 7:
+        if Picture == 8:
             Devices = 0                                                     # Reset Devices so for the next time it will start with Pico 1.
             #once every value for every possible Zebro is determind then
             for Zebros in range(1):                                         # total of maximum of x Zebro's
@@ -785,17 +788,19 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     # Release Condition Serial Write. (Now movement can start.)
                     Picture_1_start_time = time.time() # Take current time so the main reset at Picture 1 every 10 mins
 
-        if Picture == 8:
+        if Picture == 9:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)                  # Take a gray picture
             #cv2.imwrite("gray.jpg",gray)
             blurred = cv2.GaussianBlur(gray, (11, 11), 0)                   # Blur image for noise reduction
             # threshold the image to reveal light regions in the
             # blurred image
-            thresh = cv2.threshold(blurred, 215, 254, cv2.THRESH_BINARY)[1]
+            thresh = cv2.threshold(blurred, 225, 250, cv2.THRESH_BINARY)[1]
             # perform a series of dilations to remove
             # any small blobs of noise from the thresholded image
+            thresh = cv2.dilate(thresh, None, iterations=1)
             thresh = cv2.dilate(thresh, None, iterations=3)
             # find the contours in the mask, then sort them from left to right
+            cv2.imwrite("graywew.jpg",thresh)
             cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cnts = cnts[0] if imutils.is_cv2() else cnts[1]
             try:
@@ -809,145 +814,94 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             Old_Zebro_1_Middle_y = Zebro_1_Middle_y
             
             # loop over the contours
+            Leds = []
             for (i, c) in enumerate(cnts):
                 # draw the bright spot on the image
-                
                 (x, y, w, h) = cv2.boundingRect(c)                          # For finding the x and y of the leds
                 x_compare_1 = x + 80                                        # The max x and y can have moved before checking again
                 y_compare_1 = y + 70
                 x_compare_2 = x - 80
                 y_compare_2 = y - 70
-                
-                if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):   # For re deteming the middle point
-                    New_Zebro_1_Middle_x = x
-                    New_Zebro_1_Middle_y = y
-                    #print(New_Zebro_1_Middle_x)
-                    #print(New_Zebro_1_Middle_y)
-                    #print(Old_Zebro_1_Middle_x)
-                    #print(Old_Zebro_1_Middle_y)
-                    #print("Check values")
-                    New_Direction_Pico_1 = None
-                    
-                    if Old_Direction_Pico_1 == "North":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
-
-                        elif ((Old_Zebro_1_Middle_x+2) >= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif ((Old_Zebro_1_Middle_x+2) <= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif ((Old_Zebro_1_Middle_x+2) > New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif ((Old_Zebro_1_Middle_x+2) < New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
+                Led = [x,y]
+                Leds.append(Led)
+            print(Leds)
+            print(len(Leds))
+            for Testing_i in Leds:
+                for Testing_y in Leds:
+                    Delta_X = abs(Testing_i[0] - Testing_y[0])
+                    Delta_Y = abs(Testing_i[1] - Testing_y[1])
+                    Distance = math.sqrt((Delta_X*Delta_X) + (Delta_Y*Delta_Y))
+                    print(Distance)
+                    if (Distance > 28) and (Distance <= 38):
+                        print("Led1 and led 2")
+                        Found_Led_1_1 = Testing_i
+                        Found_Led_1_2 = Testing_y
+                        Found_Led_2_1 = Testing_i
+                        Found_Led_2_2 = Testing_y
+                        print(Found_Led_1_1)
+                        print(Found_Led_1_2)
+                    if (Distance > 38) and (Distance <= 49):
+                        Found_Led_2_3 = Testing_i
+                        Found_Led_2_4 = Testing_y
+                        Found_Led_3_1 = Testing_i
+                        Found_Led_3_2 = Testing_y
+                        print("Led2 and Led 3")
+                    if (Distance > 49) and (Distance <= 60):
+                        Found_Led_1_3 = Testing_i
+                        Found_Led_1_4 = Testing_y
+                        Found_Led_3_3 = Testing_i
+                        Found_Led_3_4 = Testing_y
+                        print(Found_Led_1_3)
+                        print(Found_Led_1_4)
+                        print("Led1 and Led 3")
                         
-                    elif Old_Direction_Pico_1 == "South":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
+            if Found_Led_1_1 == Found_Led_1_2:
+                Led_1 = Found_Led_1_1
+            elif Found_Led_1_1 == Found_Led_1_3:
+                Led_1 = Found_Led_1_1
+            elif Found_Led_1_1 == Found_Led_1_4:
+                Led_1 = Found_Led_1_1
+            elif Found_Led_1_2 == Found_Led_1_3:
+                Led_1 = Found_Led_1_2
+            elif Found_Led_1_2 == Found_Led_1_4:
+                Led_1 = Found_Led_1_2
+            elif Found_Led_1_3 == Found_Led_1_4:
+                Led_1 = Found_Led_1_3
 
-                        elif ((Old_Zebro_1_Middle_x+2) >= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif ((Old_Zebro_1_Middle_x+2) <= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif ((Old_Zebro_1_Middle_x+2) > New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif ((Old_Zebro_1_Middle_x+2) < New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
-                            
-                    elif Old_Direction_Pico_1 == "East":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
+            if Found_Led_2_1 == Found_Led_2_2:
+                Led_2 = Found_Led_2_1
+            elif Found_Led_2_1 == Found_Led_2_3:
+                Led_2 = Found_Led_2_1
+            elif Found_Led_2_1 == Found_Led_2_4:
+                Led_2 = Found_Led_2_1
+            elif Found_Led_2_2 == Found_Led_2_3:
+                Led_2 = Found_Led_2_2
+            elif Found_Led_2_2 == Found_Led_2_4:
+                Led_2 = Found_Led_2_2
+            elif Found_Led_2_3 == Found_Led_2_4:
+                Led_2 = Found_Led_2_3
 
-                        elif ((Old_Zebro_1_Middle_x+2) >= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif ((Old_Zebro_1_Middle_x+2) <= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif ((Old_Zebro_1_Middle_x+2) > New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif ((Old_Zebro_1_Middle_x+2) < New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
-                            
-                    elif Old_Direction_Pico_1 == "West":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                            
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "South"
-                            
-                        #elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "East"
-                        #elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "West"
-                        #elif (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                        #    New_Direction_Pico_1 = "North"
-
-                        elif ((Old_Zebro_1_Middle_x+2) >= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif ((Old_Zebro_1_Middle_x+2) <= New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif ((Old_Zebro_1_Middle_x+2) > New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif ((Old_Zebro_1_Middle_x+2) < New_Zebro_1_Middle_x) and ((Old_Zebro_1_Middle_y+2) >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"        
-                    Pico_1 = 1
-                    #print(New_Direction_Pico_1)
-                    #print(New_Zebro_1_Middle_x)
-                    #print(New_Zebro_1_Middle_y)
-                    #print("This is Zebro 1")
-
-            if Pico_1 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
-                Zebro_1_Middle_x = New_Zebro_1_Middle_x
-                Zebro_1_Middle_y = New_Zebro_1_Middle_y
-                Direction_Zebro_1 = New_Direction_Pico_1
+            if Found_Led_3_1 == Found_Led_3_2:
+                Led_3 = Found_Led_3_1
+            elif Found_Led_3_1 == Found_Led_3_3:
+                Led_3 = Found_Led_3_1
+            elif Found_Led_3_1 == Found_Led_3_4:
+                Led_3 = Found_Led_3_1
+            elif Found_Led_3_2 == Found_Led_3_3:
+                Led_3 = Found_Led_3_2
+            elif Found_Led_3_2 == Found_Led_3_4:
+                Led_3 = Found_Led_3_2
+            elif Found_Led_3_3 == Found_Led_3_4:
+                Led_3 = Found_Led_3_3
                 
-            elif Pico_1 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 10 mins again
-                Zebro_1_Middle_x = New_Zebro_1_Middle_x
-                Zebro_1_Middle_y = New_Zebro_1_Middle_y
-                Direction_Zebro_1 = New_Direction_Pico_1
-                Pico_1_Lost = Pico_1_Lost + 1
-
-            if Pico_1_Lost == 10:
-                Zebro_1_Middle_x = 0
-                Zebro_1_Middle_y = 0
-                Direction_Zebro_1 = None
-                Old_Direction_Pico_1 = None
-                Old_Zebro_1_Middle_x = 0
-                Old_Zebro_1_Middle_y = 0
-                New_Direction_Pico_1 = None
-                New_Zebro_1_Middle_x = 0
-                New_Zebro_1_Middle_y = 0
-                print("Lost Pico 1")
-                
+            print(Led_1)
+            print(Led_2)
+            print(Led_3)
+            (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(Led_1[0],Led_3[0],Led_1[1],Led_3[1])
+            Zebro_1_Middle_x = Zebro_Middle_x
+            Zebro_1_Middle_y = Zebro_Middle_y     
+            Direction_Zebro_1 = Direction
+            
             for Zebros in range(1):
                 Blocking_Zebro = []                                         # Here will be the blocked Directions in
                 if Zebros == 0:
@@ -981,7 +935,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_Pico_Direction_1.mutex.release()
                         q_Pico_Direction_1.put(Direction_Zebro_1)
                     
-            Picture = 7                                                     # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
+            Picture = 8                                                     # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
 
             Pico_1 = 2
             

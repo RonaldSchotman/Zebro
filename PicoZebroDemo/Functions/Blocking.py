@@ -221,40 +221,40 @@ class Blocking:
     def Block_4(self, Zebro_1_Middle_x,Zebro_1_Middle_y):
         Blocking = []   #Here will be the blocking in in ROI
         
-        if ((Zebro_1_Middle_y < 80) or (Zebro_1_Middle_y > 870) or (Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_x < 230)):
-            if ((Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_y < 80)):
+        if ((Zebro_1_Middle_y < 200) or (Zebro_1_Middle_y > 800) or (Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_x < 330)):
+            if ((Zebro_1_Middle_x > 1300) or (Zebro_1_Middle_y < 150) or (Zebro_1_Middle_y > 850)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x < 230) or (Zebro_1_Middle_y > 870)):
+            if ((Zebro_1_Middle_x < 330) or (Zebro_1_Middle_y > 800) or (Zebro_1_Middle_y < 200)):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_y > 870)):
+            if ((Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_y > 800) ):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x < 230) or (Zebro_1_Middle_y < 80)):
+            if ((Zebro_1_Middle_x < 330) or (Zebro_1_Middle_y < 180)):
                 Block = "North"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 480) and (Zebro_1_Middle_y < 160)):
+        if ( (Zebro_1_Middle_x < 560) and (Zebro_1_Middle_y < 180) ):
                 Block = "North"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 480) and (Zebro_1_Middle_y > 800)):
+        if ( (Zebro_1_Middle_x < 560) and (Zebro_1_Middle_y > 750) ):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y < 160)):
+        if ( (Zebro_1_Middle_x > 1100) and (Zebro_1_Middle_y < 180)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y > 800)):
+        if ( (Zebro_1_Middle_x > 1100) and (Zebro_1_Middle_y > 750)):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None
@@ -312,16 +312,16 @@ class Blocking:
                     Blocking.append(Block)
                     Block = None
         
-        if ((Zebro_1_Middle_y < 80) or (Zebro_1_Middle_y > 870) or (Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_x < 230)):
+        if ((Zebro_1_Middle_y < 80) or (Zebro_1_Middle_y > 850) or (Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_x < 230)):
             if ((Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_y < 80)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x < 230) or (Zebro_1_Middle_y > 870)):
+            if ((Zebro_1_Middle_x < 230) or (Zebro_1_Middle_y > 850)):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_y > 870)):
+            if ((Zebro_1_Middle_x > 1400) or (Zebro_1_Middle_y > 850)):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None
