@@ -856,7 +856,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
             Writing = ("Main","Pico_N%s"% Devices_Serial, "Leds_off")       # Turn led 3 off again         
             q_Control_Serial_Write.put((1, Writing), block=True, timeout=None)
-            time.sleep(1)                                                   # Give the Uart some time to turn all leds off
+            time.sleep(2)                                                   # Give the Uart some time to turn all leds off
             
         if Picture == 6:
             print("Picture %d"%Picture)                                     # Debug print for saying where the code is
@@ -999,8 +999,9 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 Blocking_Zebro = []                                         # Here will be the blocking in
                 if Zebros == 0:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_1_Middle_x,Zebro_1_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_1 needs to be adjusted accordingly
-                    
+                    # In here should be every middle point possible for every Zebro. Block_2 or Block_1 needs to be adjusted accordingly
+                    Blocking_Zebro = Block.Block_5(Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
                     PicoZebro_1 = [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_1.empty() == True:                       # if the queue is empty fill it
@@ -1024,9 +1025,9 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_Pico_Direction_1.put(Direction_Zebro_1)
 
                 elif Zebros == 1:                                             # The comming step has to be done for every possible Zebro 
-                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_2_Middle_x,Zebro_2_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_2 needs to be adjusted accordingly
-                    
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements.                     
+                    Blocking_Zebro = Block.Block_5(Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
                     PicoZebro_2 = [Zebro_2_Middle_x , Zebro_2_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_2.empty() == True:                       # if the queue is empty fill it
@@ -1050,9 +1051,9 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_Pico_Direction_2.put(Direction_Zebro_2)
 
                 elif Zebros == 2:                                             # The comming step has to be done for every possible Zebro 
-                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_3_Middle_x,Zebro_3_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_3 needs to be adjusted accordingly
-                    
+                    # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements.                    
+                    Blocking_Zebro = Block.Block_5(Zebro_3_Middle_x, Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_3_Middle_y, Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
                     PicoZebro_3 = [Zebro_3_Middle_x , Zebro_3_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_3.empty() == True:                       # if the queue is empty fill it
@@ -1077,8 +1078,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
                 elif Zebros == 3:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_4_Middle_x,Zebro_4_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_4 needs to be adjusted accordingly
-                    
+                    Blocking_Zebro = Block.Block_5(Zebro_4_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_1_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_4_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_1_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
                     PicoZebro_4 = [Zebro_4_Middle_x , Zebro_4_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_4.empty() == True:                       # if the queue is empty fill it
@@ -1103,8 +1104,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
                 elif Zebros == 4:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_5_Middle_x,Zebro_5_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_5 needs to be adjusted accordingly
-                    
+                    Blocking_Zebro = Block.Block_5(Zebro_5_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_1_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_5_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_1_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
                     PicoZebro_5 = [Zebro_5_Middle_x , Zebro_5_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_5.empty() == True:                       # if the queue is empty fill it
@@ -1129,8 +1130,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
                 elif Zebros == 5:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_6_Middle_x,Zebro_6_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_6 needs to be adjusted accordingly
-                    
+                    Blocking_Zebro = Block.Block_5(Zebro_6_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_1_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_6_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_1_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
                     PicoZebro_6 = [Zebro_6_Middle_x , Zebro_6_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_6.empty() == True:                       # if the queue is empty fill it
@@ -1155,8 +1156,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
                 elif Zebros == 6:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_7_Middle_x,Zebro_7_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_1 needs to be adjusted accordingly
-                    
+                    Blocking_Zebro = Block.Block_5(Zebro_7_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_1_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_7_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_1_Middle_y, Zebro_8_Middle_y)
                     PicoZebro_7 = [Zebro_7_Middle_x , Zebro_7_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_7.empty() == True:                       # if the queue is empty fill it
@@ -1181,8 +1182,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
                 elif Zebros == 7:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
-                    Blocking_Zebro = Block.Block_4(Zebro_8_Middle_x,Zebro_8_Middle_y) # In here should be every middle point possible for every Zebro. Block_2 or Block_8 needs to be adjusted accordingly
-                    
+                    Blocking_Zebro = Block.Block_5(Zebro_8_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_1_Middle_x,
+                                                   Zebro_8_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_1_Middle_y)
                     PicoZebro_8 = [Zebro_8_Middle_x , Zebro_8_Middle_y, Blocking_Zebro] # Set PicoZebro_x with new values
                     
                     if q_PicoZebro_8.empty() == True:                       # if the queue is empty fill it
@@ -1333,71 +1334,387 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                             New_Direction_Pico_1 = "East"          
                     Pico_1 = 1
                     
-                if (x_compare_2 < Zebro_1_Middle_x < x_compare_1) and (y_compare_2 < Zebro_1_Middle_y < y_compare_1):   # For re deteming the middle point
-                    New_Zebro_1_Middle_x = x
-                    New_Zebro_1_Middle_y = y
-                    New_Direction_Pico_1 = None
+                if (x_compare_2 < Zebro_2_Middle_x < x_compare_1) and (y_compare_2 < Zebro_2_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_2_Middle_x = x
+                    New_Zebro_2_Middle_y = y
+                    New_Direction_Pico_2 = None
                     
-                    if Old_Direction_Pico_1 == "North":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
+                    if Old_Direction_Pico_2 == "North":
+                        if (Old_Zebro_2_Middle_x == New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y == New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "North"
+                        elif (Old_Zebro_2_Middle_x >= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y > New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "North"
+                        elif (Old_Zebro_2_Middle_x <= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y < New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "South"
+                        elif (Old_Zebro_2_Middle_x > New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y <= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "West"
+                        elif (Old_Zebro_2_Middle_x < New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y >= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "East"
                         
-                    elif Old_Direction_Pico_1 == "South":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
+                    elif Old_Direction_Pico_2 == "South":
+                        if (Old_Zebro_2_Middle_x == New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y == New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "South"
+                        elif (Old_Zebro_2_Middle_x >= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y > New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "North"
+                        elif (Old_Zebro_2_Middle_x <= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y < New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "South"
+                        elif (Old_Zebro_2_Middle_x > New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y <= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "West"
+                        elif (Old_Zebro_2_Middle_x < New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y >= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "East"
                             
-                    elif Old_Direction_Pico_1 == "East":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
-                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"
+                    elif Old_Direction_Pico_2 == "East":
+                        if (Old_Zebro_2_Middle_x == New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y == New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "East"
+                        elif (Old_Zebro_2_Middle_x >= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y > New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "North"
+                        elif (Old_Zebro_2_Middle_x <= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y < New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "South"
+                        elif (Old_Zebro_2_Middle_x > New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y <= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "West"
+                        elif (Old_Zebro_2_Middle_x < New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y >= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "East"
                             
-                    elif Old_Direction_Pico_1 == "West":
-                        if (Old_Zebro_1_Middle_x == New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y == New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif (Old_Zebro_1_Middle_x >= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y > New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "North"
-                        elif (Old_Zebro_1_Middle_x <= New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y < New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "South"
-                        elif (Old_Zebro_1_Middle_x > New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y <= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "West"
-                        elif (Old_Zebro_1_Middle_x < New_Zebro_1_Middle_x) and (Old_Zebro_1_Middle_y >= New_Zebro_1_Middle_y):
-                            New_Direction_Pico_1 = "East"          
-                    Pico_1 = 1
+                    elif Old_Direction_Pico_2 == "West":
+                        if (Old_Zebro_2_Middle_x == New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y == New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "West"
+                        elif (Old_Zebro_2_Middle_x >= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y > New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "North"
+                        elif (Old_Zebro_2_Middle_x <= New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y < New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "South"
+                        elif (Old_Zebro_2_Middle_x > New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y <= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "West"
+                        elif (Old_Zebro_2_Middle_x < New_Zebro_2_Middle_x) and (Old_Zebro_2_Middle_y >= New_Zebro_2_Middle_y):
+                            New_Direction_Pico_2 = "East"          
+                    Pico_2 = 1
+                if (x_compare_2 < Zebro_3_Middle_x < x_compare_1) and (y_compare_2 < Zebro_3_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_3_Middle_x = x
+                    New_Zebro_3_Middle_y = y
+                    New_Direction_Pico_3 = None
+                    
+                    if Old_Direction_Pico_3 == "North":
+                        if (Old_Zebro_3_Middle_x == New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y == New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "North"
+                        elif (Old_Zebro_3_Middle_x >= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y > New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "North"
+                        elif (Old_Zebro_3_Middle_x <= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y < New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "South"
+                        elif (Old_Zebro_3_Middle_x > New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y <= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "West"
+                        elif (Old_Zebro_3_Middle_x < New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y >= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "East"
+                        
+                    elif Old_Direction_Pico_3 == "South":
+                        if (Old_Zebro_3_Middle_x == New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y == New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "South"
+                        elif (Old_Zebro_3_Middle_x >= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y > New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "North"
+                        elif (Old_Zebro_3_Middle_x <= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y < New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "South"
+                        elif (Old_Zebro_3_Middle_x > New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y <= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "West"
+                        elif (Old_Zebro_3_Middle_x < New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y >= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "East"
+                            
+                    elif Old_Direction_Pico_3 == "East":
+                        if (Old_Zebro_3_Middle_x == New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y == New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "East"
+                        elif (Old_Zebro_3_Middle_x >= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y > New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "North"
+                        elif (Old_Zebro_3_Middle_x <= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y < New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "South"
+                        elif (Old_Zebro_3_Middle_x > New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y <= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "West"
+                        elif (Old_Zebro_3_Middle_x < New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y >= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "East"
+                            
+                    elif Old_Direction_Pico_3 == "West":
+                        if (Old_Zebro_3_Middle_x == New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y == New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "West"
+                        elif (Old_Zebro_3_Middle_x >= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y > New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "North"
+                        elif (Old_Zebro_3_Middle_x <= New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y < New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "South"
+                        elif (Old_Zebro_3_Middle_x > New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y <= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "West"
+                        elif (Old_Zebro_3_Middle_x < New_Zebro_3_Middle_x) and (Old_Zebro_3_Middle_y >= New_Zebro_3_Middle_y):
+                            New_Direction_Pico_3 = "East"          
+                    Pico_3 = 1
+                if (x_compare_2 < Zebro_4_Middle_x < x_compare_1) and (y_compare_2 < Zebro_4_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_4_Middle_x = x
+                    New_Zebro_4_Middle_y = y
+                    New_Direction_Pico_4 = None
+                    
+                    if Old_Direction_Pico_4 == "North":
+                        if (Old_Zebro_4_Middle_x == New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y == New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "North"
+                        elif (Old_Zebro_4_Middle_x >= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y > New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "North"
+                        elif (Old_Zebro_4_Middle_x <= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y < New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "South"
+                        elif (Old_Zebro_4_Middle_x > New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y <= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "West"
+                        elif (Old_Zebro_4_Middle_x < New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y >= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "East"
+                        
+                    elif Old_Direction_Pico_4 == "South":
+                        if (Old_Zebro_4_Middle_x == New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y == New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "South"
+                        elif (Old_Zebro_4_Middle_x >= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y > New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "North"
+                        elif (Old_Zebro_4_Middle_x <= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y < New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "South"
+                        elif (Old_Zebro_4_Middle_x > New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y <= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "West"
+                        elif (Old_Zebro_4_Middle_x < New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y >= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "East"
+                            
+                    elif Old_Direction_Pico_4 == "East":
+                        if (Old_Zebro_4_Middle_x == New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y == New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "East"
+                        elif (Old_Zebro_4_Middle_x >= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y > New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "North"
+                        elif (Old_Zebro_4_Middle_x <= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y < New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "South"
+                        elif (Old_Zebro_4_Middle_x > New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y <= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "West"
+                        elif (Old_Zebro_4_Middle_x < New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y >= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "East"
+                            
+                    elif Old_Direction_Pico_4 == "West":
+                        if (Old_Zebro_4_Middle_x == New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y == New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "West"
+                        elif (Old_Zebro_4_Middle_x >= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y > New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "North"
+                        elif (Old_Zebro_4_Middle_x <= New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y < New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "South"
+                        elif (Old_Zebro_4_Middle_x > New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y <= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "West"
+                        elif (Old_Zebro_4_Middle_x < New_Zebro_4_Middle_x) and (Old_Zebro_4_Middle_y >= New_Zebro_4_Middle_y):
+                            New_Direction_Pico_4 = "East"          
+                    Pico_4 = 1
+                if (x_compare_2 < Zebro_5_Middle_x < x_compare_1) and (y_compare_2 < Zebro_5_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_5_Middle_x = x
+                    New_Zebro_5_Middle_y = y
+                    New_Direction_Pico_5 = None
+                    
+                    if Old_Direction_Pico_5 == "North":
+                        if (Old_Zebro_5_Middle_x == New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y == New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "North"
+                        elif (Old_Zebro_5_Middle_x >= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y > New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "North"
+                        elif (Old_Zebro_5_Middle_x <= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y < New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "South"
+                        elif (Old_Zebro_5_Middle_x > New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y <= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "West"
+                        elif (Old_Zebro_5_Middle_x < New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y >= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "East"
+                        
+                    elif Old_Direction_Pico_5 == "South":
+                        if (Old_Zebro_5_Middle_x == New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y == New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "South"
+                        elif (Old_Zebro_5_Middle_x >= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y > New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "North"
+                        elif (Old_Zebro_5_Middle_x <= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y < New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "South"
+                        elif (Old_Zebro_5_Middle_x > New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y <= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "West"
+                        elif (Old_Zebro_5_Middle_x < New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y >= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "East"
+                            
+                    elif Old_Direction_Pico_5 == "East":
+                        if (Old_Zebro_5_Middle_x == New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y == New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "East"
+                        elif (Old_Zebro_5_Middle_x >= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y > New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "North"
+                        elif (Old_Zebro_5_Middle_x <= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y < New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "South"
+                        elif (Old_Zebro_5_Middle_x > New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y <= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "West"
+                        elif (Old_Zebro_5_Middle_x < New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y >= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "East"
+                            
+                    elif Old_Direction_Pico_5 == "West":
+                        if (Old_Zebro_5_Middle_x == New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y == New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "West"
+                        elif (Old_Zebro_5_Middle_x >= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y > New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "North"
+                        elif (Old_Zebro_5_Middle_x <= New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y < New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "South"
+                        elif (Old_Zebro_5_Middle_x > New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y <= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "West"
+                        elif (Old_Zebro_5_Middle_x < New_Zebro_5_Middle_x) and (Old_Zebro_5_Middle_y >= New_Zebro_5_Middle_y):
+                            New_Direction_Pico_5 = "East"          
+                    Pico_5 = 1
+                if (x_compare_2 < Zebro_6_Middle_x < x_compare_1) and (y_compare_2 < Zebro_6_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_6_Middle_x = x
+                    New_Zebro_6_Middle_y = y
+                    New_Direction_Pico_6 = None
+                    
+                    if Old_Direction_Pico_6 == "North":
+                        if (Old_Zebro_6_Middle_x == New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y == New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "North"
+                        elif (Old_Zebro_6_Middle_x >= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y > New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "North"
+                        elif (Old_Zebro_6_Middle_x <= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y < New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "South"
+                        elif (Old_Zebro_6_Middle_x > New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y <= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "West"
+                        elif (Old_Zebro_6_Middle_x < New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y >= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "East"
+                        
+                    elif Old_Direction_Pico_6 == "South":
+                        if (Old_Zebro_6_Middle_x == New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y == New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "South"
+                        elif (Old_Zebro_6_Middle_x >= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y > New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "North"
+                        elif (Old_Zebro_6_Middle_x <= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y < New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "South"
+                        elif (Old_Zebro_6_Middle_x > New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y <= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "West"
+                        elif (Old_Zebro_6_Middle_x < New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y >= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "East"
+                            
+                    elif Old_Direction_Pico_6 == "East":
+                        if (Old_Zebro_6_Middle_x == New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y == New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "East"
+                        elif (Old_Zebro_6_Middle_x >= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y > New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "North"
+                        elif (Old_Zebro_6_Middle_x <= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y < New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "South"
+                        elif (Old_Zebro_6_Middle_x > New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y <= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "West"
+                        elif (Old_Zebro_6_Middle_x < New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y >= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "East"
+                            
+                    elif Old_Direction_Pico_6 == "West":
+                        if (Old_Zebro_6_Middle_x == New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y == New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "West"
+                        elif (Old_Zebro_6_Middle_x >= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y > New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "North"
+                        elif (Old_Zebro_6_Middle_x <= New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y < New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "South"
+                        elif (Old_Zebro_6_Middle_x > New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y <= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "West"
+                        elif (Old_Zebro_6_Middle_x < New_Zebro_6_Middle_x) and (Old_Zebro_6_Middle_y >= New_Zebro_6_Middle_y):
+                            New_Direction_Pico_6 = "East"          
+                    Pico_6 = 1
+                if (x_compare_2 < Zebro_7_Middle_x < x_compare_1) and (y_compare_2 < Zebro_7_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_7_Middle_x = x
+                    New_Zebro_7_Middle_y = y
+                    New_Direction_Pico_7 = None
+                    
+                    if Old_Direction_Pico_7 == "North":
+                        if (Old_Zebro_7_Middle_x == New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y == New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "North"
+                        elif (Old_Zebro_7_Middle_x >= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y > New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "North"
+                        elif (Old_Zebro_7_Middle_x <= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y < New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "South"
+                        elif (Old_Zebro_7_Middle_x > New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y <= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "West"
+                        elif (Old_Zebro_7_Middle_x < New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y >= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "East"
+                        
+                    elif Old_Direction_Pico_7 == "South":
+                        if (Old_Zebro_7_Middle_x == New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y == New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "South"
+                        elif (Old_Zebro_7_Middle_x >= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y > New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "North"
+                        elif (Old_Zebro_7_Middle_x <= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y < New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "South"
+                        elif (Old_Zebro_7_Middle_x > New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y <= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "West"
+                        elif (Old_Zebro_7_Middle_x < New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y >= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "East"
+                            
+                    elif Old_Direction_Pico_7 == "East":
+                        if (Old_Zebro_7_Middle_x == New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y == New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "East"
+                        elif (Old_Zebro_7_Middle_x >= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y > New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "North"
+                        elif (Old_Zebro_7_Middle_x <= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y < New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "South"
+                        elif (Old_Zebro_7_Middle_x > New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y <= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "West"
+                        elif (Old_Zebro_7_Middle_x < New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y >= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "East"
+                            
+                    elif Old_Direction_Pico_7 == "West":
+                        if (Old_Zebro_7_Middle_x == New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y == New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "West"
+                        elif (Old_Zebro_7_Middle_x >= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y > New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "North"
+                        elif (Old_Zebro_7_Middle_x <= New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y < New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "South"
+                        elif (Old_Zebro_7_Middle_x > New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y <= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "West"
+                        elif (Old_Zebro_7_Middle_x < New_Zebro_7_Middle_x) and (Old_Zebro_7_Middle_y >= New_Zebro_7_Middle_y):
+                            New_Direction_Pico_7 = "East"          
+                    Pico_7 = 1
+                if (x_compare_2 < Zebro_8_Middle_x < x_compare_1) and (y_compare_2 < Zebro_8_Middle_y < y_compare_1):   # For re deteming the middle point
+                    New_Zebro_8_Middle_x = x
+                    New_Zebro_8_Middle_y = y
+                    New_Direction_Pico_8 = None
+                    
+                    if Old_Direction_Pico_8 == "North":
+                        if (Old_Zebro_8_Middle_x == New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y == New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "North"
+                        elif (Old_Zebro_8_Middle_x >= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y > New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "North"
+                        elif (Old_Zebro_8_Middle_x <= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y < New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "South"
+                        elif (Old_Zebro_8_Middle_x > New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y <= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "West"
+                        elif (Old_Zebro_8_Middle_x < New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y >= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "East"
+                        
+                    elif Old_Direction_Pico_8 == "South":
+                        if (Old_Zebro_8_Middle_x == New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y == New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "South"
+                        elif (Old_Zebro_8_Middle_x >= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y > New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "North"
+                        elif (Old_Zebro_8_Middle_x <= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y < New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "South"
+                        elif (Old_Zebro_8_Middle_x > New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y <= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "West"
+                        elif (Old_Zebro_8_Middle_x < New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y >= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "East"
+                            
+                    elif Old_Direction_Pico_8 == "East":
+                        if (Old_Zebro_8_Middle_x == New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y == New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "East"
+                        elif (Old_Zebro_8_Middle_x >= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y > New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "North"
+                        elif (Old_Zebro_8_Middle_x <= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y < New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "South"
+                        elif (Old_Zebro_8_Middle_x > New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y <= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "West"
+                        elif (Old_Zebro_8_Middle_x < New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y >= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "East"
+                            
+                    elif Old_Direction_Pico_8 == "West":
+                        if (Old_Zebro_8_Middle_x == New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y == New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "West"
+                        elif (Old_Zebro_8_Middle_x >= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y > New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "North"
+                        elif (Old_Zebro_8_Middle_x <= New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y < New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "South"
+                        elif (Old_Zebro_8_Middle_x > New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y <= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "West"
+                        elif (Old_Zebro_8_Middle_x < New_Zebro_8_Middle_x) and (Old_Zebro_8_Middle_y >= New_Zebro_8_Middle_y):
+                            New_Direction_Pico_8 = "East"          
+                    Pico_8 = 1
                     
             if Pico_1 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
                 Zebro_1_Middle_x = New_Zebro_1_Middle_x
                 Zebro_1_Middle_y = New_Zebro_1_Middle_y
-                Direction_Zebro_1 = New_Direction_Pico_1
-                
+                Direction_Zebro_1 = New_Direction_Pico_1                
             elif Pico_1 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 10 mins again
                 Zebro_1_Middle_x = New_Zebro_1_Middle_x
                 Zebro_1_Middle_y = New_Zebro_1_Middle_y
                 Direction_Zebro_1 = New_Direction_Pico_1
                 Pico_1_Lost = Pico_1_Lost + 1
-
             if Pico_1_Lost == 10:
                 Zebro_1_Middle_x = 0
                 Zebro_1_Middle_y = 0
@@ -1409,11 +1726,152 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 New_Zebro_1_Middle_x = 0
                 New_Zebro_1_Middle_y = 0
                 print("Lost Pico 1")
+            if Pico_2 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
+                Zebro_2_Middle_x = New_Zebro_2_Middle_x
+                Zebro_2_Middle_y = New_Zebro_2_Middle_y
+                Direction_Zebro_2 = New_Direction_Pico_2                
+            elif Pico_2 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 10 mins again
+                Zebro_2_Middle_x = New_Zebro_2_Middle_x
+                Zebro_2_Middle_y = New_Zebro_2_Middle_y
+                Direction_Zebro_2 = New_Direction_Pico_2
+                Pico_2_Lost = Pico_2_Lost + 1
+            if Pico_2_Lost == 10:
+                Zebro_2_Middle_x = 0
+                Zebro_2_Middle_y = 0
+                Direction_Zebro_2 = None
+                Old_Direction_Pico_2 = None
+                Old_Zebro_2_Middle_x = 0
+                Old_Zebro_2_Middle_y = 0
+                New_Direction_Pico_2 = None
+                New_Zebro_2_Middle_x = 0
+                New_Zebro_2_Middle_y = 0
+                print("Lost Pico 2")
+            if Pico_3 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
+                Zebro_3_Middle_x = New_Zebro_3_Middle_x
+                Zebro_3_Middle_y = New_Zebro_3_Middle_y
+                Direction_Zebro_3 = New_Direction_Pico_3                
+            elif Pico_3 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 30 mins again
+                Zebro_3_Middle_x = New_Zebro_3_Middle_x
+                Zebro_3_Middle_y = New_Zebro_3_Middle_y
+                Direction_Zebro_3 = New_Direction_Pico_3
+                Pico_3_Lost = Pico_3_Lost + 1
+            if Pico_3_Lost == 10:
+                Zebro_3_Middle_x = 0
+                Zebro_3_Middle_y = 0
+                Direction_Zebro_3 = None
+                Old_Direction_Pico_3 = None
+                Old_Zebro_3_Middle_x = 0
+                Old_Zebro_3_Middle_y = 0
+                New_Direction_Pico_3 = None
+                New_Zebro_3_Middle_x = 0
+                New_Zebro_3_Middle_y = 0
+                print("Lost Pico 3")
+            if Pico_4 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
+                Zebro_4_Middle_x = New_Zebro_4_Middle_x
+                Zebro_4_Middle_y = New_Zebro_4_Middle_y
+                Direction_Zebro_4 = New_Direction_Pico_4                
+            elif Pico_4 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 40 mins again
+                Zebro_4_Middle_x = New_Zebro_4_Middle_x
+                Zebro_4_Middle_y = New_Zebro_4_Middle_y
+                Direction_Zebro_4 = New_Direction_Pico_4
+                Pico_4_Lost = Pico_4_Lost + 1
+            if Pico_4_Lost == 10:
+                Zebro_4_Middle_x = 0
+                Zebro_4_Middle_y = 0
+                Direction_Zebro_4 = None
+                Old_Direction_Pico_4 = None
+                Old_Zebro_4_Middle_x = 0
+                Old_Zebro_4_Middle_y = 0
+                New_Direction_Pico_4 = None
+                New_Zebro_4_Middle_x = 0
+                New_Zebro_4_Middle_y = 0
+                print("Lost Pico 4")
+            if Pico_5 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
+                Zebro_5_Middle_x = New_Zebro_5_Middle_x
+                Zebro_5_Middle_y = New_Zebro_5_Middle_y
+                Direction_Zebro_5 = New_Direction_Pico_5                
+            elif Pico_5 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 50 mins again
+                Zebro_5_Middle_x = New_Zebro_5_Middle_x
+                Zebro_5_Middle_y = New_Zebro_5_Middle_y
+                Direction_Zebro_5 = New_Direction_Pico_5
+                Pico_5_Lost = Pico_5_Lost + 1
+            if Pico_5_Lost == 10:
+                Zebro_5_Middle_x = 0
+                Zebro_5_Middle_y = 0
+                Direction_Zebro_5 = None
+                Old_Direction_Pico_5 = None
+                Old_Zebro_5_Middle_x = 0
+                Old_Zebro_5_Middle_y = 0
+                New_Direction_Pico_5 = None
+                New_Zebro_5_Middle_x = 0
+                New_Zebro_5_Middle_y = 0
+                print("Lost Pico 5")
+            if Pico_6 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
+                Zebro_6_Middle_x = New_Zebro_6_Middle_x
+                Zebro_6_Middle_y = New_Zebro_6_Middle_y
+                Direction_Zebro_6 = New_Direction_Pico_6                
+            elif Pico_6 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 60 mins again
+                Zebro_6_Middle_x = New_Zebro_6_Middle_x
+                Zebro_6_Middle_y = New_Zebro_6_Middle_y
+                Direction_Zebro_6 = New_Direction_Pico_6
+                Pico_6_Lost = Pico_6_Lost + 1
+            if Pico_6_Lost == 10:
+                Zebro_6_Middle_x = 0
+                Zebro_6_Middle_y = 0
+                Direction_Zebro_6 = None
+                Old_Direction_Pico_6 = None
+                Old_Zebro_6_Middle_x = 0
+                Old_Zebro_6_Middle_y = 0
+                New_Direction_Pico_6 = None
+                New_Zebro_6_Middle_x = 0
+                New_Zebro_6_Middle_y = 0
+                print("Lost Pico 6")
+            if Pico_7 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
+                Zebro_7_Middle_x = New_Zebro_7_Middle_x
+                Zebro_7_Middle_y = New_Zebro_7_Middle_y
+                Direction_Zebro_7 = New_Direction_Pico_7                
+            elif Pico_7 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 70 mins again
+                Zebro_7_Middle_x = New_Zebro_7_Middle_x
+                Zebro_7_Middle_y = New_Zebro_7_Middle_y
+                Direction_Zebro_7 = New_Direction_Pico_7
+                Pico_7_Lost = Pico_7_Lost + 1
+            if Pico_7_Lost == 10:
+                Zebro_7_Middle_x = 0
+                Zebro_7_Middle_y = 0
+                Direction_Zebro_7 = None
+                Old_Direction_Pico_7 = None
+                Old_Zebro_7_Middle_x = 0
+                Old_Zebro_7_Middle_y = 0
+                New_Direction_Pico_7 = None
+                New_Zebro_7_Middle_x = 0
+                New_Zebro_7_Middle_y = 0
+                print("Lost Pico 7")
+            if Pico_8 == 1:                                                 # This check is necessary for determing of a Pico Zebro is lost or not
+                Zebro_8_Middle_x = New_Zebro_8_Middle_x
+                Zebro_8_Middle_y = New_Zebro_8_Middle_y
+                Direction_Zebro_8 = New_Direction_Pico_8                
+            elif Pico_8 == 2:                                               # A Check which determines of the Pico Zebro is lost and should be forgotten until after 80 mins again
+                Zebro_8_Middle_x = New_Zebro_8_Middle_x
+                Zebro_8_Middle_y = New_Zebro_8_Middle_y
+                Direction_Zebro_8 = New_Direction_Pico_8
+                Pico_8_Lost = Pico_8_Lost + 1
+            if Pico_8_Lost == 10:
+                Zebro_8_Middle_x = 0
+                Zebro_8_Middle_y = 0
+                Direction_Zebro_8 = None
+                Old_Direction_Pico_8 = None
+                Old_Zebro_8_Middle_x = 0
+                Old_Zebro_8_Middle_y = 0
+                New_Direction_Pico_8 = None
+                New_Zebro_8_Middle_x = 0
+                New_Zebro_8_Middle_y = 0
+                print("Lost Pico 8")
                 
-            for Zebros in range(1):
+            for Zebros in range(8):
                 Blocking_Zebro = []                                         # Here will be the blocked Directions in
                 if Zebros == 0:
-                    Blocking_Zebro = Block.Block_4(Zebro_1_Middle_x,Zebro_1_Middle_y) # For calculating the Blocked Directions with 1 Pico Zebro Block_2 is used
+                    Blocking_Zebro = Block.Block_5(Zebro_1_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_1_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y) # For calculating the Blocked Directions with 1 Pico Zebro Block_2 is used
                     if (Pico_1_Lost > 0) and (Pico_1_Lost < 10):
                         Blocking_Zebro = ["South","North","East","West"]
 
@@ -1442,10 +1900,214 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_Pico_Direction_1.unfinished_tasks = 0
                         q_Pico_Direction_1.mutex.release()
                         q_Pico_Direction_1.put(Direction_Zebro_1)
+                elif Zebros == 1:
+                    Blocking_Zebro = Block.Block_5(Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
+                    # For calculating the Blocked Directions with 2 Pico Zebro Block_2 is used
+                    if (Pico_2_Lost > 0) and (Pico_2_Lost < 10):
+                        Blocking_Zebro = ["South","North","East","West"]
+
+                    Zebro_2_Middle_x = Zebro_2_Middle_x
+                    Zebro_2_Middle_y = Zebro_2_Middle_y    
+                    PicoZebro_2 = [Zebro_2_Middle_x , Zebro_2_Middle_y, Blocking_Zebro] 
+                    if q_PicoZebro_2.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_2.put(PicoZebro_2)
+                    elif q_PicoZebro_2.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
+                        q_PicoZebro_2.mutex.acquire()                       # which could happen condsidering this could happen faster than the Pico Control thread could use these values
+                        q_PicoZebro_2.queue.clear()
+                        q_PicoZebro_2.all_tasks_done.notify_all()
+                        q_PicoZebro_2.unfinished_tasks = 0
+                        q_PicoZebro_2.mutex.release()
+                        q_PicoZebro_2.put(PicoZebro_2)
+                    # once it is determined if finding Direction leve works this can be done:    
+                    if q_Pico_Direction_2.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_2.put(Direction_Zebro_2)
+                    elif q_Pico_Direction_2.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_2.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_2.queue.clear()
+                        q_Pico_Direction_2.all_tasks_done.notify_all()
+                        q_Pico_Direction_2.unfinished_tasks = 0
+                        q_Pico_Direction_2.mutex.release()
+                        q_Pico_Direction_2.put(Direction_Zebro_2)
+                elif Zebros == 2:
+                    Blocking_Zebro = Block.Block_5(Zebro_3_Middle_x, Zebro_2_Middle_x, Zebro_1_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_3_Middle_y, Zebro_2_Middle_y, Zebro_1_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
+                    if (Pico_3_Lost > 0) and (Pico_3_Lost < 10):
+                        Blocking_Zebro = ["South","North","East","West"]
+
+                    Zebro_3_Middle_x = Zebro_3_Middle_x
+                    Zebro_3_Middle_y = Zebro_3_Middle_y    
+                    PicoZebro_3 = [Zebro_3_Middle_x , Zebro_3_Middle_y, Blocking_Zebro] 
+                    if q_PicoZebro_3.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_3.put(PicoZebro_3)
+                    elif q_PicoZebro_3.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
+                        q_PicoZebro_3.mutex.acquire()                       # which could happen condsidering this could happen faster than the Pico Control thread could use these values
+                        q_PicoZebro_3.queue.clear()
+                        q_PicoZebro_3.all_tasks_done.notify_all()
+                        q_PicoZebro_3.unfinished_tasks = 0
+                        q_PicoZebro_3.mutex.release()
+                        q_PicoZebro_3.put(PicoZebro_3)
+                    # once it is determined if finding Direction leve works this can be done:    
+                    if q_Pico_Direction_3.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_3.put(Direction_Zebro_3)
+                    elif q_Pico_Direction_3.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_3.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_3.queue.clear()
+                        q_Pico_Direction_3.all_tasks_done.notify_all()
+                        q_Pico_Direction_3.unfinished_tasks = 0
+                        q_Pico_Direction_3.mutex.release()
+                        q_Pico_Direction_3.put(Direction_Zebro_3)
+                elif Zebros == 3:
+                    Blocking_Zebro = Block.Block_5(Zebro_4_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_1_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_4_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_1_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
+                    if (Pico_4_Lost > 0) and (Pico_4_Lost < 10):
+                        Blocking_Zebro = ["South","North","East","West"]
+
+                    Zebro_4_Middle_x = Zebro_4_Middle_x
+                    Zebro_4_Middle_y = Zebro_4_Middle_y    
+                    PicoZebro_4 = [Zebro_4_Middle_x , Zebro_4_Middle_y, Blocking_Zebro] 
+                    if q_PicoZebro_4.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_4.put(PicoZebro_4)
+                    elif q_PicoZebro_4.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
+                        q_PicoZebro_4.mutex.acquire()                       # which could happen condsidering this could happen faster than the Pico Control thread could use these values
+                        q_PicoZebro_4.queue.clear()
+                        q_PicoZebro_4.all_tasks_done.notify_all()
+                        q_PicoZebro_4.unfinished_tasks = 0
+                        q_PicoZebro_4.mutex.release()
+                        q_PicoZebro_4.put(PicoZebro_4)
+                    # once it is determined if finding Direction leve works this can be done:    
+                    if q_Pico_Direction_4.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_4.put(Direction_Zebro_4)
+                    elif q_Pico_Direction_4.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_4.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_4.queue.clear()
+                        q_Pico_Direction_4.all_tasks_done.notify_all()
+                        q_Pico_Direction_4.unfinished_tasks = 0
+                        q_Pico_Direction_4.mutex.release()
+                        q_Pico_Direction_4.put(Direction_Zebro_4)
+                elif Zebros == 4:
+                    Blocking_Zebro = Block.Block_5(Zebro_5_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_1_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_5_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_1_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
+                    if (Pico_5_Lost > 0) and (Pico_5_Lost < 10):
+                        Blocking_Zebro = ["South","North","East","West"]
+
+                    Zebro_5_Middle_x = Zebro_5_Middle_x
+                    Zebro_5_Middle_y = Zebro_5_Middle_y    
+                    PicoZebro_5 = [Zebro_5_Middle_x , Zebro_5_Middle_y, Blocking_Zebro] 
+                    if q_PicoZebro_5.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_5.put(PicoZebro_5)
+                    elif q_PicoZebro_5.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
+                        q_PicoZebro_5.mutex.acquire()                       # which could happen condsidering this could happen faster than the Pico Control thread could use these values
+                        q_PicoZebro_5.queue.clear()
+                        q_PicoZebro_5.all_tasks_done.notify_all()
+                        q_PicoZebro_5.unfinished_tasks = 0
+                        q_PicoZebro_5.mutex.release()
+                        q_PicoZebro_5.put(PicoZebro_5)
+                    # once it is determined if finding Direction leve works this can be done:    
+                    if q_Pico_Direction_5.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_5.put(Direction_Zebro_5)
+                    elif q_Pico_Direction_5.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_5.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_5.queue.clear()
+                        q_Pico_Direction_5.all_tasks_done.notify_all()
+                        q_Pico_Direction_5.unfinished_tasks = 0
+                        q_Pico_Direction_5.mutex.release()
+                        q_Pico_Direction_5.put(Direction_Zebro_5)
+                elif Zebros == 5:
+                    Blocking_Zebro = Block.Block_5(Zebro_6_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_1_Middle_x, Zebro_7_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_6_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_1_Middle_y, Zebro_7_Middle_y, Zebro_8_Middle_y)
+                    if (Pico_6_Lost > 0) and (Pico_6_Lost < 10):
+                        Blocking_Zebro = ["South","North","East","West"]
+
+                    Zebro_6_Middle_x = Zebro_6_Middle_x
+                    Zebro_6_Middle_y = Zebro_6_Middle_y    
+                    PicoZebro_6 = [Zebro_6_Middle_x , Zebro_6_Middle_y, Blocking_Zebro] 
+                    if q_PicoZebro_6.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_6.put(PicoZebro_6)
+                    elif q_PicoZebro_6.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
+                        q_PicoZebro_6.mutex.acquire()                       # which could happen condsidering this could happen faster than the Pico Control thread could use these values
+                        q_PicoZebro_6.queue.clear()
+                        q_PicoZebro_6.all_tasks_done.notify_all()
+                        q_PicoZebro_6.unfinished_tasks = 0
+                        q_PicoZebro_6.mutex.release()
+                        q_PicoZebro_6.put(PicoZebro_6)
+                    # once it is determined if finding Direction leve works this can be done:    
+                    if q_Pico_Direction_6.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_6.put(Direction_Zebro_6)
+                    elif q_Pico_Direction_6.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_6.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_6.queue.clear()
+                        q_Pico_Direction_6.all_tasks_done.notify_all()
+                        q_Pico_Direction_6.unfinished_tasks = 0
+                        q_Pico_Direction_6.mutex.release()
+                        q_Pico_Direction_6.put(Direction_Zebro_6)
+                elif Zebros == 6:
+                    Blocking_Zebro = Block.Block_5(Zebro_7_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_1_Middle_x, Zebro_8_Middle_x,
+                                                   Zebro_7_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_1_Middle_y, Zebro_8_Middle_y)
+                    if (Pico_7_Lost > 0) and (Pico_7_Lost < 10):
+                        Blocking_Zebro = ["South","North","East","West"]
+
+                    Zebro_7_Middle_x = Zebro_7_Middle_x
+                    Zebro_7_Middle_y = Zebro_7_Middle_y    
+                    PicoZebro_7 = [Zebro_7_Middle_x , Zebro_7_Middle_y, Blocking_Zebro] 
+                    if q_PicoZebro_7.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_7.put(PicoZebro_7)
+                    elif q_PicoZebro_7.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
+                        q_PicoZebro_7.mutex.acquire()                       # which could happen condsidering this could happen faster than the Pico Control thread could use these values
+                        q_PicoZebro_7.queue.clear()
+                        q_PicoZebro_7.all_tasks_done.notify_all()
+                        q_PicoZebro_7.unfinished_tasks = 0
+                        q_PicoZebro_7.mutex.release()
+                        q_PicoZebro_7.put(PicoZebro_7)
+                    # once it is determined if finding Direction leve works this can be done:    
+                    if q_Pico_Direction_7.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_7.put(Direction_Zebro_7)
+                    elif q_Pico_Direction_7.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_7.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_7.queue.clear()
+                        q_Pico_Direction_7.all_tasks_done.notify_all()
+                        q_Pico_Direction_7.unfinished_tasks = 0
+                        q_Pico_Direction_7.mutex.release()
+                        q_Pico_Direction_7.put(Direction_Zebro_7)
+                elif Zebros == 7:
+                    Blocking_Zebro = Block.Block_5(Zebro_8_Middle_x, Zebro_2_Middle_x, Zebro_3_Middle_x, Zebro_4_Middle_x, Zebro_5_Middle_x, Zebro_6_Middle_x, Zebro_7_Middle_x, Zebro_1_Middle_x,
+                                                   Zebro_8_Middle_y, Zebro_2_Middle_y, Zebro_3_Middle_y, Zebro_4_Middle_y, Zebro_5_Middle_y, Zebro_6_Middle_y, Zebro_7_Middle_y, Zebro_1_Middle_y) 
+                    if (Pico_8_Lost > 0) and (Pico_8_Lost < 10):
+                        Blocking_Zebro = ["South","North","East","West"]
+
+                    Zebro_8_Middle_x = Zebro_8_Middle_x
+                    Zebro_8_Middle_y = Zebro_8_Middle_y    
+                    PicoZebro_8 = [Zebro_8_Middle_x , Zebro_8_Middle_y, Blocking_Zebro] 
+                    if q_PicoZebro_8.empty() == True:                       # if the queue is empty fill it
+                        q_PicoZebro_8.put(PicoZebro_8)
+                    elif q_PicoZebro_8.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
+                        q_PicoZebro_8.mutex.acquire()                       # which could happen condsidering this could happen faster than the Pico Control thread could use these values
+                        q_PicoZebro_8.queue.clear()
+                        q_PicoZebro_8.all_tasks_done.notify_all()
+                        q_PicoZebro_8.unfinished_tasks = 0
+                        q_PicoZebro_8.mutex.release()
+                        q_PicoZebro_8.put(PicoZebro_8)
+                    # once it is determined if finding Direction leve works this can be done:    
+                    if q_Pico_Direction_8.empty() == True:                  # if the queue is empty fill it
+                        q_Pico_Direction_8.put(Direction_Zebro_8)
+                    elif q_Pico_Direction_8.empty() == False:               # else empty it before filling it again with the next data.
+                        q_Pico_Direction_8.mutex.acquire()                  # Which is the current direction of the Pico Zebro
+                        q_Pico_Direction_8.queue.clear()
+                        q_Pico_Direction_8.all_tasks_done.notify_all()
+                        q_Pico_Direction_8.unfinished_tasks = 0
+                        q_Pico_Direction_8.mutex.release()
+                        q_Pico_Direction_8.put(Direction_Zebro_8)
                     
             Picture = 7                                                     # Making sure this steps repeats itself untill 10 mins = 600 secibds has passed
 
             Pico_1 = 2
+            Pico_2 = 2
+            Pico_3 = 2
+            Pico_4 = 2
+            Pico_5 = 2
+            Pico_6 = 2
+            Pico_7 = 2
+            Pico_8 = 2
             
             if ((time.time() - Picture_1_start_time) > 600):                # Check if 10 mins has passed
                 Picture = 0                                                 # Restart code and redetermine which Pico Zebro is which 
