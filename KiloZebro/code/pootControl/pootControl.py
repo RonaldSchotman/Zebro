@@ -272,16 +272,16 @@ def main(stdscr):
                 lift_off_time_b = time_sync_counter + 1
                 touch_down_time_a = 0
                 touch_down_time_b = lift_off_time_b + 1
-                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk forward')
+                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk forward')
             if input_char == 's':
                 lift_off_time_a = 0
                 lift_off_time_b = time_sync_counter + 1
                 touch_down_time_a = 0
                 touch_down_time_b = lift_off_time_b + 1
-                command = Command("[0x00 30 4 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "s", 'walk backward')
-            if input_char == 'z':
-                stand_up_time = time_sync_counter + 2
-                command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')
+                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "s", 'walk backward')
+            # if input_char == 'z':
+            #     stand_up_time = time_sync_counter + 2
+            #     command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')
 
 
             if command:

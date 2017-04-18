@@ -20,7 +20,7 @@
 
 // http://www.andymark.com/PG71-Gearmotor-With-Encoder-p/am-2971.htm
 // 32.5 * 7 pulses per round * 4 edges = 910 (32.5k7)
-//#define ENCODER_PULSES_PER_ROTATION 910
+#define ENCODER_PULSES_PER_ROTATION 910
 
 #define ENCODER_SIG_A_PIN GPIO_PIN_6 //PA6, PIN22
 #define ENCODER_SIG_A_BANK GPIOA

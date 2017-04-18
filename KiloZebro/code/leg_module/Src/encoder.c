@@ -21,6 +21,7 @@
 #include "vregs.h"
 #include "errors.h"
 #include "globals.h"
+#include "address.h"
 
 /**
  * Initialises the rotational encoder
@@ -110,6 +111,9 @@ void encoder_write_to_vregs(void) {
 int16_t encoder_get_position(void) {
 	int16_t counter_value;
 	counter_value = TIM3->CNT;
+//	if (address_get_side() == ADDRESS_LEFT) {
+//		counter_value = -counter_value;
+//	}
 	return (counter_value);
 }
 

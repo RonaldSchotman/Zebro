@@ -24,13 +24,14 @@
 
 #define MOTION_MODE_IDLE 0
 #define MOTION_MODE_CALIBRATE 1
-#define MOTION_MODE_STAND_UP 2
-#define MOTION_MODE_WALK_FORWARD 3
-#define MOTION_MODE_WALK_BACKWARD 4
-#define MOTION_MODE_CONTINUOUS_ROTATION 10
-#define MOTION_MODE_MOVE_TO_LIFT_OFF 11
+#define MOTION_MODE_WALK_FORWARD 2
+#define MOTION_MODE_WALK_BACKWARD 3
 #define MOTION_MODE_PANIC_STOP 255
 
+#define MOTION_SETPOINT_GENERATOR_DT 5
+#define MOTION_A_MAX 1 /* pulses per s squared but scaled down by a factor of thousand. Max constant speed is 2 rps = 1820 p/s. When doing 810 pulses in 0.5 sec, Amax needs to be INT16_MAX */
+#define MOTION_ACC_DEC_TIME_MS 400
+//#define MOTION_ACCURACY_SHIFT 10
 
 //#define MOTION_DEBUG_COMMAND 5
 #define MOTION_DIRECTION_FORWARD 0
@@ -54,11 +55,11 @@
 
 #define ARRAY_SIZE 255
 #define TOUCH_DOWN_POSITION_L 350
-#define TOUCH_DOWN_POSITION_R 560
+#define TOUCH_DOWN_POSITION 560
 #define STAND_UP_POSITION_L 310
-#define STAND_UP_POSITION_R 610 // 910-585
+#define STAND_UP_POSITION 610 // 910-585
 #define LIFT_OFF_POSITION_L 270
-#define LIFT_OFF_POSITION_R 650
+#define LIFT_OFF_POSITION 650
 
 #include "stdint.h"
 
@@ -86,6 +87,7 @@ void motion_position_control_set_kd(uint8_t value);
 uint8_t motion_position_control_get_kp(void);
 uint8_t motion_position_control_get_ki(void);
 uint8_t motion_position_control_get_kd(void);
+void motion_absolute_position_calculator(void);
 int32_t motion_drive_h_bridge(void);
 //uint8_t motion_move_to_point(uint16_t point, uint8_t dir, uint32_t arrival_time);
 //void set_next_walk_instruction(uint8_t value);

@@ -24,6 +24,7 @@ int32_t address_measure_position(void);
 int32_t address_get_position(void);
 int32_t address_get_side(void);
 int32_t address_get_zebrobus_address(void);
+void address_write_to_vregs(void);
 
 #define ADDRESS_LEFT_0 0
 #define ADDRESS_LEFT_1 1
