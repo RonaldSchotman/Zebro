@@ -1342,6 +1342,7 @@ if __name__ == '__main__':
     # These Queue objects are only data obtained by main loop and read by Pico Zebro loops.
     q_PicoZebro_1 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
     q_PicoZebro_2 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
+    q_PicoZebro_3 = queue.Queue(maxsize=1) #This is a list with in it [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] etc for every zebro.
     # With a maximum of 1 list. so maxsize = 1.
 
     #In here will be the direection. Only at the start the main will put something in here afterwards for 10 mins the Zebro thread needs to put himself something in there with guessing.
@@ -1351,10 +1352,12 @@ if __name__ == '__main__':
     #If higher Precision with direction is required
     q_Pico_Angle_1 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
     q_Pico_Angle_2 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
+    q_Pico_Angle_3 = queue.Queue(maxsize=1) # With a maximum of 1 list. so maxsize = 1.
 
     #All Pico Zebro Names 1 - 20
     Pico_N1 = "Pico_N1"
     Pico_N2 = "Pico_N2"
+    Pico_N3 = "Pico_N3"
 
     UART_Thread_1 = UART_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main) # This call on the UArt thread will be the same no matter how many Pico's there are
     UART_Thread_1.setName('UART_Thread')
@@ -1368,9 +1371,11 @@ if __name__ == '__main__':
     Pico_Zebro_1.setName('Pico_Zebro_1')
     Pico_Zebro_2 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N2,q_PicoZebro_2,q_Pico_Direction_2,q_Pico_Angle_2)
     Pico_Zebro_2.setName('Pico_Zebro_2')
+    Pico_Zebro_3 = Control_Zebro_Thread(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,Pico_N3,q_PicoZebro_3,q_Pico_Direction_3,q_Pico_Angle_3)
+    Pico_Zebro_3.setName('Pico_Zebro_3')
 
     # In the main every Pico value needs to be set So the more Pico the more values you have to give with the main.
-    main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,q_PicoZebro_1, q_PicoZebro_2,
-         q_Pico_Direction_1, q_Pico_Direction_2,
-         q_Pico_Angle_1, q_Pico_Angle_2)
+    main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,q_PicoZebro_1, q_PicoZebro_2,q_PicoZebro_3,
+         q_Pico_Direction_1, q_Pico_Direction_2,q_Pico_Direction_3,
+         q_Pico_Angle_1, q_Pico_Angle_2, q_Pico_Angle_3)
 
