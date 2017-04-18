@@ -148,7 +148,9 @@ class UART_Thread(threading.Thread):                                        # UA
                         elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
                             setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
-                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off 
+                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                            time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
+                            setLed(connectionID=0, ledNr=1, value=0)        # Turn Led3_off 
                     Sended_Data = 0                                         # Data is send
                     #print("Main_Wrote")                                     # For debug, for showing which thread was the last to try to write over Uart
                     
