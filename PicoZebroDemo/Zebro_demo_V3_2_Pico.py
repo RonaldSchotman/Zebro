@@ -79,9 +79,9 @@ class Check_Connected_thread(threading.Thread):
             if self.q_Control_Uart_Main.empty() == True:        # if the main doesn't have control send next movement otherwise you already should have been stuck before
                 Writing = ("Global","Connect", "Devices")     
                 self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
-                print("checked Devices")
+               # print("checked Devices")
             time.sleep(2)
-            print("check")
+            #print("check")
 
 class UART_Thread(threading.Thread):                                        # UART Thread
     def __init__(self,q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main): # initialize UART thread for communication between BLE and Raspberry pi 
@@ -102,7 +102,7 @@ class UART_Thread(threading.Thread):                                        # UA
             if (self.q_Control_Serial_Write.empty() == False) or (Sended_Data == 1): # Check if there is data to send.
                 Sended_Data = 1                                             # if Yes set Sended_Data to 1 untill data is send.
                 Serial = self.q_Control_Serial_Write.get(block=False)       # Try to obtain next Queue variable for sending command 
-                print(Serial)                                               # Say what has the be send and if the main or a Pico Zebro thread is sending it.
+                #print(Serial)                                               # Say what has the be send and if the main or a Pico Zebro thread is sending it.
                 #Serial is obtained as follows:
                 #Serial[0] = priority of Queue, Serial[1][0] = Which Pico Zebro thread or Main is sending the Data
                 #Serial[1][1] = Which device or devices need the command needs to be send to, Serial[1][2] = The actual command
@@ -129,40 +129,42 @@ class UART_Thread(threading.Thread):                                        # UA
                                 setMovement(x, 0)                           # Set movement to IDLE = Stop.
                         elif Serial[1][2] == 'Led1_on':                     # if the global command is Led1_on
                             for x in range(2):                              # Make every Zebro turn Led1_on
-                                setLed(connectionID=0, ledNr=3, value=7)    # Turn led 1 on
+                                setLed(x, ledNr=3, value=7)    # Turn led 1 on
                         elif Serial[1][2] == "Led2_on":                     # An extra led if it possible to realtime find the Pico Zebro's
                             for x in range(2):                              # A loop over every possible Zebro
-                                setLed(connectionID=0, ledNr=1, value=7)    # Turn led 3 on
+                                setLed(x, ledNr=1, value=7)    # Turn led 3 on
                         elif Serial[1][2] == "Led3_on":                     # An extra led if it possible to realtime find the Pico Zebro's
                             for x in range(2):                              # A loop over every possible Zebro
-                                setLed(connectionID=0, ledNr=2, value=7)    # Turn led 3 on
+                                setLed(x, ledNr=2, value=7)    # Turn led 3 on
                     elif Serial[1][1] == 'Pico_N1':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        connection_Pico_1 = 0
                         if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
-                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                            setLed(connectionID=connection_Pico_1, ledNr=3, value=7)        # Turn Led1_on 
                         elif Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
-                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                            setLed(connectionID=connection_Pico_1, ledNr=2, value=7)        # Turn Led3_on
                         elif Serial[1][2] == 'Led2_on':                       # For  when led needs to be turned on
-                            setLed(connectionID=0, ledNr=1, value=7)        # Turn Led3_on
+                            setLed(connectionID=connection_Pico_1, ledNr=1, value=7)        # Turn Led3_on
                         elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
-                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            setLed(connectionID=connection_Pico_1, ledNr=3, value=0)        # Turn Led1_off
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
-                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                            setLed(connectionID=connection_Pico_1, ledNr=2, value=0)        # Turn Led3_off
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
-                            setLed(connectionID=0, ledNr=1, value=0)        # Turn Led3_off
+                            setLed(connectionID=connection_Pico_1, ledNr=1, value=0)        # Turn Led3_off
                             
                     elif Serial[1][1] == 'Pico_N2':                         # This has to made for every Pico Zebro for controlling it seperatly with the Main
+                        connection_Pico_1 = 1
                         if Serial[1][2] == 'Led1_on':                       # The three used commands are Led1_on, Led3_on and Leds_off
-                            setLed(connectionID=0, ledNr=3, value=7)        # Turn Led1_on 
+                            setLed(connectionID=connection_Pico_1, ledNr=3, value=7)        # Turn Led1_on 
                         elif Serial[1][2] == 'Led3_on':                       # For  when led needs to be turned on
-                            setLed(connectionID=0, ledNr=2, value=7)        # Turn Led3_on
+                            setLed(connectionID=connection_Pico_1, ledNr=2, value=7)        # Turn Led3_on
                         elif Serial[1][2] == 'Led2_on':                       # For  when led needs to be turned on
-                            setLed(connectionID=0, ledNr=1, value=7)        # Turn Led3_on
+                            setLed(connectionID=connection_Pico_1, ledNr=1, value=7)        # Turn Led3_on
                         elif Serial[1][2] == 'Leds_off':                    # If everything is done correctly ot should not be possible there are more than these 2 leds on
-                            setLed(connectionID=0, ledNr=3, value=0)        # Turn Led1_off
+                            setLed(connectionID=connection_Pico_1, ledNr=3, value=0)        # Turn Led1_off
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
-                            setLed(connectionID=0, ledNr=2, value=0)        # Turn Led3_off
+                            setLed(connectionID=connection_Pico_1, ledNr=2, value=0)        # Turn Led3_off
                             time.sleep(0.01)                                # A small delay was seemingly necessary the bluetooth bus couldn't take it otherwise
-                            setLed(connectionID=0, ledNr=1, value=0)        # Turn Led3_off 
+                            setLed(connectionID=connection_Pico_1, ledNr=1, value=0)        # Turn Led3_off 
                     
                     Sended_Data = 0                                         # Data is send
                     #print("Main_Wrote")
@@ -187,7 +189,7 @@ class UART_Thread(threading.Thread):                                        # UA
                  # For Each Pico such an elif:    
                 elif Serial[1][0] == "Pico_N2":                             # if Pico_N1 has to send data for now only four commands
                     if Serial[1][1] == "Pico_N2":                           # This should be Pico_Nx or the wrong pico is writing to it.
-                        connection_Pico_1 = 0                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
+                        connection_Pico_1 = 1                               # This is the bluetooth address of the Pico Zebro 1 for Zebro 2 it is 1
                         if Serial[1][2] == "Stop":                          # Make Pico Zebro 1 stop
                             setMovement(connection_Pico_1, 0)
                         elif Serial[1][2] == "Forward":                     # Let Pico Zebro 1 Move Forward
@@ -269,7 +271,7 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                 if (self.q_Control_Uart_Main.empty() == True):              # Obtain which Zebro has connected
                     Connected_Devices = connectedArray                      # in the global Variable connectedArray must stand which devices are connected
                     #print(self.Zebro+" Checked Devices")
-
+                    
                 #print(Connected_Devices)                                    # Extra check for which devices are connected
                 
                 if Connected_Devices[Connected_To] == 1:                    # self.Zebro:   # Needs to be Pico_Nx
@@ -347,9 +349,9 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                     # This is for determing the next Movement with change. Except for Stop the Movement change will be determined with highest change of being the same as Last Movement 
                     if Last_Movement == "Stop":
                         Random_N = random.randrange(1,100)                  # if the last movement of the Pico Zebro was to stop (always this at the start
-                        if Random_N <= 70:                                  # it has a 60% change to move forward afterwards
+                        if Random_N <= 60:                                  # it has a 60% change to move forward afterwards
                             Movement = "Forward"
-                        elif Random_N > 70 and Random_N <= 80:              # 10% Change to keep standing still
+                        elif Random_N > 60 and Random_N <= 80:              # 10% Change to keep standing still
                             Movement = "Stop"
                         elif Random_N > 80 and  Random_N <= 90:             # 10% Change to go to the right
                             Movement = "Right"
@@ -358,9 +360,9 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
 
                     if Last_Movement == "Forward":                          # If the last movement was Forward it has 80% change to keep moving forward
                         Random_N = random.randrange(1,100)                  # It almost always to have the highest change to keep moving forward
-                        if Random_N <= 80:                                  # The random.randrange create a number everytime to create a change to change the movement
+                        if Random_N <= 70:                                  # The random.randrange create a number everytime to create a change to change the movement
                             Movement = "Forward"
-                        elif Random_N > 80 and Random_N <= 90:              # 10% Change to keep standing still
+                        elif Random_N > 70 and Random_N <= 90:              # 10% Change to keep standing still
                             Movement = "Stop"
                         elif Random_N > 90 and Random_N <= 95:              # 5% Change to go to the right
                             Movement = "Right"
@@ -371,22 +373,22 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                         Random_N = random.randrange(1,100)
                         if Random_N <= 25:                                  # 25% change to move Forward after moving right
                             Movement = "Forward"
-                        elif Random_N > 25 and Random_N <= 35:              # 10% change to stop again
+                        elif Random_N > 25 and Random_N <= 45:              # 10% change to stop again
                             Movement = "Stop"
-                        elif Random_N > 35 and Random_N <= 95:              # 60% to keep moving right
+                        elif Random_N > 45 and Random_N <= 98:              # 60% to keep moving right
                             Movement = "Right"
-                        elif Random_N > 95 and Random_N <= 100:             # 5% To go suddenly to left
+                        elif Random_N > 98 and Random_N <= 100:             # 5% To go suddenly to left
                             Movement = "Left"
      
                     if Last_Movement == "Left":                             # Last movement was left so 50% to keep moving left
                         Random_N = random.randrange(1,100)
                         if Random_N <= 25:                                  # 25% to go Forward
                             Movement = "Forward"    
-                        elif Random_N > 25 and Random_N <= 35:              # 10% to stop
+                        elif Random_N > 25 and Random_N <= 45:              # 10% to stop
                             Movement = "Stop"
-                        elif Random_N > 35 and Random_N <= 40:              # 5% to suddenly go right
+                        elif Random_N > 45 and Random_N <= 48:              # 5% to suddenly go right
                             Movement = "Right"
-                        elif Random_N > 40 and Random_N <= 100:             # 60% to keep moving right
+                        elif Random_N > 48 and Random_N <= 100:             # 60% to keep moving right
                             Movement = "Left"
                             
                     # If Direction works THIS can go away because direction keeps direction updated
@@ -419,7 +421,7 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                     for Names in Blocked_Direction:
                         if Direction == Names:
                             DONT_Send = 1
-                    print(Movement)        
+                    #print(Movement)        
                     if DONT_Send == 1: # If the direction is blocked make the Pico Zebro stop and try to figure out his next direction
                         # Obtain Serial Write
                         # Check if Main is writing in Uart. If so wait untill main is finished
@@ -431,7 +433,7 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                             
                             self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
                             print("The Zebro has been stopped")
-                            print(Writing)
+                            #print(Writing)
                             #Release Serial Write
                     else:
                         # Obtain Serial Write
@@ -442,8 +444,8 @@ class Control_Zebro_Thread(threading.Thread):                               # Th
                         if self.q_Control_Uart_Main.empty() == True:        # if the main doesn't have control send next movement otherwise you already should have been stuck before
                             Writing = (self.Zebro,self.Zebro, Movement)     # The change this can go wrong is extremly small but possible.
                             self.q_Control_Serial_Write.put((2, Writing), block=True, timeout=None)
-                            print("Zebro is moving")
-                            print(Writing)
+                            #print("Zebro is moving")
+                            #print(Writing)
                             
                         Last_Movement = Movement
                         #Current_Direction = Direction
@@ -550,8 +552,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
         # Obtain ROI which is the Hexagon.
         mask = np.zeros(image.shape, dtype=np.uint8)
-        roi_corners = np.array([[(400,530),(640,115),(1203,115),(1425,530),(1203,900),(640,900)]], dtype=np.int32)
-
+        #roi_corners = np.array([[(400,530),(640,115),(1203,115),(1425,530),(1203,900),(640,900)]], dtype=np.int32)
+        roi_corners = np.array([[(350,500),(550,55),(1153,55),(1305,500),(1053,900),(550,900)]], dtype=np.int32)
         #roi_corners = np.array([[(1260,910), (1430,810), (1420,110), (1230,10), (420,10), (220,130), (225,820), (390,910)]], dtype=np.int32)
         # fill the ROI so it doesn't get wiped out when the mask is applied
         channel_count = image.shape[2]  # i.e. 3 or 4 depending on your image
@@ -734,7 +736,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
         if Picture == 8:
             Devices = 0                                                     # Reset Devices so for the next time it will start with Pico 1.
             #once every value for every possible Zebro is determind then
-            for Zebros in range(6):                                         # total of maximum of x Zebro's
+            for Zebros in range(2):                                         # total of maximum of x Zebro's
                 Blocking_Zebro = []                                         # Here will be the blocking in
                 if Zebros == 0:                                             # The comming step has to be done for every possible Zebro 
                     # The reason Block function is in another python script is to make this one easier to read because the BLocked functions got a lot of if statements. 
@@ -789,8 +791,8 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         q_Pico_Direction_2.mutex.release()
                         q_Pico_Direction_2.put(Direction_Zebro_2)
                         
-                    print(PicoZebro_2)
-                    print(Direction_Zebro_2)
+                    #print(PicoZebro_2)
+                    #print(Direction_Zebro_2)
                     #Picture = 9                                            # This has to be 9 for going to the next step for the last Zebro for every other one does not need to be assigned
                     Writing = ("Main","Global", "Leds_off")                 # Making sure all leds are turned off
                     q_Control_Serial_Write.put((1, Writing), block=True, timeout=None) # Turn leds of again
@@ -827,7 +829,9 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             # perform a series of dilations to remove
             # any small blobs of noise from the thresholded image
             thresh = cv2.dilate(thresh, None, iterations=1)
-            thresh = cv2.dilate(thresh, None, iterations=3)
+            cv2.imwrite("gray.jpg",thresh)
+            cv2.imshow("sdsdd",thresh)
+            thresh = cv2.dilate(thresh, None, iterations=4)
             # find the contours in the mask, then sort them from left to right
             cv2.imwrite("graywew.jpg",thresh)
             cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -853,44 +857,63 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             for (i, c) in enumerate(cnts):
                 # draw the bright spot on the image
                 (x, y, w, h) = cv2.boundingRect(c)                          # For finding the x and y of the leds
-                Old_Zebro_1_Middle_x_pos = Old_Zebro_1_Middle_x + 200
-                Old_Zebro_1_Middle_x_neg = Old_Zebro_1_Middle_x - 200
-                Old_Zebro_1_Middle_y_pos = Old_Zebro_1_Middle_y + 200
-                Old_Zebro_1_Middle_y_neg = Old_Zebro_1_Middle_y - 200
+                Old_Zebro_1_Middle_x_pos = Old_Zebro_1_Middle_x + 100
+                Old_Zebro_1_Middle_x_neg = Old_Zebro_1_Middle_x - 100
+                Old_Zebro_1_Middle_y_pos = Old_Zebro_1_Middle_y + 100
+                Old_Zebro_1_Middle_y_neg = Old_Zebro_1_Middle_y - 100
 
-                Old_Zebro_2_Middle_x_pos = Old_Zebro_2_Middle_x + 200
-                Old_Zebro_2_Middle_x_neg = Old_Zebro_2_Middle_x - 200
-                Old_Zebro_2_Middle_y_pos = Old_Zebro_2_Middle_y + 200
-                Old_Zebro_2_Middle_y_neg = Old_Zebro_2_Middle_y - 200
+                Old_Zebro_2_Middle_x_pos = Old_Zebro_2_Middle_x + 100
+                Old_Zebro_2_Middle_x_neg = Old_Zebro_2_Middle_x - 100
+                Old_Zebro_2_Middle_y_pos = Old_Zebro_2_Middle_y + 100
+                Old_Zebro_2_Middle_y_neg = Old_Zebro_2_Middle_y - 100
                 
                 if (x < Old_Zebro_1_Middle_x_pos) and (x > Old_Zebro_1_Middle_x_neg) and (y < Old_Zebro_1_Middle_y_pos) and (y > Old_Zebro_1_Middle_y_neg):
                     Zebro_1_Led = [x,y]
                     Zebro_1_Leds.append(Zebro_1_Led)
-                elif (x < Old_Zebro_2_Middle_x_pos) and (x > Old_Zebro_2_Middle_x_neg) and (y < Old_Zebro_2_Middle_y_pos) and (y > Old_Zebro_2_Middle_y_neg):
+                    #print(Zebro_1_Leds)
+
+                if (x < Old_Zebro_2_Middle_x_pos) and (x > Old_Zebro_2_Middle_x_neg) and (y < Old_Zebro_2_Middle_y_pos) and (y > Old_Zebro_2_Middle_y_neg):
                     Zebro_2_Led = [x,y]
                     Zebro_2_Leds.append(Zebro_2_Led)
+                    
                 Led = [x,y]
                 Leds.append(Led)
+            print(Leds)
+            print(Zebro_1_Leds)
+            print(Zebro_2_Leds)
             
             for Zebros_1 in range(2):
                 Blocking_Zebro = []                                         # Here will be the blocked Directions in
+                Found_Led_1_1 = 0
+                Found_Led_1_2 = 0
+                Found_Led_1_3 = 0
+                Found_Led_1_4 = 0
+                Found_Led_2_1 = 0
+                Found_Led_2_2 = 0
+                Found_Led_2_3 = 0
+                Found_Led_2_4 = 0
+                Found_Led_3_1 = 0
+                Found_Led_3_2 = 0
+                Found_Led_3_3 = 0
+                Found_Led_3_4 = 0
+                
                 if Zebros_1 == 0:
                     for Testing_i in Zebro_1_Leds:
                         for Testing_y in Zebro_1_Leds:
                             Delta_X = abs(Testing_i[0] - Testing_y[0])
                             Delta_Y = abs(Testing_i[1] - Testing_y[1])
                             Distance = math.sqrt((Delta_X*Delta_X) + (Delta_Y*Delta_Y))
-                            if (Distance > 25) and (Distance <= 32):
+                            if (Distance > 25) and (Distance <= 29):
                                 Found_Led_1_1 = Testing_i
                                 Found_Led_1_2 = Testing_y
                                 Found_Led_2_1 = Testing_i
                                 Found_Led_2_2 = Testing_y
-                            if (Distance > 32) and (Distance <= 42):
+                            if (Distance > 34) and (Distance <= 38):
                                 Found_Led_2_3 = Testing_i
                                 Found_Led_2_4 = Testing_y
                                 Found_Led_3_1 = Testing_i
                                 Found_Led_3_2 = Testing_y
-                            if (Distance > 42) and (Distance <= 52):
+                            if (Distance > 44) and (Distance <= 48):
                                 Found_Led_1_3 = Testing_i
                                 Found_Led_1_4 = Testing_y
                                 Found_Led_3_3 = Testing_i
@@ -937,31 +960,32 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     try:    
                         (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(Led_1[0],Led_3[0],Led_1[1],Led_3[1])
                         Zebro_1_Middle_x = Zebro_Middle_x
-                        Zebro_1_Middle_y = Zebro_Middle_y 
+                        Zebro_1_Middle_y = Zebro_Middle_y
+                        Direction_Zebro_1 = Direction
                     except TypeError:
                         pass
                         
-                    Direction_Zebro_1 = Direction
                     if (Zebro_1_Middle_x == 0) or (Zebro_1_Middle_y == 0):
                         Zebro_1_Middle_x = Old_Zebro_1_Middle_x
                         Zebro_1_Middle_y = Old_Zebro_1_Middle_y
+                        
                 elif Zebros_1 == 1:
                     for Testing_i in Zebro_2_Leds:
                         for Testing_y in Zebro_2_Leds:
                             Delta_X = abs(Testing_i[0] - Testing_y[0])
                             Delta_Y = abs(Testing_i[1] - Testing_y[1])
                             Distance = math.sqrt((Delta_X*Delta_X) + (Delta_Y*Delta_Y))
-                            if (Distance > 25) and (Distance <= 32):
+                            if (Distance > 25) and (Distance <= 29):
                                 Found_Led_1_1 = Testing_i
                                 Found_Led_1_2 = Testing_y
                                 Found_Led_2_1 = Testing_i
                                 Found_Led_2_2 = Testing_y
-                            if (Distance > 32) and (Distance <= 42):
+                            if (Distance > 34) and (Distance <= 38):
                                 Found_Led_2_3 = Testing_i
                                 Found_Led_2_4 = Testing_y
                                 Found_Led_3_1 = Testing_i
                                 Found_Led_3_2 = Testing_y
-                            if (Distance > 42) and (Distance <= 52):
+                            if (Distance > 44) and (Distance <= 48):
                                 Found_Led_1_3 = Testing_i
                                 Found_Led_1_4 = Testing_y
                                 Found_Led_3_3 = Testing_i
@@ -1008,10 +1032,11 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                         (Zebro_Middle_x,Zebro_Middle_y,Direction, Angle) = Find_Orientation(Led_1[0],Led_3[0],Led_1[1],Led_3[1])
                         Zebro_2_Middle_x = Zebro_Middle_x
                         Zebro_2_Middle_y = Zebro_Middle_y
+                        Direction_Zebro_2 = Direction
+                        #print("Found Pico 2")
                     except TypeError:
                         pass
                          
-                    Direction_Zebro_2 = Direction
                     if (Zebro_2_Middle_x == 0) or (Zebro_2_Middle_y == 0):
                         Zebro_2_Middle_x = Old_Zebro_2_Middle_x
                         Zebro_2_Middle_y = Old_Zebro_2_Middle_y
@@ -1025,7 +1050,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     PicoZebro_1 = [Zebro_1_Middle_x , Zebro_1_Middle_y, Blocking_Zebro] 
                     print(Direction_Zebro_1)
                     print(PicoZebro_1)
-                    print("debug")
+                    print("debug 1")
                     if q_PicoZebro_1.empty() == True:                       # if the queue is empty fill it
                         q_PicoZebro_1.put(PicoZebro_1)
                     elif q_PicoZebro_1.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 
@@ -1055,7 +1080,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                     PicoZebro_2 = [Zebro_2_Middle_x , Zebro_2_Middle_y, Blocking_Zebro] 
                     print(Direction_Zebro_2)
                     print(PicoZebro_2)
-                    print("debug")
+                    print("debug 2")
                     if q_PicoZebro_2.empty() == True:                       # if the queue is empty fill it
                         q_PicoZebro_2.put(PicoZebro_2)
                     elif q_PicoZebro_2.empty() == False:                    # else empty it before filling it again with the next data. of the Pico Zebro 

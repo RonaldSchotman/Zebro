@@ -45,7 +45,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # %H:%M:%S
     Timetest = time.strftime("%Y_%m_%d_%H")
     mask = np.zeros(image.shape, dtype=np.uint8)
-    roi_corners = np.array([[(400,530),(640,115),(1203,115),(1425,530),(1203,900),(640,900)]], dtype=np.int32)
+    roi_corners = np.array([[(350,500),(550,55),(1153,55),(1305,500),(1053,900),(550,900)]], dtype=np.int32)
     #roi_corners = np.array([[(1260,910), (1430,810), (1420,110), (1230,10), (420,10), (220,130), (225,820), (390,910)]], dtype=np.int32)
     # fill the ROI so it doesn't get wiped out when the mask is applied
     channel_count = image.shape[2]  # i.e. 3 or 4 depending on your image

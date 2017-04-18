@@ -151,6 +151,43 @@ class RightTriangle(object):
     def __repr__(self):
         return '<RightTriangle({}, {}, {})>'.format(self.__right_angle, self.__acute_angle_a, self.__acute_angle_b)
 
+    def get_rotation_angle(self):
+        # type: () -> float
+        front_point = self.__right_angle
+        back_point = self.__acute_angle_b
+
+        x = front_point.x - back_point.x
+        y = front_point.y - back_point.y
+
+        rotation_angle_in_radians = 0
+
+        quarter = math.pi / 2
+
+        if x == 0:
+            if y > 0:
+                rotation_angle_in_radians = 0 * quarter        # 0 degrees
+            else:
+                rotation_angle_in_radians = 2 * quarter        # 180 degrees
+        elif y == 0:
+            if x > 0:
+                rotation_angle_in_radians = quarter            # 90 degrees
+            else:
+                rotation_angle_in_radians = 3 * quarter        # 270 degrees
+        else:
+            a = math.atan(abs(y) / abs(x))
+
+            if x > 0:
+                if y > 0:
+                    rotation_angle_in_radians = quarter - a
+                elif y < 0:
+                    rotation_angle_in_radians = quarter + a
+            elif x < 0:
+                if y > 0:
+                    rotation_angle_in_radians = quarter * 3 + a
+                elif y < 0:
+                    rotation_angle_in_radians = quarter * 3 - a
+
+        return rotation_angle_in_radians * 180 / math.pi
 
 class RightTriangleFromPointFinder(object):
     def __init__(self, point, relative_length_leg_a, relative_length_leg_b, fuzziness):

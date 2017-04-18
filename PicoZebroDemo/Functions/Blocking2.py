@@ -11,40 +11,40 @@ class Blocking2:
     def Block_4(self, Zebro_1_Middle_x,Zebro_1_Middle_y):
         Blocking = []   #Here will be the blocking in in ROI
         
-        if ((Zebro_1_Middle_y < 200) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_x > 1350) or (Zebro_1_Middle_x < 450)):
-            if ((Zebro_1_Middle_x > 1350) or (Zebro_1_Middle_y < 200) or (Zebro_1_Middle_y > 820)):
+        if ((Zebro_1_Middle_y < 150) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_x < 400)):
+            if ((Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_y < 150) or (Zebro_1_Middle_y > 820)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x < 450) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_y < 200)):
+            if ((Zebro_1_Middle_x < 400) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_y < 150)):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x > 1350) or (Zebro_1_Middle_y > 820) ):
+            if ((Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_y > 820) ):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x < 450) or (Zebro_1_Middle_y < 200)):
+            if ((Zebro_1_Middle_x < 400) or (Zebro_1_Middle_y < 150)):
                 Block = "North"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 550) and (Zebro_1_Middle_y < 400) ):
+        if ( (Zebro_1_Middle_x < 500) and (Zebro_1_Middle_y < 500) ):
                 Block = "North"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 510) and (Zebro_1_Middle_y > 500) ):
+        if ( (Zebro_1_Middle_x < 500) and (Zebro_1_Middle_y > 500) ):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y < 400)):
+        if ( (Zebro_1_Middle_x > 1100) and (Zebro_1_Middle_y < 500)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y > 500)):
+        if ( (Zebro_1_Middle_x > 1100) and (Zebro_1_Middle_y > 500)):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None
@@ -57,12 +57,12 @@ class Blocking2:
         Blocking_x_2 = abs(Zebro_1_Middle_x - Zebro_2_Middle_x)     # For determing the blocked Direction for the Pico Zebro it needs to be determined if any of the other Pico Zebro's are close by
         Blocking_y_2 = abs(Zebro_1_Middle_y - Zebro_2_Middle_y)     # With its absolute value in distance this can be stermined.
         
-        if ((0 < Blocking_x_2 < 400) and (0 < Blocking_y_2 < 400)):
-            if (((Zebro_1_Middle_x < Zebro_2_Middle_x) and (Zebro_1_Middle_y > Zebro_2_Middle_y))):
+        if ((0 < Blocking_x_2 < 300) and (0 < Blocking_y_2 < 300)):
+            if (((Zebro_1_Middle_x < Zebro_2_Middle_x) or (Zebro_1_Middle_y > Zebro_2_Middle_y))):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
-            if (((Zebro_1_Middle_x > Zebro_2_Middle_x) and (Zebro_1_Middle_y < Zebro_2_Middle_y))):
+            if (((Zebro_1_Middle_x > Zebro_2_Middle_x) or (Zebro_1_Middle_y < Zebro_2_Middle_y))):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
@@ -75,40 +75,40 @@ class Blocking2:
                 Blocking.append(Block)
                 Block = None
                 
-        if ((Zebro_1_Middle_y < 200) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_x > 1350) or (Zebro_1_Middle_x < 450)):
-            if ((Zebro_1_Middle_x > 1350) or (Zebro_1_Middle_y < 200) or (Zebro_1_Middle_y > 820)):
+        if ((Zebro_1_Middle_y < 150) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_x < 400)):
+            if ((Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_y < 150) or (Zebro_1_Middle_y > 820)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x < 450) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_y < 200)):
+            if ((Zebro_1_Middle_x < 400) or (Zebro_1_Middle_y > 820) or (Zebro_1_Middle_y < 150)):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x > 1350) or (Zebro_1_Middle_y > 820) ):
+            if ((Zebro_1_Middle_x > 1200) or (Zebro_1_Middle_y > 820) ):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None
-            if ((Zebro_1_Middle_x < 450) or (Zebro_1_Middle_y < 200)):
+            if ((Zebro_1_Middle_x < 400) or (Zebro_1_Middle_y < 150)):
                 Block = "North"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 550) and (Zebro_1_Middle_y < 400) ):
+        if ( (Zebro_1_Middle_x < 500) and (Zebro_1_Middle_y < 500) ):
                 Block = "North"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x < 510) and (Zebro_1_Middle_y > 500) ):
+        if ( (Zebro_1_Middle_x < 500) and (Zebro_1_Middle_y > 500) ):
                 Block = "West"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y < 400)):
+        if ( (Zebro_1_Middle_x > 1100) and (Zebro_1_Middle_y < 500)):
                 Block = "East"
                 Blocking.append(Block)
                 Block = None
                 
-        if ( (Zebro_1_Middle_x > 1200) and (Zebro_1_Middle_y > 500)):
+        if ( (Zebro_1_Middle_x > 1100) and (Zebro_1_Middle_y > 500)):
                 Block = "South"
                 Blocking.append(Block)
                 Block = None

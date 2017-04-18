@@ -874,8 +874,9 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
                 points.append(Point(x, y))
             
             for line_segment in LineSegmentGenerator.create_line_segments_between_points(points, 1000, 1000):
-                print('LineSegment: {}\n    Length: {}'.format(line_segment, line_segment.length))
-
+                # print('LineSegment: {}\n    Length: {}'.format(line_segment, line_segment.length))
+                pass
+            
             for point in points:
                 point.find_line_segments_that_connect_line_segments_from_this_point()
 
@@ -888,7 +889,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
 
             print("Found some triangles:")
             for right_triangle in right_triangles:
-                print(right_triangle)
+                print("Triangle: {} Rotation: {}".format(right_triangle, right_triangle.get_rotation_angle()))
 
             for Zebros_1 in range(2):
                 Blocking_Zebro = []                                         # Here will be the blocked Directions in
