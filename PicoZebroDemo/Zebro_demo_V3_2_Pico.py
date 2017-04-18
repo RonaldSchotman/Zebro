@@ -829,7 +829,7 @@ def main(q_Control_Serial_Write,q_Data_is_Send,q_Control_Uart_Main,         # Th
             # perform a series of dilations to remove
             # any small blobs of noise from the thresholded image
             thresh = cv2.dilate(thresh, None, iterations=1)
-            cv2.imwrite("gray.jpg",thresh)
+            #cv2.imwrite("gray.jpg",thresh)
             cv2.imshow("sdsdd",thresh)
             thresh = cv2.dilate(thresh, None, iterations=4)
             # find the contours in the mask, then sort them from left to right
