@@ -175,8 +175,10 @@ void adc_write_data_to_vregs(void) {
 
 #ifdef DEBUG_VREGS
 	for (i = 0; i < num_of_channels; i++) {
-		vregs_write((VREGS_ADC_DATA0A + (2*i)), (uint8_t) (adc_data_dump[i] >> 14)); //internal temp, motor current, Battery, ID resistor, hall3b, hall2b, hall1b
-		vregs_write((VREGS_ADC_DATA0B + (2*i)), (uint8_t) (adc_data_dump[i] >> 6)); //internal temp, motor current, Battery, ID resistor, hall3b, hall2b, hall1b
+		vregs_write((VREGS_ADC_DATA0A + (2 * i)),
+				(uint8_t) (adc_data_dump[i] >> 14)); //internal temp, motor current, Battery, ID resistor, hall3b, hall2b, hall1b
+		vregs_write((VREGS_ADC_DATA0B + (2 * i)),
+				(uint8_t) (adc_data_dump[i] >> 6)); //internal temp, motor current, Battery, ID resistor, hall3b, hall2b, hall1b
 	}
 //	vregs_write(VREGS_ADC_DATA0A, (uint8_t) (adc_data_dump[0] >> 14)); //internal temp
 //	vregs_write(VREGS_ADC_DATA1A, (uint8_t) (adc_data_dump[1] >> 14)); //motor current
@@ -248,6 +250,9 @@ void adc_control_motor_current(int32_t current_setpoint,
 	 */
 	/* remove offset */
 	current_measured_cast = current_measured_cast - ADC_MID_RANGE_COUNT;
+	if (address_get_side() == ADDRESS_LEFT) {
+		current_measured_cast = -current_measured_cast;
+	}
 	if (current_setpoint != 0) {
 		dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically 108/109 ticks*/
 		time_prev = time17_get_time();
@@ -276,11 +281,21 @@ void adc_control_motor_current(int32_t current_setpoint,
 		}
 		if (duty_cycle < 0) {
 			duty_cycle = (uint16_t) (abs(duty_cycle));
-			h_bridge_drive_motor(duty_cycle, H_BRIDGE_BACKWARD,
-			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			if (address_get_side() == ADDRESS_RIGHT) {
+				h_bridge_drive_motor(duty_cycle, H_BRIDGE_BACKWARD,
+				H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			} else {
+				h_bridge_drive_motor(duty_cycle, H_BRIDGE_FORWARD,
+				H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			}
 		} else {
-			h_bridge_drive_motor((uint16_t) duty_cycle, H_BRIDGE_FORWARD,
-			H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			if (address_get_side() == ADDRESS_RIGHT) {
+				h_bridge_drive_motor((uint16_t) duty_cycle, H_BRIDGE_FORWARD,
+				H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			} else {
+				h_bridge_drive_motor(duty_cycle, H_BRIDGE_BACKWARD,
+				H_BRIDGE_MODE_SIGN_MAGNITUDE);
+			}
 		}
 	}
 
@@ -347,6 +362,16 @@ uint8_t adc_check_motor_current(uint16_t current_measured) {
 	} else if (over_current_counter > 0)
 		over_current_counter--;
 	return 0;
+}
+
+int16_t adc_get_absolute_current_measured_mA(void) {
+	int16_t current_measured;
+	current_measured = (adc_data_dump[ADC_MOTOR_CURRENT_INDEX]) - ADC_MID_RANGE_COUNT;
+	current_measured = (current_measured * ADC_FULL_RANGE_MILLIVOLT)
+			/ ADC_FULL_RANGE_COUNT;
+	/* convert to mA */
+	current_measured = abs((current_measured * 1000) / ADC_CURRENT_SENSITIVITY);
+	return current_measured;
 }
 
 /* ------------------------------

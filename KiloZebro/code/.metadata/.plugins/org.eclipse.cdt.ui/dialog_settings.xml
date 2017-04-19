@@ -8,8 +8,8 @@
 		<item value="321" key="DIALOG_Y_ORIGIN"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
-		<item value="140" key="size.height"/>
-		<item value="776" key="size.width"/>
+		<item value="134" key="size.height"/>
+		<item value="770" key="size.width"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
 	</section>
@@ -17,6 +17,7 @@
 		<item value="false" key="caseSensitive"/>
 		<item value="227191" key="searchFlags"/>
 		<list key="previousPatterns">
+			<item value="new_data_flag"/>
 			<item value="VREGS_DEBUG_FLAG_1"/>
 			<item value="adc_get_value"/>
 			<item value="adc_data_dump"/>

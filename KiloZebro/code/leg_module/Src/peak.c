@@ -58,9 +58,9 @@ uint8_t peak_process_adc_values_sensor(void) {
 
 		// We assume the magnet in the leg is positioned such that peaks will be positive.
 		delta = abs(adc_data - avgHistory[sensor][0]);
-		if (delta > 5000) { /* a delta larger than 5000 wouldn't make sense looking at the ADC data */
-			delta = 0;
-		}
+//		if (delta > 5000) { /* a delta larger than 5000 wouldn't make sense looking at the ADC data */
+//			delta = 0;
+//		}
 #ifdef DEBUG_VREGS
 		move_over_array_elements(array_deltas, PEAK_HISTORY_LAG);
 		array_deltas[PEAK_HISTORY_LAG - 1] = delta;
@@ -68,8 +68,8 @@ uint8_t peak_process_adc_values_sensor(void) {
 		if (avg_delta>max_avg_delta) {
 			max_avg_delta = avg_delta;
 		}
-		vregs_write(VREGS_PEAK_MAX_AVG_DELTA, (uint8_t) (max_avg_delta>>4));
-		vregs_write(VREGS_PEAK_AVG_DELTA, (uint8_t) (avg_delta>>4));
+		vregs_write(VREGS_PEAK_MAX_AVG_DELTA, (uint8_t) (max_avg_delta>>8));
+		vregs_write(VREGS_PEAK_AVG_DELTA, (uint8_t) (avg_delta>>8));
 #endif
 
 		if (delta > (threshold * abs(standard_deviation))) {

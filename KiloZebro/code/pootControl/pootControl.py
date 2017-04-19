@@ -197,6 +197,7 @@ def main(stdscr):
     #print(bus_pirate.get_data())
     
     last_time_update = datetime.datetime.now()
+    position = 0
     time_sync_counter = 0
     position_control_kp = 0
     current_control_kp = 0
@@ -268,17 +269,19 @@ def main(stdscr):
                 command = Command("[0x00 147 {0}]".format(position_control_kd), ";", 'Decrease kd position control')
 
             if input_char == 'w':
-                lift_off_time_a = 0
-                lift_off_time_b = time_sync_counter + 1
-                touch_down_time_a = 0
-                touch_down_time_b = lift_off_time_b + 1
-                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "w", 'walk forward')
+                position = (position + 810)%910
+                position_a = (position >> 8) & 0xff
+                position_b = position & 0xff
+                time_a = time_sync_counter
+                time_b = 187
+                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "w", 'walk forward')
             if input_char == 's':
-                lift_off_time_a = 0
-                lift_off_time_b = time_sync_counter + 1
-                touch_down_time_a = 0
-                touch_down_time_b = lift_off_time_b + 1
-                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(lift_off_time_a, lift_off_time_b, touch_down_time_a, touch_down_time_b), "s", 'walk backward')
+                position = (position + 810)%910
+                position_a = (position >> 8) & 0xff
+                position_b = position & 0xff
+                time_a = time_sync_counter
+                time_b = 187
+                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "w", 'walk backward')
             # if input_char == 'z':
             #     stand_up_time = time_sync_counter + 2
             #     command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')

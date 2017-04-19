@@ -22,6 +22,7 @@
 #include "errors.h"
 #include "globals.h"
 #include "address.h"
+#include "motion.h"
 
 /**
  * Initialises the rotational encoder
@@ -96,10 +97,10 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
  */
 void encoder_write_to_vregs(void) {
 	int16_t counter_value; // Counter value is max 16 bits according to datasheet. Tested and it's true.
-	counter_value = TIM3->CNT;
+	counter_value = encoder_get_position();
 #ifdef DEBUG_VREGS
-	vregs_write(VREGS_ENCODER_POSITION_A, (uint8_t) (counter_value));
-	vregs_write(VREGS_ENCODER_POSITION_B, (uint8_t) (counter_value >> 8));
+	vregs_write(VREGS_ENCODER_POSITION_A, (uint8_t) (counter_value >> 8));
+	vregs_write(VREGS_ENCODER_POSITION_B, (uint8_t) (counter_value));
 	uint16_t dir = TIM3->CR1;
 	vregs_write(VREGS_ENCODER_DIR, (uint8_t)((dir>>4)&0x0001)); // 1 = counterclockwise/count down, 0 = clockwise/count upwards looking at the front of the motor.
 #endif
@@ -110,10 +111,10 @@ void encoder_write_to_vregs(void) {
  */
 int16_t encoder_get_position(void) {
 	int16_t counter_value;
-	counter_value = TIM3->CNT;
-//	if (address_get_side() == ADDRESS_LEFT) {
-//		counter_value = -counter_value;
-//	}
+	counter_value = (int16_t)(TIM3->CNT);
+	if (address_get_side() == ADDRESS_LEFT) {
+		counter_value = (int16_t)(-(TIM3->CNT));
+	}
 	return (counter_value);
 }
 
@@ -134,6 +135,7 @@ uint8_t encoder_get_direction(void) {
 void encoder_reset_position(void) {
 	/* One must not write to the higher half of the register because this is not used. */
 	TIM3->CNT &= 0xFFFF0000;
+	motion_reset_absolute_position_calculator();
 }
 
 ///**

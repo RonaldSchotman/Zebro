@@ -225,10 +225,10 @@ struct zebrobus_write_request zebrobus_get_write_request() {
 
 				switch (request.address) {
 				case VREGS_MOTION_MODE:
-				case VREGS_MOTION_LIFT_OFF_TIME_A:
-				case VREGS_MOTION_LIFT_OFF_TIME_B:
-				case VREGS_MOTION_TOUCH_DOWN_TIME_A:
-				case VREGS_MOTION_TOUCH_DOWN_TIME_B:
+				case VREGS_MOTION_POSITION_A:
+				case VREGS_MOTION_POSITION_B:
+				case VREGS_MOTION_TIME_A:
+				case VREGS_MOTION_TIME_B:
 				case VREGS_MOTION_NEW_DATA_FLAG:
 				case VREGS_MOTION_CRC:
 				case VREGS_MOTION_UPDATE:

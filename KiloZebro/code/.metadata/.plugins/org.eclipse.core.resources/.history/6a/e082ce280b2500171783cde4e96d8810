@@ -1,0 +1,82 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: adc.h
+ *
+ * Description:
+ * Code to drive the ADC
+ *
+ * Authors:
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+
+#include "stdint.h"
+
+#ifndef __ADC_H__
+#define __ADC_H__
+
+int32_t adc_init();
+void adc_write_data_to_vregs();
+//void adc_request_conversion(void);
+//void adc_wait_for_data(void);
+int32_t adc_get_temperature(void);
+//int32_t adc_get_motor_current_ma(void);
+//uint32_t adc_get_absolute_motor_current_ma(void);
+uint8_t adc_check_motor_current(uint16_t current_measured);
+void adc_control_motor_current(int32_t current_setpoint, uint16_t current_measured);
+void adc_current_control_set_kp(uint8_t value);
+uint8_t adc_current_control_get_kp(void);
+uint8_t adc_current_control_get_ki(void);
+void adc_current_control_set_ki(uint8_t value);
+uint16_t adc_get_value(int32_t index);
+
+/* Temperature sensor calibration value address */
+#define TEMP110_CAL_ADDR (557<<4) // calculated using TEMP30 (printed on screen: 213) and an average slope of 4.3 and rounded. (4.3*80+213 = 557)
+#define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
+#define VDD_CALIB ((uint16_t) (330<<4))
+#define VDD_APPLI ((uint16_t) (300<<4))
+
+#define ADC_FULL_RANGE_COUNT 65536 // max number is uint10 left aligned = 65472
+#define ADC_MID_RANGE_COUNT 32768 // halfway of max is uint9 left aligned = 32704
+#define ADC_FULL_RANGE_MILLIVOLT 3300 // max of 3.3V
+#define ADC_MID_RANGE_MILLIVOLT 1650 // voltage at 0A = vcc/2 = 1.65V
+#define ADC_OVER_CURRENT_COUNT 26000
+
+#define ADC_CURRENT_SENSITIVITY 55 // 55 mV/A See acs711 25AB-T datasheet. (65536/(1650/55)) = 1092.26667 #/Amp
+#define ADC_CURRENT_EMERGENCY_SAMPLES 100
+
+#define ADC_HAL_1_PIN 0
+#define ADC_HAL_1_BANK GPIOC
+#define ADC_HAL_2_PIN 1
+#define ADC_HAL_2_BANK GPIOC
+#define ADC_HAL_3_PIN 2
+#define ADC_HAL_3_BANK GPIOC
+#define ADC_ID_RESISTOR_PIN 3
+#define ADC_ID_RESISTOR_BANK GPIOC
+#define ADC_BATTERY_PIN 4
+#define ADC_BATTERY_BANK GPIOC
+#define ADC_MOTOR_CURRENT_PIN 5
+#define ADC_MOTOR_CURRENT_BANK GPIOC
+
+#define ADC_NUM_OF_CHANNELS 7
+
+#define ADC_HAL_1_CH 10
+#define ADC_HAL_2_CH 11
+#define ADC_HAL_3_CH 12
+#define ADC_ID_RESISTOR_CH 13
+#define ADC_BATTERY_CH 14
+#define ADC_MOTOR_CURRENT_CH 15
+#define ADC_TEMP_CH 16
+
+#define ADC_HAL_1_INDEX 6
+#define ADC_HAL_2_INDEX 5
+#define ADC_HAL_3_INDEX 4
+#define ADC_ID_RESISTOR_INDEX 3
+#define ADC_BATTERY_INDEX 2
+#define ADC_MOTOR_CURRENT_INDEX 1
+#define ADC_TEMP_INDEX 0
+
+#endif /* __ADC_H__ */

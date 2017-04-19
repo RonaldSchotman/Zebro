@@ -37,11 +37,12 @@
 #define MOTION_DIRECTION_FORWARD 0
 #define MOTION_DIRECTION_BACKWARD 1
 
-#define MOTION_PROBE_CURRENT_SETPOINT 1000
+#define MOTION_CALIB_MAX_CURRENT_MA 800
 //#define MOTION_CURRENT_SETPOINT_MAX INT16_MAX
 //#define MOTION_CURRENT_SETPOINT_MIN INT16_MIN
 #define MOTION_CURRENT_SETPOINT_MAX 16383
 #define MOTION_CURRENT_SETPOINT_MIN -16383
+#define MOTION_CALIBRATION_HALL_SENSOR 2
 
 /* At a very maximum a leg should be able to spin 2 rounds in 1 second (120 RPM). This is 1820 pulses per second.
  * The motor is measured to do 140 RPM at full dutycycle. So our max dutycycle is 223 for 120 RPM. Now we have (1820/1)/223 ~= 8.
@@ -55,7 +56,7 @@
 
 #define ARRAY_SIZE 255
 #define TOUCH_DOWN_POSITION_L 350
-#define TOUCH_DOWN_POSITION 560
+#define TOUCH_DOWN_POSITION 570
 #define STAND_UP_POSITION_L 310
 #define STAND_UP_POSITION 610 // 910-585
 #define LIFT_OFF_POSITION_L 270
@@ -65,10 +66,10 @@
 
 struct motion_state{
 	uint8_t mode;
-	uint8_t lift_off_time_a;
-	uint8_t lift_off_time_b;
-	uint8_t touch_down_time_a;
-	uint8_t touch_down_time_b;
+	uint8_t position_a;
+	uint8_t position_b;
+	uint8_t time_a;
+	uint8_t time_b;
 	uint8_t new_data_flag;
 	uint8_t crc;
 };
@@ -88,6 +89,7 @@ uint8_t motion_position_control_get_kp(void);
 uint8_t motion_position_control_get_ki(void);
 uint8_t motion_position_control_get_kd(void);
 void motion_absolute_position_calculator(void);
+void motion_reset_absolute_position_calculator(void);
 int32_t motion_drive_h_bridge(void);
 //uint8_t motion_move_to_point(uint16_t point, uint8_t dir, uint32_t arrival_time);
 //void set_next_walk_instruction(uint8_t value);

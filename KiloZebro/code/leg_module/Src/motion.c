@@ -47,10 +47,10 @@ uint8_t calibrate = 1; /* When Zebro is turned on, calibrate should first be on.
 static int16_t last_known_position = 0;
 static uint8_t side_of_zebro = 0;
 //static uint32_t increasing_delay = 0;
-static uint8_t kp = 150, ki = 150, kd = 30;
+static uint8_t kp = 120, ki = 150, kd = 30;
 /* current setpoint. This is a setpoint between -2^15 and 2^15 */
 static int32_t current_setpoint;
-static int16_t position_setpoint;
+static int16_t position_setpoint = 0;
 static int16_t absolute_position;
 
 /**
@@ -65,20 +65,20 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
 		new_state.mode = data;
 		break;
 
-	case VREGS_MOTION_LIFT_OFF_TIME_A:
-		new_state.lift_off_time_a = data;
+	case VREGS_MOTION_POSITION_A:
+		new_state.position_a = data;
 		break;
 
-	case VREGS_MOTION_LIFT_OFF_TIME_B:
-		new_state.lift_off_time_b = data;
+	case VREGS_MOTION_POSITION_B:
+		new_state.position_b = data;
 		break;
 
-	case VREGS_MOTION_TOUCH_DOWN_TIME_A:
-		new_state.touch_down_time_a = data;
+	case VREGS_MOTION_TIME_A:
+		new_state.time_a = data;
 		break;
 
-	case VREGS_MOTION_TOUCH_DOWN_TIME_B:
-		new_state.touch_down_time_b = data;
+	case VREGS_MOTION_TIME_B:
+		new_state.time_b = data;
 		break;
 
 	case VREGS_MOTION_NEW_DATA_FLAG:
@@ -102,10 +102,10 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
 			motion_write_state_to_vregs(state);
 		}
 		new_state.mode = 0;
-		new_state.lift_off_time_a = 0;
-		new_state.lift_off_time_b = 0;
-		new_state.touch_down_time_a = 0;
-		new_state.touch_down_time_b = 0;
+		new_state.position_a = 0;
+		new_state.position_b = 0;
+		new_state.time_a = 0;
+		new_state.time_b = 0;
 		new_state.new_data_flag = 0;
 		new_state.crc = 0;
 		break;
@@ -122,11 +122,10 @@ int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data) {
  */
 int32_t motion_write_state_to_vregs(struct motion_state motion_state) {
 	vregs_write(VREGS_MOTION_MODE, motion_state.mode);
-	vregs_write(VREGS_MOTION_LIFT_OFF_TIME_A,
-			(uint8_t) (motion_state.lift_off_time_a));
-	vregs_write(VREGS_MOTION_LIFT_OFF_TIME_B, motion_state.lift_off_time_b);
-	vregs_write(VREGS_MOTION_TOUCH_DOWN_TIME_A, motion_state.touch_down_time_a);
-	vregs_write(VREGS_MOTION_TOUCH_DOWN_TIME_B, motion_state.touch_down_time_b);
+	vregs_write(VREGS_MOTION_POSITION_A, (uint8_t) (motion_state.position_a));
+	vregs_write(VREGS_MOTION_POSITION_B, motion_state.position_b);
+	vregs_write(VREGS_MOTION_TIME_A, motion_state.time_a);
+	vregs_write(VREGS_MOTION_TIME_B, motion_state.time_b);
 	vregs_write(VREGS_MOTION_NEW_DATA_FLAG, motion_state.new_data_flag);
 	vregs_write(VREGS_MOTION_CRC, motion_state.crc);
 	return 0;
@@ -143,8 +142,8 @@ int32_t motion_validate_state(struct motion_state motion_state) {
 void motion_control_position(void) {
 	static uint8_t counter = 0;
 	static uint16_t dt, time_prev;
-	static int32_t error_position, error_position_prev, error_integral,
-			error_derivative;
+	static int16_t error_position, error_position_prev;
+	static int32_t error_integral, error_derivative;
 
 	dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically */
 	time_prev = time17_get_time();
@@ -211,7 +210,6 @@ void motion_control_position(void) {
 		vregs_write(VREGS_POSITION_CONTROL_ED_POS, (uint8_t) (0));
 	}
 	vregs_write(VREGS_POSITION_CONTROL_DT, (uint8_t) (dt / 48));
-	vregs_write(VREGS_POSITION_SETPOINT, (uint8_t) (position_setpoint));
 	vregs_write(VREGS_POSITION_MEASURED, (uint8_t) (encoder_get_position()));
 #endif
 }
@@ -245,19 +243,24 @@ uint8_t motion_position_control_get_kd(void) {
 
 void motion_absolute_position_calculator(void) {
 	static int16_t previous_encoder_position;
-	int16_t delta = encoder_get_position() - previous_encoder_position;
-	absolute_position = (absolute_position + delta)
-			% ENCODER_PULSES_PER_ROTATION;
+	int16_t current_position = encoder_get_position();
+	int16_t delta = current_position - previous_encoder_position;
+	absolute_position = absolute_position + delta;
 	if (absolute_position < 0) {
 		absolute_position = ENCODER_PULSES_PER_ROTATION + absolute_position;
 	}
-	previous_encoder_position = encoder_get_position();
+	absolute_position = absolute_position % ENCODER_PULSES_PER_ROTATION;
+	previous_encoder_position = current_position;
 
 #ifdef DEBUG_VREGS
-	vregs_write(VREGS_POSITION_ABSOLUTE_A, (uint8_t) absolute_position);
-	vregs_write(VREGS_POSITION_ABSOLUTE_B, (uint8_t) (absolute_position >> 8));
-	vregs_write(VREGS_POSITION_DELTA, (uint8_t) (delta));
+	vregs_write(VREGS_POSITION_ABSOLUTE_A, (uint8_t) (absolute_position >> 8));
+	vregs_write(VREGS_POSITION_ABSOLUTE_B, (uint8_t) absolute_position);
 #endif
+}
+
+void motion_reset_absolute_position_calculator(void) {
+	absolute_position = 0;
+	return;
 }
 
 /**
@@ -282,9 +285,15 @@ int32_t motion_drive_h_bridge() {
 	static uint16_t position[2] = { 0, 0 };
 	uint8_t side_of_zebro = address_get_side();
 
+	static uint8_t kp_old;
+	static uint8_t ki_old;
+	static uint8_t kd_old;
+
 	static uint16_t distance_move = 0;
 
 	static int16_t starting_setpoint = 0;
+	static int16_t absolute_starting_setpoint = 0;
+	static int16_t absolute_ending_setpoint = 0;
 //	static int16_t ending_setpoint = 0;
 //	static uint32_t position_ramp_length = 0;
 //	uint16_t delta_s = 0;
@@ -299,6 +308,11 @@ int32_t motion_drive_h_bridge() {
 	static uint32_t starting_time = 0;
 	uint32_t t = 0;
 
+//	uint16_t ending_position_setpoint, delta_s;
+//	static uint16_t setpoint = 0;
+//	static uint32_t previous_time;
+//	int32_t delta_t;
+
 #ifdef DEBUG_VREGS
 	vregs_write(VREGS_MOTION_STD_DEV_A, (uint8_t) get_std_var());
 	vregs_write(VREGS_MOTION_STD_DEV_B, (uint8_t) (get_std_var() >> 8));
@@ -306,20 +320,18 @@ int32_t motion_drive_h_bridge() {
 	vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) calibrate);
 	vregs_write(VREGS_DEBUG_FLAG_2, (uint8_t) (ADC1->CR & ADC_CR_ADSTART));
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_A,
-			(uint8_t) last_known_position);
+			(uint8_t) last_known_position >> 8);
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_B,
-			(uint8_t) (last_known_position >> 8));
+			(uint8_t) (last_known_position));
 //	vregs_write(VREGS_MOTION_CONSTANT_SPEED, (uint8_t) (constant_speed >> 3));
 //	vregs_write(VREGS_MOTION_POSITION_RAMP_LENGTH,
 //			(uint8_t) (position_ramp_length));
 	vregs_write(VREGS_MOTION_POSITION_SETPOINT_A,
-			(uint8_t) (position_setpoint));
-	vregs_write(VREGS_MOTION_POSITION_SETPOINT_B,
 			(uint8_t) (position_setpoint >> 8));
-	vregs_write(VREGS_POSITION_DISTANCE_MOVE_A,
-			(uint8_t) (distance_move));
-	vregs_write(VREGS_POSITION_DISTANCE_MOVE_B,
-			(uint8_t) (distance_move >> 8));
+	vregs_write(VREGS_MOTION_POSITION_SETPOINT_B,
+			(uint8_t) (position_setpoint));
+	vregs_write(VREGS_POSITION_DISTANCE_MOVE_A, (uint8_t) (distance_move >> 8));
+	vregs_write(VREGS_POSITION_DISTANCE_MOVE_B, (uint8_t) (distance_move));
 #endif
 
 	switch (state.mode) {
@@ -334,6 +346,12 @@ int32_t motion_drive_h_bridge() {
 
 	case MOTION_MODE_CALIBRATE:
 		if (fsm_flag == 0) {
+			kp_old = kp;
+			ki_old = ki;
+			kd_old = kd;
+			kp = 30;
+			ki = 38;
+			kd = 7;
 			/* Set calibrate to 1 to enable reading adc-data of the hall-sensors */
 			set_calibrate(1);
 			/* Set AD_STOP to 1 to stop measuring on the ADC. */
@@ -356,37 +374,27 @@ int32_t motion_drive_h_bridge() {
 				fsm_flag = 1;
 				interrupts_enable();
 			}
-			/* Set the encoder value somewhere in the middle of its range to prevent wrapping around immediately. */
-//			encoder_set_position_mid();
 		}
 		if (fsm_flag == 1) {
-			if (side_of_zebro == 0) {
-//				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
-			} else {
-//				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
-			}
-			/* If the legs current position is smaller of equal to the last position, we are touching the ground.
-			 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
-			if ((position[!side_of_zebro] <= position[side_of_zebro])) { /* We will always enter this loop the first time the calibrate-loop runs because positions are initialized equal.*/
+			vregs_write(VREGS_DEBUG_FLAG_3,
+					(adc_get_absolute_current_measured_mA() >> 8));
+			if (adc_get_absolute_current_measured_mA() > MOTION_CALIB_MAX_CURRENT_MA) {
 				start_timing_measurement();
 				/* wait for position to hold */
-				if (stop_and_return_timing_measurement(400)) {
-					h_bridge_disable();
-//					current_setpoint = 0;
+				if (stop_and_return_timing_measurement(500)) {
+					encoder_reset_position();
+					position_setpoint = encoder_get_position();
 					fsm_flag = 2;
 				}
 			} else {
-				/* If the position condition was not satisfied, reset timer. */
 				reset_timing_measurement();
+				if (time_get_time_ms() % 10 == 0) {
+					position_setpoint -= 1;
+				}
 			}
 		}
 		if (fsm_flag == 2) {
 			static uint16_t n = 0;
-			if (side_of_zebro == 0) {
-//				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
-			} else {
-//				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
-			}
 			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
 				adc_data[n] = adc_get_value(ADC_HAL_2_INDEX); /* We're only interested in the value of the 3rd hall sensor */
 				n = n + 1;
@@ -394,49 +402,51 @@ int32_t motion_drive_h_bridge() {
 			if (n >= ARRAY_SIZE) {
 				n = ARRAY_SIZE - 1;
 			}
-			/* If the legs current position is larger or equal to the last position, we are touching the ground.
-			 * There is a problem when the encoder goes from 910 --> 0 or the other way around.
-			 * What if the leg keeps spinning? How to calibrate then, because of overflow encoder etc? */
-			if ((position[!side_of_zebro] >= position[side_of_zebro])) { /* Condition is different since we turn the other way */
-				start_timing_measurement();
-				/* wait for position data */
-				if (stop_and_return_timing_measurement(400)) {
-					h_bridge_disable();
-//					current_setpoint = 0;
-					/* Calculate the standard deviation of the collected samples. */
-					std_var = std_var_stable(adc_data, n);
-					fsm_flag = 3;
-				}
+			if (position_setpoint >= 400) {
+				fsm_flag = 3;
 			} else {
-				/* If the position condition was not satisfied, reset timer. */
-				reset_timing_measurement();
+				if (time_get_time_ms() % 10 == 0) {
+					position_setpoint += 1;
+				}
 			}
+//			vregs_write(VREGS_DEBUG_FLAG_3,
+//					(adc_get_absolute_current_measured_mA() >> 8));
+//			if (adc_get_absolute_current_measured_mA() > MOTION_CALIB_MAX_CURRENT_MA) {
+//				start_timing_measurement();
+//				/* wait for position to hold */
+//				if (stop_and_return_timing_measurement(500)) {
+//					/* Calculate the standard deviation of the collected samples. */
+//					std_var = std_var_stable(adc_data, n);
+//					position_setpoint = encoder_get_position();
+//					fsm_flag = 3;
+//				}
+//			} else {
+//				reset_timing_measurement();
+//				if (time_get_time_ms() % 10 == 0) {
+//					position_setpoint += 1;
+//				}
+//			}
 		}
 		if (fsm_flag == 3) {
 			reset_peak_detected();
 			fsm_flag = 4;
 		}
 		if (fsm_flag == 4) {
-			if (side_of_zebro == 0) {
-//				current_setpoint = MOTION_PROBE_CURRENT_SETPOINT;
-			} else {
-//				current_setpoint = -MOTION_PROBE_CURRENT_SETPOINT;
-			}
-			if (get_peak_detected(2) == 1) {
-				h_bridge_disable();
-//				current_setpoint = 0;
+			if (get_peak_detected(MOTION_CALIBRATION_HALL_SENSOR) == 1) {
 				encoder_reset_position();
 				last_known_position = encoder_get_position();
 				fsm_flag = 5;
+			} else {
+				if (time_get_time_ms() % 10 == 0) {
+					position_setpoint -= 1;
+				}
 			}
-			/* Do we need to free the adc_data memory? We don't need this array after this. */
-//				for (i = 0; i < (ARRAY_SIZE - 1); i++) {
-//					free(&adc_data[i]);
-//					adc_data[i] = 0;
-//				}
 		}
 		/* wait for adstart to become 0 */
 		if (fsm_flag == 5) {
+			kp = kp_old;
+			ki = ki_old;
+			kd = kd_old;
 			if ((ADC1->CR & ADC_CR_ADSTART) != 0) {
 				/* Set AD_STOP to 1 to stop measuring on the ADC. */
 				ADC1->CR |= ADC_CR_ADSTP;
@@ -458,33 +468,32 @@ int32_t motion_drive_h_bridge() {
 				interrupts_enable();
 			}
 		}
-
-		/* Last thing that should happen in this loop, get new encoder data. Slower is better since there is a higher chance of spotting the stopping of rotation. */
-		if (time_get_time_ms() % 200 == 0) {
-			position[0] = position[1];
-			position[1] = encoder_get_position();
-		}
 		break;
 
 		/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
 	case MOTION_MODE_WALK_FORWARD:
-
-/* RIGHT SIDE */
 		if (fsm_flag == 0) {
 			starting_setpoint = encoder_get_position();
+			absolute_starting_setpoint = absolute_position;
+			absolute_ending_setpoint = ((state.position_a << 8)
+					+ state.position_b);
 			starting_time = time_get_time_ms();
-			if (absolute_position >= LIFT_OFF_POSITION) {
-				distance_move = ENCODER_PULSES_PER_ROTATION - (absolute_position - LIFT_OFF_POSITION);
-			}else {
-				distance_move = LIFT_OFF_POSITION - absolute_position;
+			if (absolute_starting_setpoint >= absolute_ending_setpoint) {
+				distance_move =
+						ENCODER_PULSES_PER_ROTATION
+								- (absolute_starting_setpoint
+										- absolute_ending_setpoint);
+			} else {
+				distance_move = absolute_ending_setpoint
+						- absolute_starting_setpoint;
 			}
-			t_move_total = ((state.lift_off_time_a * 4)
-					+ (state.lift_off_time_b * 1000)) - starting_time;
+			t_move_total = ((state.time_a * 1000) + (state.time_b * 4))
+					- starting_time;
 			t_ad = MOTION_ACC_DEC_TIME_MS;
 			fsm_flag = 6;
 		}
 		if (fsm_flag == 6) {
-			t = time_get_time_ms() - starting_time;
+			t = time_calculate_delta(time_get_time_ms(), starting_time);
 			if (t <= t_ad) {
 				position_setpoint = (starting_setpoint
 						+ ((distance_move * t * t)
@@ -501,142 +510,16 @@ int32_t motion_drive_h_bridge() {
 			if ((t > (t_move_total - t_ad)) && (t <= t_move_total)) {
 				position_setpoint = (starting_setpoint
 						+ (distance_move
-								- ((distance_move * ((t_move_total - t)*(t_move_total - t)))
-										/ (2 * t_ad * (t_move_total - t_ad)))));
-			}
-			if (t >= t_move_total) {
-				last_known_position = encoder_get_position();
-				fsm_flag = 7;
-			}
-		}
-
-		if (fsm_flag == 7) {
-			starting_setpoint = encoder_get_position();
-			starting_time = time_get_time_ms();
-			if (absolute_position >= TOUCH_DOWN_POSITION) {
-				distance_move = ENCODER_PULSES_PER_ROTATION - (absolute_position - TOUCH_DOWN_POSITION);
-			}else {
-				distance_move = TOUCH_DOWN_POSITION - absolute_position;
-			}
-
-			t_move_total = ((state.touch_down_time_a * 4)
-					+ (state.touch_down_time_b * 1000)) - starting_time;
-			t_ad = MOTION_ACC_DEC_TIME_MS;
-			fsm_flag = 8;
-		}
-
-		if (fsm_flag == 8) {
-			t = time_get_time_ms() - starting_time;
-			if (t <= t_ad) {
-				position_setpoint = (starting_setpoint
-						+ ((distance_move * t * t)
-								/ (2 * t_ad * (t_move_total - t_ad))));
-			}
-
-			if ((t > t_ad) && (t <= (t_move_total - t_ad))) {
-				position_setpoint = (starting_setpoint
-						+ (((distance_move * t) / (t_move_total - t_ad))
-								- ((distance_move * t_ad)
-										/ (2 * (t_move_total - t_ad)))));
-			}
-
-			if ((t > (t_move_total - t_ad)) && (t <= t_move_total)) {
-				position_setpoint = (starting_setpoint
-						+ (distance_move
-								- ((distance_move * ((t_move_total - t)*(t_move_total - t)))
+								- ((distance_move
+										* ((t_move_total - t)
+												* (t_move_total - t)))
 										/ (2 * t_ad * (t_move_total - t_ad)))));
 			}
 			if (t >= t_move_total) {
 				last_known_position = encoder_get_position();
 				motion_stop();
-				fsm_flag = 0;
 			}
 		}
-
-
-/* LEFT SIDE */
-//		if (fsm_flag == 0) {
-//			starting_setpoint = encoder_get_position();
-//			starting_time = time_get_time_ms();
-//			if (absolute_position <= LIFT_OFF_POSITION_L) {
-//				distance_move = ENCODER_PULSES_PER_ROTATION - (LIFT_OFF_POSITION_L - absolute_position);
-//			}else {
-//				distance_move = absolute_position - LIFT_OFF_POSITION_L;
-//			}
-//			t_move_total = ((state.lift_off_time_a * 4)
-//					+ (state.lift_off_time_b * 1000)) - starting_time;
-//			t_ad = MOTION_ACC_DEC_TIME_MS;
-//			fsm_flag = 6;
-//		}
-//		if (fsm_flag == 6) {
-//			t = time_get_time_ms() - starting_time;
-//			if (t <= t_ad) {
-//				position_setpoint = (starting_setpoint
-//						- ((distance_move * t * t)
-//								/ (2 * t_ad * (t_move_total - t_ad))));
-//			}
-//
-//			if ((t > t_ad) && (t <= (t_move_total - t_ad))) {
-//				position_setpoint = (starting_setpoint
-//						- (((distance_move * t) / (t_move_total - t_ad))
-//								- ((distance_move * t_ad)
-//										/ (2 * (t_move_total - t_ad)))));
-//			}
-//
-//			if ((t > (t_move_total - t_ad)) && (t <= t_move_total)) {
-//				position_setpoint = (starting_setpoint
-//						- (distance_move
-//								- ((distance_move * ((t_move_total - t)*(t_move_total - t)))
-//										/ (2 * t_ad * (t_move_total - t_ad)))));
-//			}
-//			if (t >= t_move_total) {
-//				last_known_position = encoder_get_position();
-//				fsm_flag = 7;
-//			}
-//		}
-//
-//		if (fsm_flag == 7) {
-//			starting_setpoint = encoder_get_position();
-//			starting_time = time_get_time_ms();
-//			if (absolute_position <= TOUCH_DOWN_POSITION_L) {
-//				distance_move = ENCODER_PULSES_PER_ROTATION - (TOUCH_DOWN_POSITION_L - absolute_position);
-//			}else {
-//				distance_move = absolute_position - TOUCH_DOWN_POSITION_L;
-//			}
-//
-//			t_move_total = ((state.touch_down_time_a * 4)
-//					+ (state.touch_down_time_b * 1000)) - starting_time;
-//			t_ad = MOTION_ACC_DEC_TIME_MS;
-//			fsm_flag = 8;
-//		}
-//
-//		if (fsm_flag == 8) {
-//			t = time_get_time_ms() - starting_time;
-//			if (t <= t_ad) {
-//				position_setpoint = (starting_setpoint
-//						- ((distance_move * t * t)
-//								/ (2 * t_ad * (t_move_total - t_ad))));
-//			}
-//
-//			if ((t > t_ad) && (t <= (t_move_total - t_ad))) {
-//				position_setpoint = (starting_setpoint
-//						- (((distance_move * t) / (t_move_total - t_ad))
-//								- ((distance_move * t_ad)
-//										/ (2 * (t_move_total - t_ad)))));
-//			}
-//
-//			if ((t > (t_move_total - t_ad)) && (t <= t_move_total)) {
-//				position_setpoint = (starting_setpoint
-//						- (distance_move
-//								- ((distance_move * ((t_move_total - t)*(t_move_total - t)))
-//										/ (2 * t_ad * (t_move_total - t_ad)))));
-//			}
-//			if (t >= t_move_total) {
-//				last_known_position = encoder_get_position();
-//				motion_stop();
-//				fsm_flag = 0;
-//			}
-//		}
 		break;
 
 	case MOTION_MODE_WALK_BACKWARD:
@@ -651,241 +534,6 @@ int32_t motion_drive_h_bridge() {
 	return return_value;
 }
 
-/* Function to move the leg to a certain position (touch down, stand, or lift) with a certain direction (forward or backward).
- * dir should be 0 for forward and 1 for backward. Arrival time should be in absolute milliseconds.
- *
- * For fluent movement: no h_bridge_disable() in this function
- *
- * Don't put motion_stop() in this function. Do this after using this function.
- *
- * Info:
- * Left leg : get_address_side = 0; walking forward = counterclockwise = h_bridge_drive(x, 0, x) : encoder_dir = 1 : encoder = counting down.
- */
-//uint8_t motion_move_to_point(uint16_t position, uint8_t dir,
-//		uint32_t arrival_time) {
-//	uint8_t status = 0; /* Turns 1 when the point was reached. */
-//	uint8_t direction = side_of_zebro ^ dir; /* Bitwise xor makes direction correct for any dir on any leg. */
-//	int16_t dutycycle = 0;
-//	uint16_t difference_position = 0;
-//	uint32_t difference_time = 0;
-//	uint16_t current_position = encoder_get_position();
-//	static int32_t time_old_error_d_loop, time_old_desired_speed_loop,
-//			time_old_position, average_current_speed, time_old_error_i_loop,
-//			pid_output;
-//	static int16_t error_old, error_d, error, error_i, current_speed[4]; /* doesn't need to be static. For debug it is */
-//	int32_t delta_time;
-//	static uint32_t desired_speed;
-////	static uint16_t Kp = 128, Ki = 32, Kd = 4, position_old;
-//	static uint16_t Kp = 200, Ki = 40, Kd = 1, position_old;
-//
-//	difference_position = abs(position - current_position);
-//
-//	if (dir == 1) {
-//		/* Calculate the number of pulses before we reach the correct position. */
-//		if (!side_of_zebro) {
-//			if (position < current_position) {
-//				difference_position = ENCODER_PULSES_PER_ROTATION
-//						- difference_position;
-//			}
-//		} else if (side_of_zebro) {
-//			if (position > current_position) {
-//				difference_position = ENCODER_PULSES_PER_ROTATION
-//						- difference_position;
-//			}
-//		} else {
-//			/* should never happen */
-//			difference_position = 0; /* This is safe since dutycycle will be zero because of this. */
-//		}
-//
-//		/* Forward */
-//	} else if (dir == 0) {
-//		/* Calculate the number of pulses before we reach the correct position. */
-//		if (!side_of_zebro) {
-//			if (position > current_position) {
-//				difference_position = ENCODER_PULSES_PER_ROTATION
-//						- difference_position;
-//			}
-//		} else if (side_of_zebro) {
-//			if (position < current_position) {
-//				difference_position = ENCODER_PULSES_PER_ROTATION
-//						- difference_position;
-//			}
-//		} else {
-//			/* should never happen */
-//			difference_position = 0; /* This is safe since dutycycle will be zero because of this. */
-//		}
-//	} else {
-//		// do nothing
-//	}
-//
-//	/* Check if the leg arrived. OLD STATEMENT FOR DIR=0 */
-////		if (((current_position <= position + MOTION_POSITION_HYSTERESIS)
-////				&& (current_position >= (position - MOTION_POSITION_HYSTERESIS))
-////				&& (!side_of_zebro))
-////				|| ((current_position >= position - MOTION_POSITION_HYSTERESIS)
-////						&& (current_position
-////								<= (position + MOTION_POSITION_HYSTERESIS))
-////						&& (side_of_zebro))) {
-//	/* Later on we will check if the time difference is large than zero. */
-//	difference_time = time_calculate_delta(arrival_time, time_get_time_ms());
-//
-//	/* Calculate the dutycycle necessary to get the leg at the right position at the right time. */
-//	if ((difference_time > 0) && (difference_position > 0)) {
-//		if (time_calculate_delta(time_get_time_ms(),
-//				time_old_desired_speed_loop) >= 10) {
-//			time_old_desired_speed_loop = time_get_time_ms();
-//			desired_speed = ((((difference_position) * 1000) << 12)
-//					/ difference_time) >> 12;
-//		}
-//		/* prevent wrap around? */
-//		if ((abs(position_old - current_position)) >= 3) {
-////			current_speed[3] = (((abs(position_old - current_position)) * 1000)
-////					/ (time_calculate_delta(time_get_time_ms(),
-////							time_old_position)));
-////			time_old_position = time_get_time_ms();
-////			uint8_t i = 0;
-////			int16_t sum = 0;
-////			for (i = 0; i < 4; i++) {
-////				sum += current_speed[i];
-////			}
-////			average_current_speed = sum >> 2; //Divide sum to get average. We lose some accuracy, but this is no problem.
-////
-////			uint8_t j;
-////			for (j = 0; i < 3; j++) {
-////				current_speed[j] = current_speed[j + 1];
-////			}
-//			average_current_speed = (((abs(position_old - current_position)) * 1000)
-//										/ (time_calculate_delta(time_get_time_ms(),
-//												time_old_position)));
-//			/* number between -1820 and +1820 */
-//			error = desired_speed - average_current_speed;
-//			position_old = current_position;
-//		} else {
-//			/* current speed & errors stays as it is */
-//		}
-//		if (time_calculate_delta(time_get_time_ms(), time_old_error_d_loop)
-//				>= 5) {
-//			delta_time = time_calculate_delta(time_get_time_ms(),
-//					time_old_error_d_loop);
-//			time_old_error_d_loop = time_get_time_ms();
-//			/* number between -5000 and +5000 */
-//			error_d = ((error - error_old) * 1000) / delta_time;
-//			error_old = error;
-//		} else {
-//			/* do nothing */
-//		}
-//		/* error is a number between -1820 and +1820. error_d is a number between -4000 and +4000; error_i is a number between -100 and +100
-//		 * Say we want all K-values between 0 and 100. Then pid_output has a max of: 100*1820 + 25*4000 + 1820*100 = 464,000
-//		 */
-//		pid_output = ((Kp * error) + (Ki * error_i) + (Kd * error_d));
-//
-//		/* The error_i needs a lot of time because the error values are between 0 and 255 and that is not high enough to allow multiplying by at dt of 0.001. We need at least a 100 ms. */
-//		if (time_calculate_delta(time_get_time_ms(), time_old_error_i_loop)
-//				>= 100) {
-//			delta_time = time_calculate_delta(time_get_time_ms(),
-//					time_old_error_i_loop);
-//			time_old_error_i_loop = time_get_time_ms();
-//			/* If motor is at max torque we want to stop the integrating error. Max torque is defined as: 255 << 14. Same order of magnitude as the other errors.*/
-//			if (abs(pid_output) >= 464000
-//					&& (((error >= 0) && (error_i >= 0))
-//							|| ((error < 0) && (error_i < 0)))) {
-//				/* Leave error_i as it was. */
-//			} else {
-//				/* number between -100 and +100 */
-//				error_i = error_i + ((((error << 8) * delta_time) / 1000) >> 8);
-//			}
-//		}
-//
-//		/* this should be between -250 and 250! */
-//		dutycycle = (desired_speed >> 3) + (pid_output >> 11);
-//
-//		if (dutycycle > 250 || dutycycle < -250) {
-//			if (dutycycle > 0) {
-//				dutycycle = 250;
-//			}
-//			if (dutycycle < 0) {
-//				dutycycle = -250;
-//			}
-//		}
-//		if (dutycycle < 0) {
-//			direction = !direction;
-//			dutycycle = (uint8_t) (-dutycycle);
-//		} else {
-//			dutycycle = (uint8_t) dutycycle;
-//		}
-//	} else {
-//		difference_time = 0;
-//		dutycycle = 0; /* We are not actually sending this value to the h-bridge, because that would be bad. */
-//	}
-//	/* Check if the leg arrived. OLD STATEMENT FOR DIR=1 */
-////		if (((current_position >= position - MOTION_POSITION_HYSTERESIS)
-////				&& (current_position <= (position + MOTION_POSITION_HYSTERESIS))
-////				&& (!side_of_zebro))
-////				|| ((current_position <= position + MOTION_POSITION_HYSTERESIS)
-////						&& (current_position
-////								>= (position - MOTION_POSITION_HYSTERESIS))
-////						&& (side_of_zebro))) {
-//	if (current_position == position) { /* This works when checking at at least 1820 Hz since we want to guarantee functionality. */
-//		if (increasing_delay > 2500) {
-//			increasing_delay = increasing_delay - 2500;
-//		}
-//		last_known_position = position;
-//		arrival_time = 0;
-//		/* Null things when step is done, otherwise it influences the next step. */
-//		error = 0;
-//		error_old = 0;
-//		error_d = 0;
-//		error_i = 0;
-//		desired_speed = 0;
-//		current_speed[0] = 0;
-//		current_speed[1] = 0;
-//		current_speed[2] = 0;
-//		current_speed[3] = 0;
-//		average_current_speed = 0;
-//		position_old = 0;
-//		status = 1;
-//	} else {
-//		if (dutycycle > 0) {
-//			h_bridge_drive_motor(dutycycle, direction,
-//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
-//		} else {
-//			/* just keep turning. Don't really know if this is nice. We'll see. */
-//			h_bridge_drive_motor(25, direction,
-//			H_BRIDGE_MODE_SIGN_MAGNITUDE);
-//		}
-//	}
-//
-//#ifdef DEBUG_VREGS
-//	vregs_write(VREGS_MOTION_ARRIVAL_TIME, (arrival_time >> 10));
-//	vregs_write(VREGS_MOTION_DUTYCYCLE, dutycycle);
-//	vregs_write(VREGS_MOTION_DELTA_T, difference_time >> 10);
-//	vregs_write(VREGS_MOTION_DELTA_S_A, difference_position);
-//	vregs_write(VREGS_MOTION_DELTA_S_B, difference_position >> 8);
-//
-//	vregs_write(VREGS_MOTION_DESIRED_SPEED, (uint8_t) (desired_speed >> 3));
-//	vregs_write(VREGS_MOTION_CURRENT_SPEED,
-//			(uint8_t) (average_current_speed >> 3));
-//	if (error >= 0) {
-//		vregs_write(VREGS_MOTION_PID_ERROR_A, (uint8_t) error);
-//		vregs_write(VREGS_MOTION_PID_ERROR_B, (uint8_t) (error >> 8));
-//	}
-//	if (error_i >= 0) {
-//		vregs_write(VREGS_MOTION_PID_ERROR_I_A, (uint8_t) error_i);
-//		vregs_write(VREGS_MOTION_PID_ERROR_I_B, (uint8_t) (error_i >> 8));
-//	}
-//	if (error_d >= 0) {
-//		vregs_write(VREGS_MOTION_PID_ERROR_D_A, (uint8_t) error_d);
-//		vregs_write(VREGS_MOTION_PID_ERROR_D_B, (uint8_t) (error_d >> 8));
-//	}
-//	if (pid_output >= 0) {
-//		vregs_write(VREGS_MOTION_PID_OUTPUT_P, (uint8_t) (pid_output >> 11));
-//	}
-//	if (pid_output < 0) {
-//		vregs_write(VREGS_MOTION_PID_OUTPUT_M, (uint8_t) ((-pid_output) >> 11));
-//	}
-//#endif
-//	return status;
-//}
 /* Set the setpoint for current */
 void set_current_setpoint(int32_t value) {
 	current_setpoint = value;
@@ -970,10 +618,10 @@ void motion_set_state(uint8_t mode, uint8_t lift_off_time_a,
 		uint8_t lift_off_time_b, uint8_t touch_down_time_a,
 		uint8_t touch_down_time_b, uint8_t new_data_flag, uint8_t crc) {
 	state.mode = mode;
-	state.lift_off_time_a = lift_off_time_a;
-	state.lift_off_time_b = lift_off_time_b;
-	state.touch_down_time_a = touch_down_time_a;
-	state.touch_down_time_b = touch_down_time_b;
+	state.position_a = lift_off_time_a;
+	state.position_b = lift_off_time_b;
+	state.time_a = touch_down_time_a;
+	state.time_b = touch_down_time_b;
 	state.new_data_flag = new_data_flag;
 	state.crc = crc;
 	motion_write_state_to_vregs(state);
@@ -984,10 +632,10 @@ void motion_set_state(uint8_t mode, uint8_t lift_off_time_a,
  */
 int32_t motion_stop(void) {
 	state.mode = 0;
-	state.lift_off_time_a = 0;
-	state.lift_off_time_b = 0;
-	state.touch_down_time_a = 0;
-	state.touch_down_time_b = 0;
+	state.position_a = 0;
+	state.position_b = 0;
+	state.time_a = 0;
+	state.time_b = 0;
 	state.new_data_flag = 0;
 	state.crc = 0;
 	motion_write_state_to_vregs(state);

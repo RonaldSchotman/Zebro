@@ -95,7 +95,7 @@ int32_t address_measure_position(void){
 	 * The INT32_MAX values are placeholders. */
 	int32_t adc_values[ADDRESS_NUMBER_OF_POSITIONS]
 	    = {625, INT32_MAX, 1310, INT32_MAX, 1845, INT32_MAX,
-	    		2458, INT32_MAX, 3143, INT32_MAX, 3500, INT32_MAX}; // The highest value used to be 3724.
+	    		2458, INT32_MAX, 3143, INT32_MAX, 3500, INT32_MAX}; // The highest value, value 11, used to be 3724.
 
 	/* left aligned 10 bit, so shift! */
 	adc_readout = (adc_get_value(ADC_ID_RESISTOR_INDEX))>>4;

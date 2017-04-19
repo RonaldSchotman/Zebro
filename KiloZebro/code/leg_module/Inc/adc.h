@@ -26,6 +26,7 @@ int32_t adc_get_temperature(void);
 //int32_t adc_get_motor_current_ma(void);
 //uint32_t adc_get_absolute_motor_current_ma(void);
 uint8_t adc_check_motor_current(uint16_t current_measured);
+int16_t adc_get_absolute_current_measured_mA(void);
 void adc_control_motor_current(int32_t current_setpoint, uint16_t current_measured);
 void adc_current_control_set_kp(uint8_t value);
 uint8_t adc_current_control_get_kp(void);
