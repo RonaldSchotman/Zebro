@@ -1,4 +1,4 @@
-15:56:26 **** Incremental Build of configuration Debug for project leg_module ****
+17:30:19 **** Incremental Build of configuration Debug for project leg_module ****
 make all 
 Building file: ../Src/motion.c
 Invoking: MCU GCC Compiler
@@ -16,8 +16,8 @@ Generating binary and Printing size information:
 arm-none-eabi-objcopy -O binary "poot.elf" "poot.bin"
 arm-none-eabi-size "poot.elf"
    text	   data	    bss	    dec	    hex	filename
-  16432	     20	   3580	  20032	   4e40	poot.elf
+  16988	     20	   3596	  20604	   507c	poot.elf
  
 
-15:56:27 Build Finished (took 474ms)
+17:30:20 Build Finished (took 525ms)
 

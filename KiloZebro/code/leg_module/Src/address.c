@@ -56,8 +56,6 @@ static int32_t leg_side;
  */
 int32_t address_init(void){
 	leg_position = address_measure_position();
-	vregs_write(VREGS_LEG_ADDRESS, (uint8_t) leg_position);
-
 	if (leg_position == ADDRESS_LEFT_0
 			|| leg_position == ADDRESS_LEFT_1
 			|| leg_position == ADDRESS_LEFT_2
@@ -75,8 +73,6 @@ int32_t address_init(void){
 			|| leg_position == ADDRESS_RIGHT_5){
 		leg_side = ADDRESS_RIGHT;
 	}
-
-	vregs_write(VREGS_LEG_SIDE, (uint8_t) leg_side);
 	return leg_position;
 }
 
@@ -99,9 +95,10 @@ int32_t address_measure_position(void){
 	 * The INT32_MAX values are placeholders. */
 	int32_t adc_values[ADDRESS_NUMBER_OF_POSITIONS]
 	    = {625, INT32_MAX, 1310, INT32_MAX, 1845, INT32_MAX,
-	    		2458, INT32_MAX, 3143, INT32_MAX, 3724, INT32_MAX};
+	    		2458, INT32_MAX, 3143, INT32_MAX, 3500, INT32_MAX}; // The highest value used to be 3724.
 
-	adc_readout = adc_get_value(ADC_ID_RESISTOR_INDEX);
+	/* left aligned 10 bit, so shift! */
+	adc_readout = (adc_get_value(ADC_ID_RESISTOR_INDEX))>>4;
 
 	/* find the closest element in the adc_values array */
 	for(cursor = 0; cursor < ADDRESS_NUMBER_OF_POSITIONS; cursor++){
@@ -137,4 +134,9 @@ int32_t address_get_side(void){
  */
 int32_t address_get_zebrobus_address(void){
 	return ADDRESS_ZEBROBUS_OFFSET + leg_position;
+}
+
+void address_write_to_vregs(void) {
+	vregs_write(VREGS_LEG_ADDRESS, (uint8_t) leg_position);
+	vregs_write(VREGS_LEG_SIDE, (uint8_t) leg_side);
 }

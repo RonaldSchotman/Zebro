@@ -61,8 +61,9 @@ int main(void) {
 	fans_init();
 	encoder_init();
 	/* need to get ADC data before running address_init(). ADC is coupled with TIM1_CC4 in h_bridge_init() */
-	zebrobus_slave_init();
 	address_init();
+	/* zebrobus uses address */
+	zebrobus_slave_init();
 	/* motion uses address */
 	motion_init();
 
@@ -84,6 +85,7 @@ int main(void) {
 		 * This is the main loop.
 		 * Every time new measurement data is available we go through it
 		 */
+		address_write_to_vregs();
 
 		/* trigger PootBus if needed */
 		pootbus_request_data();
@@ -112,6 +114,7 @@ int main(void) {
 		}
 
 		encoder_write_to_vregs();
+		motion_absolute_position_calculator();
 		motion_drive_h_bridge();
 		motion_control_position();
 
