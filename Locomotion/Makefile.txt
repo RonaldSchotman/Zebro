@@ -1,6 +1,8 @@
 In order to compile this beauty:
 
 The ncurses and the wiringPi libraries need to be installed. 
+Ncurses: sudo apt-get install libncurses5-dev libncursesw5-dev
+wiringPi: git://git.drogon.net/wiringPi , cd ~/wiringPi, ./build , gpio load i2c //mayneed to enable i2c busses
 
 Main file: 
 KiloHeaderFileTest.cpp
@@ -8,7 +10,7 @@ The main file uses the other files to get the whole system working (the Zebro wa
 
 Compilation code (in order to make the KiloHeaderFileTest.exe):
 
-g++ -Wall -o ./KiloHeaderFileTest ./Gaits.cpp ./Decisions.cpp ./Supporting.cpp ./Communications.cpp ./MaxPlusCalc.cpp ./KiloHeaderFileTest.cpp -lwiringPi -lncurses  -std=c++11
+g++ -Wall -o ./Walking ./Gaits.cpp ./Decisions.cpp ./Supporting.cpp ./Communications.cpp ./MaxPlusCalc.cpp ./KiloZebroMain.cpp -lwiringPi -lncurses  -std=c++11
 
 
 For the compilation, multiple different files are used, here are some short summaries:

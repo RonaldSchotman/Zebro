@@ -121,6 +121,16 @@ vector<vector<float> > gait(int speed) // This function calculates the Max-Plus 
 	vector<vector<float> > Q;			// Initialize vector Q
 
 
+	if (speed == 1)
+	{
+		P = CornerLeftP(Tau);
+		Q = CornerLeftQ(Tau);
+	}
+	if (speed == 2)
+	{
+		P = CornerLeftP(Tau);
+		Q = CornerLeftQ(Tau);
+	}
 	if (speed > 67)
 	{
 		P = TripodP(Tau);				// Define the P-matrix as the matrix used to calculate the Tripod Gait (1,4,5)->(2,3,6)
@@ -140,9 +150,19 @@ vector<vector<float> > gait(int speed) // This function calculates the Max-Plus 
 	vector < vector<float> > A0 = A0Matr(Tau, P);			// Calculates the A_0 matrix using the Tau-vector and the P-matrix
 	vector < vector<float> > A1 = A1Matr(Tau, Q);			// Calculates the A_1 matrix using the Tau-vector and the Q-matrix
 	vector < vector<float> > A0star = KleeneStarOp(A0);		// Calculates A_0* using the A_0 matrix following the Kleene Star operation
-	vector < vector<float> > chosenGait = MPMM(A0star, A1);  // Calculates the Max-Plus gait matrix using A_0* and A_1
+	vector < vector<float> > chosenGait = MPMM(A0star, A1);  	// Calculates the Max-Plus gait matrix using A_0* and A_1
 	return chosenGait;
 }
 
 
-// 
+//-----------------------------------------------------------------------------------------------------------------------------
+// Defines gait according to input
+int GaitChangeManual (int ch)
+{ 
+	int speeds;	
+	if (ch ==49){speeds = 75;}if (ch==50){speeds=50;};if(ch==51){speeds=25;} // Changes gaits with buttons 1,2,3
+	if (ch==111){speeds=1;};if(ch==112){speeds=2;};if (ch==105){speeds=75;}   // Supposed to change between tripod, left and right
+	return speeds;
+}
+
+

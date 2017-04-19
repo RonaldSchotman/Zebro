@@ -96,50 +96,22 @@ def previewTestCase():
             [i for (i,c) in enumerate(connectedArray)               # Print all connected devices
                 if c == 1]
         )
+        
+        if connectedArray[1] == 1:
+            setMovement(1, 1)
+            time.sleep(5)
+            setMovement(1, 0)
+            time.sleep(5)
+            print("Pico 2")
 
         if connectedArray[0] == 1:                                  # Is the Zebro connected?
-            for i in range(0, 3):                                   # Loop through 3 leds
-                setLed(connectionID=0, ledNr=0, value=4)            # Set led top left front OFF(1) for connection 0
-                setLed(connectionID=0, ledNr=1, value=4)            # Set led top left front OFF(1) for connection 0
-                setLed(connectionID=0, ledNr=2, value=4)            # Set led top left front OFF(1) for connection 0
-                setLed(connectionID=0, ledNr=3, value=4)            # Set led top left front OFF(1) for connection 0
-                time.sleep(0.2)                                     # Wait some time to make it visible for the naked eye
-                setLed(connectionID=0, ledNr=0, value=0)            # Set led top left front ON(0) for connection 0
-                setLed(connectionID=0, ledNr=1, value=0)            # Set led top left front OFF(1) for connection 0
-                setLed(connectionID=0, ledNr=2, value=0)            # Set led top left front OFF(1) for connection 0
-                setLed(connectionID=0, ledNr=3, value=0)            # Set led top left front OFF(1) for connection 0
-
-                time.sleep(0.2)                                     # Wait some time to make it visible for the naked eye
+                                               # Wait some time to make it visible for the naked eye
                 
-
-            setMovement(0, 1)
-            time.sleep(5)
-            setMovement(0, 1)
-            time.sleep(5)
             setMovement(0, 1)
             time.sleep(5)
             setMovement(0, 0)
             time.sleep(5)
-            setMovement(0, 3)
-            time.sleep(5)
-            setMovement(0, 3)
-            time.sleep(5)
-            setMovement(0, 0)
-            time.sleep(5)
-            setMovement(0, 1)
-            time.sleep(5)
-            setMovement(0, 1)
-            time.sleep(5)
-            setMovement(0, 1)
-            time.sleep(5)
-            setMovement(0, 0)
-            time.sleep(5)
-            setMovement(0, 4)
-            time.sleep(5)
-            setMovement(0, 4)
-            time.sleep(5)
-            setMovement(0, 0)
-            time.sleep(5)
+            print("Pico 1")
             
     arduino.close()                                                 # Somewhere, someday, sometime close the connection when done, unreachable statement.
 
