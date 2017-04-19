@@ -27,6 +27,14 @@ using namespace std;
 
 // HEADER FILE FOR GAITS! See the .cpp file for the extended explanations
 
+vector < vector<float> >CornerRightP(vector<float> A); // 
+
+vector < vector<float> >CornerRightQ(vector<float> A); // 
+
+vector < vector<float> >CornerLeftP(vector<float> A); // 
+
+vector < vector<float> >CornerLeftQ(vector<float> A); // 
+
 vector < vector<float> >CrawlingCatP(vector<float> A); // Defines the P-matrix of the Crawling Cat gait
 
 vector < vector<float> >CrawlingCatQ(vector<float> A); // Defines the Q-matrix of the Crawling Cat gait 

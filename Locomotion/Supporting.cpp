@@ -228,3 +228,10 @@ int int_floor(double x)  // This function floors a number, and changes the numbe
     return (int)(x+100000) - 100000; 
 }
 
+void SpecOps(int ch) // This function uses the input to start a special operation, like calibrating or stopping
+{
+
+}
+
+
+

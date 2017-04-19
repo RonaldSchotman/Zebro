@@ -40,12 +40,28 @@ vector<unsigned int> rewriteTime(vector<float> Vec) // Rewrites the time to make
         rewriteTime[0] = Tlb;rewriteTime[1] = Ttb;rewriteTime[2] = Tla;rewriteTime[3] = Tta;
         return rewriteTime;
 }
+//----------------------------------------------------------------------------------------------------------------------------
+vector<unsigned int> rewritePos(vector<float> Vec) // Rewrites the position to make sure it can be passed on to the KILO
+{
+	div_t divresult;
+        unsigned int Posi = floor(Vec[0]); 
+        divresult = div (Posi,255);
+	unsigned int grootPosi = floor(divresult.quot);
+	unsigned int kleinPosi = floor(divresult.rem);
+        vector<unsigned int> rewritePos (2,0);
+        rewritePos[0] = grootPosi;rewritePos[1] = kleinPosi;
+        return rewritePos;
+}
+
+
+
 //-----------------------------------------------------------------------------------------------------------------------------
 // Sends the liftoff and touchdown times to the seperate legs, as well as the operation modus. This is for forward walking
 void SendToLeg(vector<float> Vec,double time,int adress)
 {
 	vector<unsigned int> TimeVec = rewriteTime(Vec); // [0] = tlb (sec), [1] = ttb (sec), [2] = tla (ms/4), [3] = tta (ms/4)
-	uint8_t Data[8] = {3,(uint8_t) TimeVec[2],(uint8_t) TimeVec[0],(uint8_t) TimeVec[3],(uint8_t) TimeVec[1],1,0,1};
+	vector<unsigned int> PosVec = rewritePos(Vec);
+	uint8_t Data[8] = {2,(uint8_t) PosVec[0],(uint8_t) PosVec[1],(uint8_t) TimeVec[1],(uint8_t) TimeVec[3],1,0,1};
 	for (uint8_t i=0;i<9;i++)
 	{
 	wiringPiI2CWriteReg8(adress,30+i,Data[i]);
@@ -77,6 +93,49 @@ vector<float> SendVecUpdater(vector <float> PrevVec,vector<float> CurVec,vector<
 		{
 			cout<< " Error in SendVecUpdater";
 		}
+		SendToLeg(Vec,time,ard[i]);
+		OutPutVec[i] = Vec[0];
+		OutPutVec[i+6]=Vec[1]; 
+	}
+	return OutPutVec;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------
+// Calculates the lift off and touchdown data that needs to be send, and sends it.
+vector<float> SendVecUpdaterS(vector <float> PrevVec,vector<float> CurVec,vector<float> NextVec,double time,vector<int> ard)
+{
+	vector<float> Vec(3,0);
+	vector<float> OutPutVec(12,0);
+	float liftoffleft = 650;
+	int lor=0; int lo; int stand; int td;
+	float standleft = 610;
+	float touchdownleft = 570;
+	float liftoffright = 650;
+	float standright =610;
+	float touchdownright=570;
+	for (int i=0;i<6;i++)
+	{
+		lor = i%2;
+		if (lor==0){lo = liftoffleft;stand=standleft;td=touchdownleft;}
+		if (lor==1){lo = liftoffright;stand=standright;td=touchdownright;}
+		Vec[0] =0;Vec[1]=0;Vec[2]=0;
+		if (time<CurVec[i+6] && time>PrevVec[i])
+		{
+			Vec[0] = lo; Vec[1] = CurVec[i+6]; Vec[2]=3; // Vec[0] = liftoff, Vec[1] = touchdown, Vec[2] = mode aperandi
+		}
+		else if (time<CurVec[i] && time>=CurVec[i+6])
+		{
+			Vec[0] = td; Vec[1] = CurVec[i]; Vec[2] = 3;
+		}
+		else if (time>=CurVec[i] &&  time<=NextVec[i+6])
+		{
+			Vec[0] = lo; Vec[1]= NextVec[i+6]; Vec[2] = 3;
+		}
+		else
+		{
+			Vec[0] = stand; Vec[1] = time+1; Vec[2]=2;
+		}
+		//printVec(Vec);
 		SendToLeg(Vec,time,ard[i]);
 		OutPutVec[i] = Vec[0];
 		OutPutVec[i+6]=Vec[1]; 
@@ -187,6 +246,64 @@ vector<int> LegCheck(vector<float> CurVec, vector<float> NextVec,double time, ve
 	return curStat;
 }
 
+//----------------------------------------------------------------------------------------------------------------------------
+// This function uses the input to start a special operation, like calibrating or stopping
+int SpecOps(int ch, vector<int> ard, uint8_t syncTime) // hoi
+{
+	int walkingstop ;
+		if ( ch== 115)		// Stop Walking
+		{
+			walkingstop = 0;
+			cout<<  "         Stop Sending New Data";
+		}
+		if (ch ==99) 	// Calibrate
+		{
+			
+			wiringPiI2CWriteReg8(ard[6],30,1);
+			wiringPiI2CWriteReg8(ard[6],37,1);
+			cout<<  "         Calibrate";
+		}
+		if (ch ==122) 	// Standup
+		{
+			vector<float> PosVec(1,0);
+			PosVec[0] = 610;
+			uint8_t writeTime = (uint8_t) syncTime;
+			vector<unsigned int> PosiVec = rewritePos(PosVec);
+			uint8_t Data[8] = {2,(uint8_t) PosiVec[0],(uint8_t) PosiVec[1],(uint8_t) (writeTime+3),0,1,0,1}; 
+        		for (uint8_t i=0;i<9;i++)
+        		{
+        			wiringPiI2CWriteReg8(ard[6],30+i,Data[i]);
+        			delayMicroseconds(1);
+       			 }
+
+			cout<<  "         Stand Up";
+		}
+		if (ch ==101)
+		{
+		        // Reset Emergency Stop
+ 		       wiringPiI2CWriteReg8 (ard[6], 22, 0x12) ;
+			cout<<  "         Reset Emergency Stop";
+
+		}
+		if (ch == 32)
+		{
+			// Stop Moving
+			wiringPiI2CWriteReg8 (ard[6], 30, 255) ;
+			wiringPiI2CWriteReg8 (ard[6], 37, 1) ;
+			walkingstop =0;
+			cout<< "       PANIC STOP"  ;
+		}
+		if (ch == 114)
+                {
+                        // Go back to the idle state
+                        wiringPiI2CWriteReg8 (ard[6], 30, 0) ;
+                        wiringPiI2CWriteReg8 (ard[6], 37, 1) ;
+                        walkingstop =0;
+                        cout<< "       RESET"  ;
+                }
+
+	return walkingstop;
+}
 
 
 

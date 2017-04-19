@@ -27,7 +27,11 @@ using namespace std;
 
 vector<unsigned int> rewriteTime(vector<float> Vec);
 
+void SendToLeg(vector<float> Vec,double time,int adress);
+
 vector<float> SendVecUpdater(vector <float> PrevVec,vector<float> CurVec,vector<float> NextVec,double time,vector<int> ard);
+
+vector<float> SendVecUpdaterS(vector <float> PrevVec,vector<float> CurVec,vector<float> NextVec,double time,vector<int> ard);
 
 vector<float> SendVecCalc(vector <float> PrevVec,vector<float> CurVec,vector<float> NextVec,double time,vector<int> ard);
 
@@ -36,5 +40,7 @@ vector <int>  connectLegs();
 vector<int> readAngleState(int adress, int pos);
 
 vector<int> LegCheck(vector<float> CurVec, vector<float> NextVec,double time, vector<int> ard);
+
+int SpecOps(int ch, vector<int> ard, uint8_t syncTime);
 
 #endif

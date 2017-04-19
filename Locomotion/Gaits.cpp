@@ -25,6 +25,67 @@ using namespace std;
 // In this file, the different P and Q submatrices can be seen, as well as the files necessary to create the gait matrices. 
 
 //------------------------------------------------------------------------------------------------------
+// One-sided corner gaits (right)
+vector < vector<float> >CornerRightP(vector<float> A) // Defines the P-matrix of the Crawling Cat gait
+{
+        float td = A[0];
+        vector<vector<float> > P(6, vector<float>(6));
+        float P1arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P1 = MakeVector(P1arr, 6);
+        float P2arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P2 = MakeVector(P2arr, 6);
+        float P3arr[6] = { td, -1, -1, -1, -1, -1 }; vector<float> P3 = MakeVector(P3arr, 6);
+        float P4arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P4 = MakeVector(P4arr, 6);
+        float P5arr[6] = { -1, -1, td, -1, -1, -1 }; vector<float> P5 = MakeVector(P5arr, 6);
+        float P6arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P6 = MakeVector(P6arr, 6);
+        P[0] = P1; P[1] = P2; P[2] = P3; P[3] = P4; P[4] = P5; P[5] = P6; // Write it all in one 6x6 vector
+        return P;
+}
+
+vector < vector<float> >CornerRightQ(vector<float> A) // Defines the Q-matrix of the Crawling Cat gait 
+{
+        float td = A[0];
+        vector<vector<float> > P(6, vector<float>(6));
+        float P1arr[6] = { -1, -1, -1, -1, td, -1 }; vector<float> P1 = MakeVector(P1arr, 6);
+        float P2arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P2 = MakeVector(P2arr, 6);
+        float P3arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P3 = MakeVector(P3arr, 6);
+        float P4arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P4 = MakeVector(P4arr, 6);
+        float P5arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P5 = MakeVector(P5arr, 6);
+        float P6arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P6 = MakeVector(P6arr, 6);
+        P[0] = P1; P[1] = P2; P[2] = P3; P[3] = P4; P[4] = P5; P[5] = P6; // Write it all in one 6x6 vector
+        return P;
+}
+
+// One-sided corner gaits (left)
+vector < vector<float> >CornerLeftP(vector<float> A) // Defines the P-matrix of the Crawling Cat gait
+{
+        float td = A[0];
+        vector<vector<float> > P(6, vector<float>(6));
+        float P1arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P1 = MakeVector(P1arr, 6);
+        float P2arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P2 = MakeVector(P2arr, 6);
+        float P3arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P3 = MakeVector(P3arr, 6);
+        float P4arr[6] = { -1, td, -1, -1, -1, -1 }; vector<float> P4 = MakeVector(P4arr, 6);
+        float P5arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P5 = MakeVector(P5arr, 6);
+        float P6arr[6] = { -1, -1, -1, td, -1, -1 }; vector<float> P6 = MakeVector(P6arr, 6);
+        P[0] = P1; P[1] = P2; P[2] = P3; P[3] = P4; P[4] = P5; P[5] = P6; // Write it all in one 6x6 vector
+        return P;
+}
+
+vector < vector<float> >CornerLeftQ(vector<float> A) // Defines the Q-matrix of the Crawling Cat gait 
+{
+        float td = A[0];
+        vector<vector<float> > P(6, vector<float>(6));
+        float P1arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P1 = MakeVector(P1arr, 6);
+        float P2arr[6] = { -1, -1, -1, -1, -1, td }; vector<float> P2 = MakeVector(P2arr, 6);
+        float P3arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P3 = MakeVector(P3arr, 6);
+        float P4arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P4 = MakeVector(P4arr, 6);
+        float P5arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P5 = MakeVector(P5arr, 6);
+        float P6arr[6] = { -1, -1, -1, -1, -1, -1 }; vector<float> P6 = MakeVector(P6arr, 6);
+        P[0] = P1; P[1] = P2; P[2] = P3; P[3] = P4; P[4] = P5; P[5] = P6; // Write it all in one 6x6 vector
+        return P;
+}
+
+
+
+//------------------------------------------------------------------------------------------------------
 // 1 leg at the time following the rithm 1-2-3-4-5-6 WAVE123456
 
 vector < vector<float> >CrawlingCatP(vector<float> A) // Defines the P-matrix of the Crawling Cat gait

@@ -34,5 +34,6 @@ vector <float> CalcTauTest(int speed);	// Calculates the Tau-vector consisting o
 
 vector<vector<float> > gait(int speed); // This function calculates the Max-Plus gait matrix used depending on the speed required. 
 
+int GaitChangeManual (int ch);          // Allows for manual gait changes
 #endif
 
