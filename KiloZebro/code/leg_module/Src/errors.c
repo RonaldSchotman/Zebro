@@ -76,7 +76,7 @@ int32_t errors_reset_errors(int32_t safety){
 int32_t errors_emergency_stop(void){
 	h_bridge_disable();
 	emergency_stop = 1;
-	motion_stop();
+	motion_emergency_stop();
 	vregs_write(VREGS_EMERGENCY_STOP, 1);
 	return 0;
 }
@@ -101,7 +101,7 @@ int32_t errors_reset_emergency_stop(int32_t safety){
 	}
 	emergency_stop = 0;
 	vregs_write(VREGS_EMERGENCY_STOP, 0);
-
+	motion_return_to_idle();
 	return 0;
 }
 

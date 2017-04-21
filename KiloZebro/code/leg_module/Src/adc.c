@@ -245,7 +245,7 @@ void adc_control_motor_current(int32_t current_setpoint,
 
 	/* 3300 mV - 1650 mV = 1650 mV of maximum current measurement range. Sensitivity is 55 mV/A, meaning 1650 / 55 = 30A.
 	 * dt is dependent on the ARR value of TIM1. This is 1023, meaning a period of 2048.
-	 * dt = 1/(48e6/2048/7 channels) = 0.29866 ms.
+	 * dt = 1/(48e6/2048/7 channels) = 0.29866 ms. This is measured to be correct.
 	 * Ki can make sure the amount of error_i is still ok.
 	 */
 	/* remove offset */
@@ -254,7 +254,7 @@ void adc_control_motor_current(int32_t current_setpoint,
 		current_measured_cast = -current_measured_cast;
 	}
 	if (current_setpoint != 0) {
-		dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically 108/109 ticks*/
+		dt = time17_get_time() - time_prev; /* overflow is taken care of by uint16_t and ARR = 0xFFFF. dt is typically 13824 ticks*/
 		time_prev = time17_get_time();
 		error_current = current_setpoint - current_measured_cast;
 		error_integral = (error_integral
@@ -322,7 +322,7 @@ void adc_control_motor_current(int32_t current_setpoint,
 				(uint8_t) ((abs(error_integral)) >> 8));
 		vregs_write(VREGS_CURRENT_CONTROL_EI_POS, (uint8_t) (0));
 	}
-	vregs_write(VREGS_CURRENT_CONTROL_DT, (dt >> 7));
+	vregs_write(VREGS_CURRENT_CONTROL_DT, (dt >> 7)); /* not printable in a nice quantity */
 	vregs_write(VREGS_CURRENT_SETPOINT_A,
 			(uint8_t) ((abs(current_setpoint)) >> 8));
 	vregs_write(VREGS_CURRENT_SETPOINT_B, (uint8_t) ((abs(current_setpoint))));

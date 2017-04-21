@@ -154,20 +154,22 @@
 #define VREGS_STAND_UP_POSITION_B 124
 #define VREGS_MOTION_LIFT_OFF_POSITION_A 125
 #define VREGS_MOTION_LIFT_OFF_POSITION_B 126
-#define VREGS_MOTION_STD_DEV_A 127
-#define VREGS_MOTION_STD_DEV_B 128
+//#define VREGS_MOTION_STD_DEV_A 127
+//#define VREGS_MOTION_STD_DEV_B 128
 
 #define VREGS_PEAK_1_ADC_AVERAGE 130 //[Debug] Average of adc-samples hall sensor 1
 #define VREGS_PEAK_2_ADC_AVERAGE 131 //[Debug] Average of adc-samples hall sensor 2
 #define VREGS_PEAK_3_ADC_AVERAGE 132 //[Debug] Average of adc-samples hall sensor 3
-//#define VREGS_PEAK_1_ADC_SD 133 //[Debug] standard deviation of adc-samples sensor 1
-//#define VREGS_PEAK_2_ADC_SD 134 //[Debug] standard deviation of adc-samples sensor 2
-//#define VREGS_PEAK_3_ADC_SD 135 //[Debug] standard deviation of adc-samples sensor 3
+#define VREGS_PEAK_ADC_SD_A 133 //[Debug] standard deviation of adc-samples sensor 1
+#define VREGS_PEAK_ADC_SD_B 134 //[Debug] standard deviation of adc-samples sensor 2
+#define VREGS_PEAK_ADC_SD_C 135 //[Debug] standard deviation of adc-samples sensor 3
 #define VREGS_PEAK_1_DETECTED 136 //[Debug] Variable showing if currently a peak is being detected or not at sensor 1
 #define VREGS_PEAK_2_DETECTED 137 //[Debug] Variable showing if currently a peak is being detected or not at sensor 2
 #define VREGS_PEAK_3_DETECTED 138 //[Debug] Variable showing if currently a peak is being detected or not at sensor 3
-#define VREGS_PEAK_MAX_AVG_DELTA 139 // [Debug] maximum value of average between two successive hall-sensor samples.
-#define VREGS_PEAK_AVG_DELTA 140 // [Debug] maximum value between two successive hall-sensor samples.
+#define VREGS_PEAK_MAX_AVG_DELTA_A 139 // [Debug] maximum value of average between two successive hall-sensor samples.
+#define VREGS_PEAK_MAX_AVG_DELTA_B 140 // [Debug] maximum value of average between two successive hall-sensor samples.
+#define VREGS_PEAK_AVG_DELTA 141 // [Debug] maximum value between two successive hall-sensor samples.
+#define VREGS_PEAK_THRESHOLD 142
 //#define VREGS_PEAK_1_HISTORY_1 141
 //#define VREGS_PEAK_1_HISTORY_2 142
 //#define VREGS_PEAK_1_HISTORY_3 143

@@ -2,29 +2,29 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="LAST_KNOWN" key="selection"/>
+		<item value="safety" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="safety"/>
+			<item value="start_time"/>
+			<item value="state.time_a"/>
 			<item value="last_known"/>
 			<item value="current_setpoint"/>
 			<item value="adc_data_dump"/>
 			<item value="error"/>
 			<item value="adc_trigger"/>
-			<item value="interrupt"/>
-			<item value="I2C1-&gt;CR2"/>
-			<item value="ack"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
-		<item value="295" key="DIALOG_WIDTH"/>
+		<item value="305" key="DIALOG_WIDTH"/>
 		<item value="1|Sans|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
-		<item value="377" key="DIALOG_HEIGHT"/>
+		<item value="382" key="DIALOG_HEIGHT"/>
 		<item value="907" key="DIALOG_X_ORIGIN"/>
 		<item value="147" key="DIALOG_Y_ORIGIN"/>
 	</section>

@@ -183,21 +183,26 @@ class CommandCollection:
             screen.add_line('    ' + command.get_sequence())
         screen.add_line('='*20)
             
+def static_vars(**kwargs):
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+    return decorate
 
-  
+@static_vars(position=0) 
 def main(stdscr):
     bus_pirate = BusPirate();
     display = SerialDisplay(stdscr)
     commands = CommandCollection()
     commands.add_new_command("[0x00 30 1 0 0 0 0 0 0 1]", "c", 'Calibrate Encoders')
-    commands.add_new_command("[0x00 30 0 0 0 0 0 0 0 1]", " ", 'Stop all')
+    commands.add_new_command("[0x00 30 255 0 0 0 0 0 0 1]", " ", 'Stop all')
     commands.add_new_command("[0x00 22 0x12]", 'e', "Reset emergency_stop")
     # commands.add_new_command("[0x00 30 7 0 120 1 0 0]", "d", "Debug Command")
 
     #print(bus_pirate.get_data())
     
     last_time_update = datetime.datetime.now()
-    position = 0
     time_sync_counter = 0
     position_control_kp = 0
     current_control_kp = 0
@@ -269,22 +274,26 @@ def main(stdscr):
                 command = Command("[0x00 147 {0}]".format(position_control_kd), ";", 'Decrease kd position control')
 
             if input_char == 'w':
-                position = (position + 810)%910
-                position_a = (position >> 8) & 0xff
-                position_b = position & 0xff
+                main.position = (main.position + 10)%910
+                position_a = (main.position >> 8) & 0xff
+                position_b = main.position & 0xff
                 time_a = time_sync_counter
-                time_b = 187
+                time_b = 50
                 command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "w", 'walk forward')
             if input_char == 's':
-                position = (position + 810)%910
-                position_a = (position >> 8) & 0xff
-                position_b = position & 0xff
+                main.position = (main.position + 900)%910
+                position_a = (main.position >> 8) & 0xff
+                position_b = main.position & 0xff
                 time_a = time_sync_counter
-                time_b = 187
-                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "w", 'walk backward')
-            # if input_char == 'z':
-            #     stand_up_time = time_sync_counter + 2
-            #     command = Command("[0x00 30 2 0 {0} 0 0 0 0 1]".format(stand_up_time), "z", 'Stand Up')
+                time_b = 50
+                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "s", 'walk backward')
+            if input_char == 'z':
+                position = 610
+                position_a = (main.position >> 8) & 0xff
+                position_b = main.position & 0xff
+                time_a = time_sync_counter + 1
+                time_b = 0
+                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "z", 'stand up')
 
 
             if command:

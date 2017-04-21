@@ -18,7 +18,7 @@
 
 #define PEAK_ERROR -1
 #define PEAK_NUM_OF_SENSORS 3
-#define PEAK_HISTORY_LAG 8 //because we want to bitshift to perform division, this number should be 2, 4, 8 and so on. max 255
+#define PEAK_HISTORY_LAG 64 //because we want to bitshift to perform division, this number should be 2, 4, 8 and so on. max 255
 
 uint8_t peak_process_adc_values_sensor(void);
 uint8_t peak_get_adc_channel_index(uint8_t sensor);

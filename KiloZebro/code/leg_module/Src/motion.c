@@ -45,13 +45,15 @@ uint8_t calibrate = 1; /* When Zebro is turned on, calibrate should first be on.
 //static uint16_t stand_up_position = 0;
 //static uint16_t lift_off_position = 0;
 static int16_t last_known_position = 0;
-static uint8_t side_of_zebro = 0;
+//static uint8_t side_of_zebro = 0;
 //static uint32_t increasing_delay = 0;
 static uint8_t kp = 120, ki = 150, kd = 30;
+//static uint8_t kp = 96, ki = 120, kd = 24;
 /* current setpoint. This is a setpoint between -2^15 and 2^15 */
 static int32_t current_setpoint;
 static int16_t position_setpoint = 0;
 static int16_t absolute_position;
+static int16_t previous_encoder_position;
 
 /**
  * Process data send to any of the addresses in the motion control range.
@@ -242,7 +244,6 @@ uint8_t motion_position_control_get_kd(void) {
 }
 
 void motion_absolute_position_calculator(void) {
-	static int16_t previous_encoder_position;
 	int16_t current_position = encoder_get_position();
 	int16_t delta = current_position - previous_encoder_position;
 	absolute_position = absolute_position + delta;
@@ -260,6 +261,7 @@ void motion_absolute_position_calculator(void) {
 
 void motion_reset_absolute_position_calculator(void) {
 	absolute_position = 0;
+	previous_encoder_position = 0;
 	return;
 }
 
@@ -278,19 +280,16 @@ void motion_reset_absolute_position_calculator(void) {
  * 		4: Rotate the leg backward until the 3rd hall-sensor is found and set the encoder value to zero.
  * 		5: Calibration completed
  */
-int32_t motion_drive_h_bridge() {
+int32_t motion_command_zebro() {
 	int32_t return_value = 0;
 	static uint16_t adc_data[ARRAY_SIZE];
 	static uint8_t fsm_flag = 0;
-	static uint16_t position[2] = { 0, 0 };
-	uint8_t side_of_zebro = address_get_side();
+//	static uint16_t position[2] = { 0, 0 };
+//	uint8_t side_of_zebro = address_get_side();
 
-	static uint8_t kp_old;
-	static uint8_t ki_old;
-	static uint8_t kd_old;
-
+	static uint16_t counter = 0;
+	static int16_t previous_setpoint;
 	static uint16_t distance_move = 0;
-
 	static int16_t starting_setpoint = 0;
 	static int16_t absolute_starting_setpoint = 0;
 	static int16_t absolute_ending_setpoint = 0;
@@ -306,6 +305,7 @@ int32_t motion_drive_h_bridge() {
 	static uint32_t t_move_total = 0;
 	static uint32_t t_ad = 0;
 	static uint32_t starting_time = 0;
+	static uint32_t time_old;
 	uint32_t t = 0;
 
 //	uint16_t ending_position_setpoint, delta_s;
@@ -314,13 +314,13 @@ int32_t motion_drive_h_bridge() {
 //	int32_t delta_t;
 
 #ifdef DEBUG_VREGS
-	vregs_write(VREGS_MOTION_STD_DEV_A, (uint8_t) get_std_var());
-	vregs_write(VREGS_MOTION_STD_DEV_B, (uint8_t) (get_std_var() >> 8));
+	vregs_write(VREGS_PEAK_ADC_SD_A, (uint8_t) get_std_var());
+	vregs_write(VREGS_PEAK_ADC_SD_B, (uint8_t) (get_std_var() >> 8));
 	vregs_write(VREGS_MOTION_FSM_FLAG, (uint8_t) fsm_flag);
 	vregs_write(VREGS_DEBUG_FLAG_1, (uint8_t) calibrate);
 	vregs_write(VREGS_DEBUG_FLAG_2, (uint8_t) (ADC1->CR & ADC_CR_ADSTART));
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_A,
-			(uint8_t) last_known_position >> 8);
+			(uint8_t) (last_known_position >> 8));
 	vregs_write(VREGS_MOTION_LAST_KNOWN_POSITION_B,
 			(uint8_t) (last_known_position));
 //	vregs_write(VREGS_MOTION_CONSTANT_SPEED, (uint8_t) (constant_speed >> 3));
@@ -337,21 +337,17 @@ int32_t motion_drive_h_bridge() {
 	switch (state.mode) {
 
 	case MOTION_MODE_IDLE:
-		/* Function stabilizes the leg on the last known position
-		 * But: not more than a quarter of an entire circle.
-		 */
+		/* Function stabilizes the leg on the position_setpoint*/
+		motion_control_position();
 		fsm_flag = 0;
-		position_setpoint = last_known_position;
 		return 0;
 
 	case MOTION_MODE_CALIBRATE:
+		/* Function stabilizes the leg on the position_setpoint*/
+		motion_control_position();
+		last_known_position = encoder_get_position();
+
 		if (fsm_flag == 0) {
-			kp_old = kp;
-			ki_old = ki;
-			kd_old = kd;
-			kp = 30;
-			ki = 38;
-			kd = 7;
 			/* Set calibrate to 1 to enable reading adc-data of the hall-sensors */
 			set_calibrate(1);
 			/* Set AD_STOP to 1 to stop measuring on the ADC. */
@@ -375,27 +371,33 @@ int32_t motion_drive_h_bridge() {
 				interrupts_enable();
 			}
 		}
+
 		if (fsm_flag == 1) {
-			vregs_write(VREGS_DEBUG_FLAG_3,
-					(adc_get_absolute_current_measured_mA() >> 8));
+			/* every 10 ms */
+			if ((((TIM16->CNT) - time_old) >= 160) && (position_setpoint == encoder_get_position())) {
+				time_old = TIM16->CNT;
+				position_setpoint -= 1;
+			}
 			if (adc_get_absolute_current_measured_mA() > MOTION_CALIB_MAX_CURRENT_MA) {
-				start_timing_measurement();
+				counter += 1;
 				/* wait for position to hold */
-				if (stop_and_return_timing_measurement(500)) {
+				if (counter >= 1000) { // Loop speed is around 6000 Hz
+					counter = 0;
 					encoder_reset_position();
-					position_setpoint = encoder_get_position();
+					last_known_position = encoder_get_position();
+					position_setpoint = last_known_position;
 					fsm_flag = 2;
 				}
 			} else {
-				reset_timing_measurement();
-				if (time_get_time_ms() % 10 == 0) {
-					position_setpoint -= 1;
-				}
+				counter = 0;
 			}
 		}
 		if (fsm_flag == 2) {
+			peak_process_adc_values_sensor();
 			static uint16_t n = 0;
-			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
+//			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
+			if ((position_setpoint - previous_setpoint) >= 2) { /* We don't want to sample too often */
+				previous_setpoint = position_setpoint;
 				adc_data[n] = adc_get_value(ADC_HAL_2_INDEX); /* We're only interested in the value of the 3rd hall sensor */
 				n = n + 1;
 			}
@@ -403,50 +405,40 @@ int32_t motion_drive_h_bridge() {
 				n = ARRAY_SIZE - 1;
 			}
 			if (position_setpoint >= 400) {
+				encoder_reset_position();
+				last_known_position = encoder_get_position();
+				position_setpoint = last_known_position;
+				/* Calculate the standard deviation of the collected samples. */
+				std_var = std_var_stable(adc_data, n);
 				fsm_flag = 3;
 			} else {
-				if (time_get_time_ms() % 10 == 0) {
+				/* every 5 ms */
+				if (((TIM16->CNT) - time_old) >= 160) {
+					time_old = TIM16->CNT;
 					position_setpoint += 1;
 				}
 			}
-//			vregs_write(VREGS_DEBUG_FLAG_3,
-//					(adc_get_absolute_current_measured_mA() >> 8));
-//			if (adc_get_absolute_current_measured_mA() > MOTION_CALIB_MAX_CURRENT_MA) {
-//				start_timing_measurement();
-//				/* wait for position to hold */
-//				if (stop_and_return_timing_measurement(500)) {
-//					/* Calculate the standard deviation of the collected samples. */
-//					std_var = std_var_stable(adc_data, n);
-//					position_setpoint = encoder_get_position();
-//					fsm_flag = 3;
-//				}
-//			} else {
-//				reset_timing_measurement();
-//				if (time_get_time_ms() % 10 == 0) {
-//					position_setpoint += 1;
-//				}
-//			}
 		}
 		if (fsm_flag == 3) {
 			reset_peak_detected();
 			fsm_flag = 4;
 		}
 		if (fsm_flag == 4) {
+			peak_process_adc_values_sensor();
 			if (get_peak_detected(MOTION_CALIBRATION_HALL_SENSOR) == 1) {
 				encoder_reset_position();
 				last_known_position = encoder_get_position();
+				position_setpoint = last_known_position;
 				fsm_flag = 5;
 			} else {
-				if (time_get_time_ms() % 10 == 0) {
+				if ((((TIM16->CNT) - time_old) >= 160)) {
+					time_old = TIM16->CNT;
 					position_setpoint -= 1;
 				}
 			}
 		}
 		/* wait for adstart to become 0 */
 		if (fsm_flag == 5) {
-			kp = kp_old;
-			ki = ki_old;
-			kd = kd_old;
 			if ((ADC1->CR & ADC_CR_ADSTART) != 0) {
 				/* Set AD_STOP to 1 to stop measuring on the ADC. */
 				ADC1->CR |= ADC_CR_ADSTP;
@@ -464,7 +456,7 @@ int32_t motion_drive_h_bridge() {
 				/* Write AD_START to 1 to start conversions. */
 				ADC1->CR |= ADC_CR_ADSTART;
 				set_calibrate(0);
-				motion_stop();
+				motion_return_to_idle();
 				interrupts_enable();
 			}
 		}
@@ -472,6 +464,7 @@ int32_t motion_drive_h_bridge() {
 
 		/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
 	case MOTION_MODE_WALK_FORWARD:
+		motion_control_position();
 		if (fsm_flag == 0) {
 			starting_setpoint = encoder_get_position();
 			absolute_starting_setpoint = absolute_position;
@@ -517,7 +510,7 @@ int32_t motion_drive_h_bridge() {
 			}
 			if (t >= t_move_total) {
 				last_known_position = encoder_get_position();
-				motion_stop();
+				motion_return_to_idle();
 			}
 		}
 		break;
@@ -526,8 +519,13 @@ int32_t motion_drive_h_bridge() {
 
 		break;
 
+	case MOTION_MODE_EMERGENCY_STOP:
+		errors_emergency_stop();
+		fsm_flag = 0;
+		break;
+
 	default:
-		motion_stop();
+		motion_return_to_idle();
 		return_value = 255;
 	}
 	motion_write_state_to_vregs(state);
@@ -628,9 +626,9 @@ void motion_set_state(uint8_t mode, uint8_t lift_off_time_a,
 }
 
 /**
- * Clear the current motion command, and stop
+ * Clear the current motion command, and return to idle
  */
-int32_t motion_stop(void) {
+int32_t motion_return_to_idle(void) {
 	state.mode = 0;
 	state.position_a = 0;
 	state.position_b = 0;
@@ -639,7 +637,23 @@ int32_t motion_stop(void) {
 	state.new_data_flag = 0;
 	state.crc = 0;
 	motion_write_state_to_vregs(state);
+	last_known_position = encoder_get_position();
+	position_setpoint = last_known_position;
+	return 0;
+}
 
+/**
+ * Clear the current motion command, and go to emergency stop
+ */
+int32_t motion_emergency_stop(void) {
+	state.mode = 255;
+	state.position_a = 0;
+	state.position_b = 0;
+	state.time_a = 0;
+	state.time_b = 0;
+	state.new_data_flag = 0;
+	state.crc = 0;
+	motion_write_state_to_vregs(state);
 	return 0;
 }
 
@@ -660,27 +674,7 @@ void set_calibrate(uint8_t value) {
  * is correctly initialized
  */
 void motion_init(void) {
-	motion_stop();
-	side_of_zebro = address_get_side();
-//	touch_down_position = (!(side_of_zebro) * TOUCH_DOWN_POSITION_L)
-//			+ (side_of_zebro * TOUCH_DOWN_POSITION_R);
-//	stand_up_position = (!(side_of_zebro) * STAND_UP_POSITION_L)
-//			+ (side_of_zebro * STAND_UP_POSITION_R);
-//	lift_off_position = (!(side_of_zebro) * LIFT_OFF_POSITION_L)
-//			+ (side_of_zebro * LIFT_OFF_POSITION_R);
-//#ifdef DEBUG_VREGS
-//	vregs_write(VREGS_MOTION_TOUCH_DOWN_POSITION_A,
-//			(uint8_t) (touch_down_position));
-//	vregs_write(VREGS_MOTION_TOUCH_DOWN_POSITION_B,
-//			(uint8_t) (touch_down_position >> 8));
-//	vregs_write(VREGS_STAND_UP_POSITION_A, (uint8_t) (stand_up_position));
-//	vregs_write(VREGS_STAND_UP_POSITION_B, (uint8_t) (stand_up_position >> 8));
-//	vregs_write(VREGS_MOTION_LIFT_OFF_POSITION_A,
-//			(uint8_t) (lift_off_position));
-//	vregs_write(VREGS_MOTION_LIFT_OFF_POSITION_B,
-//			(uint8_t) (lift_off_position >> 8));
-//#endif
-
+	motion_return_to_idle();
 	return;
 }
 

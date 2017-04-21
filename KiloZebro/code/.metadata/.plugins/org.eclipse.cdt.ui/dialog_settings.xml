@@ -17,6 +17,19 @@
 		<item value="false" key="caseSensitive"/>
 		<item value="227191" key="searchFlags"/>
 		<list key="previousPatterns">
+			<item value="statemode"/>
+			<item value="pootbus_temperatures_fp3"/>
+			<item value="safety"/>
+			<item value="errors_reset_emergency_stop"/>
+			<item value="EMERGENCY_STOP"/>
+			<item value="motion_stop"/>
+			<item value="VREGS_PEAK_MAX_AVG_DELTA"/>
+			<item value="VREGS_MOTION_LAST_KNOWN_POSITION_A"/>
+			<item value="VREGS_MOTION_STD_DEV_A"/>
+			<item value="VREGS_POSITION_CONTROL_KP"/>
+			<item value="VREGS_ENCODER_POSITION_A"/>
+			<item value="time_a"/>
+			<item value="statetime_a"/>
 			<item value="new_data_flag"/>
 			<item value="VREGS_DEBUG_FLAG_1"/>
 			<item value="adc_get_value"/>

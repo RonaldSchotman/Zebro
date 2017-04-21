@@ -52,20 +52,21 @@ int main(void) {
 	/* initialise all the things */
 	uart1_init_dma();
 	h_bridge_init();
+	/* ADC is coupled with TIM1_CC4 in h_bridge_init() */
 	adc_init();
 	vregs_init();
 	errors_init();
 	leds_init();
-	pootbus_master_init();
 	time_init();
 	fans_init();
 	encoder_init();
-	/* need to get ADC data before running address_init(). ADC is coupled with TIM1_CC4 in h_bridge_init() */
+	/* need to get ADC data before running address_init() */
 	address_init();
 	/* zebrobus uses address */
 	zebrobus_slave_init();
-	/* motion uses address */
+	/* motion uses zebrobus, encoder */
 	motion_init();
+	pootbus_master_init();
 
 	/* keep a loop counter */
 	uint8_t loop_counter = 0;
@@ -109,14 +110,13 @@ int main(void) {
 //		time_dumy_locmotive_controller();
 
 		/* Only process hall-sensor data when we are calibrating. After that it is just a waste of time. */
-		if (get_calibrate() == 1) {
-			peak_process_adc_values_sensor();
-		}
+//		if (get_calibrate() == 1) {
+//			peak_process_adc_values_sensor();
+//		}
 
 		encoder_write_to_vregs();
 		motion_absolute_position_calculator();
-		motion_drive_h_bridge();
-		motion_control_position();
+		motion_command_zebro();
 
 		/* waiting until the previous uart transfer is done can be very useful
 		 * during debugging. It ensures that you have information about
@@ -135,7 +135,7 @@ int main(void) {
 		vregs_write(VREGS_LOOP_COUNTER, loop_counter++);
 
 		stop_time = time17_get_time();
-		uint16_t time_diff = stop_time - start_time; /* automatically deals with rollover because of uint */
+		uint32_t time_diff = stop_time - start_time; /* automatically deals with rollover because of uint */
 		time_diff = time_diff / 48; /* convert to us */
 		vregs_write(VREGS_LOOP_TIME, (uint8_t) time_diff);
 	}

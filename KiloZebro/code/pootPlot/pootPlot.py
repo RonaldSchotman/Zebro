@@ -238,7 +238,7 @@ if __name__ == "__main__":
             help = "Path the the vregs.h header file",
             dest = "legend_file")     
     parser.add_argument("-s", "--plot-size",
-            default = 30,
+            default = 3000,
             type = int,
             help = "number of samples to show on the plot",
             dest = "length")
