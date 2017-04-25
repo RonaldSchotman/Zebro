@@ -26,6 +26,7 @@
 int32_t time_init(void);
 int32_t time_clock_init(void);
 uint8_t time_clock_17_init(void);
+uint8_t time_clock_6_init(void);
 int32_t time_watchdog_init(void);
 uint16_t time_check_time(void);
 uint32_t time_get_time_ms(void);

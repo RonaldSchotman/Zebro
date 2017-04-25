@@ -77,8 +77,10 @@ int32_t pootbus_master_init(){
 	/* enable clock to peripheral */
 	__HAL_RCC_I2C2_CLK_ENABLE();
 
+//	/* set up the peripheral */
+//	I2C2->TIMINGR = (uint32_t)0x20303e5d;
 	/* set up the peripheral */
-	I2C2->TIMINGR = (uint32_t)0x20303e5d;
+	I2C2->TIMINGR = (uint32_t)0x0070D8FF; /* I2C freq 100 khz, clock 48000 KHz, no analog filter, 0 digital filter, 65 ns rise time, 5 ns fall time. */
 	/* enable peripheral, and requests interupts for:
 	 * * errors
 	 * * transfer complete
@@ -232,6 +234,7 @@ void I2C2_IRQHandler(){
 		break;
 
 	case POOTBUS_STATE_IDLE:
+		break;
 	default:
 		/* this should not happen, but if it does, try to fix things */
 		pootbus_reset();
@@ -249,17 +252,21 @@ void pootbus_reset(){
 	/* disable I2C2  */
 	I2C2->CR1 &= ~I2C_CR1_PE;
 	/* add some delay */
-	for(i = 0; i < 10; i++);
-	/* enable I2C2 */
-	I2C2->CR1 |= I2C_CR1_PE;
-
+//	for(i = 0; i < 10; i++);
+	if (i<10) {
+		i++;
+	} else {
+		/* enable I2C2 */
+		I2C2->CR1 |= I2C_CR1_PE;
+		pootbus_set_state(POOTBUS_STATE_IDLE);
+		i = 0;
+	}
 //	I2C2->CR2 |=  I2C_CR2_STOP;
 //	/* clear all flags */
 //	I2C2->ICR |= I2C_ICR_STOPCF | I2C_ICR_OVRCF | I2C_ICR_ARLOCF |
 //				I2C_ICR_BERRCF | I2C_ICR_NACKCF | I2C_ICR_ADDRCF |
 //				I2C_ICR_TIMOUTCF;
 //	if(I2C2->RXDR);
-	pootbus_set_state(POOTBUS_STATE_IDLE);
 }
 
 /**
@@ -323,8 +330,6 @@ void pootbus_request_data(){
 			pootbus_calc_temperatures();
 			cycle_position = 0;
 		}
-		break;
-
 	}
 }
 
@@ -347,15 +352,14 @@ int32_t pootbus_check_for_timeout(void){
 
 	current_time = time_get_time_ms();
 
-	/* the clock has made a rollover */
-	if (current_time < pootbus_transaction_start_time){
-		current_time += TIME_ROLEOVER_MS;
-	}
+//	/* the clock has made a rollover */
+//	if (current_time < pootbus_transaction_start_time){
+//		current_time += TIME_ROLEOVER_MS;
+//	}
 
 	/* this is true when the transaction
 	 * has taken more than the time out value */
-	if (pootbus_transaction_start_time + POOTBUS_MAX_TRANSACTION_TIME <
-			current_time){
+	if ((time_calculate_delta(current_time, pootbus_transaction_start_time)) > POOTBUS_MAX_TRANSACTION_TIME){
 		/* put the bus to idle mode, reseting things */
 		pootbus_reset();
 		/* raise an error */
@@ -385,14 +389,25 @@ int32_t pootbus_get_motor_temperature_fp3(int32_t index){
  */
 int32_t pootbus_check_motor_temperatures(){
 	int32_t index;
+	static uint16_t counter = 0;
 
 	for (index = 0; index < POOTBUS_NUM_OF_TEMP_SENSORS; index++){
 		if (pootbus_temperatures_fp3[index] >
 			POOTBUS_EMERGENCY_MOTOR_TEMPERATURE * 1000){
-			errors_emergency_stop();
-			errors_report(ERRORS_MOTOR_OVERTEMPERATURE);
+			if (counter < 1000) {
+				counter += 1;
+			}
+			if (counter >= 1000) {
+				errors_emergency_stop();
+				errors_report(ERRORS_MOTOR_OVERTEMPERATURE);
+			}
 			return 1;
+		} else {
+			if (counter > 0) {
+				counter -= 1;
+			}
 		}
+
 	}
 
 	return 0;

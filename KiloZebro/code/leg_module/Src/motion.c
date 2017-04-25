@@ -41,14 +41,10 @@ static struct motion_state new_state = { 0, 0, 0, 0, 0, 0, 0 };
 uint32_t std_var; /* standard deviation of the hall-sensor with a peak at hall-sensor 3. */
 uint16_t position_touch_down = 0;
 uint8_t calibrate = 1; /* When Zebro is turned on, calibrate should first be on. */
-//static uint16_t touch_down_position = 0;
-//static uint16_t stand_up_position = 0;
-//static uint16_t lift_off_position = 0;
 static int16_t last_known_position = 0;
-//static uint8_t side_of_zebro = 0;
-//static uint32_t increasing_delay = 0;
-static uint8_t kp = 120, ki = 150, kd = 30;
-//static uint8_t kp = 96, ki = 120, kd = 24;
+//static uint8_t kp = 120, ki = 150, kd = 30;
+/* half pid values are also nice, but a bit slower. */
+static uint8_t kp = 96, ki = 120, kd = 24;
 /* current setpoint. This is a setpoint between -2^15 and 2^15 */
 static int32_t current_setpoint;
 static int16_t position_setpoint = 0;
@@ -289,10 +285,15 @@ int32_t motion_command_zebro() {
 
 	static uint16_t counter = 0;
 	static int16_t previous_setpoint;
-	static uint16_t distance_move = 0;
-	static int16_t starting_setpoint = 0;
+	static uint32_t delta_distance = 0;
+	static uint32_t desired_speed;
+//	uint32_t current_speed = calculate_current_speed();
+//	uint32_t new_speed = 0;
+//	uint32_t max_change_speed = 0;
+////	static int16_t starting_setpoint = 0;
 	static int16_t absolute_starting_setpoint = 0;
 	static int16_t absolute_ending_setpoint = 0;
+//	uint32_t distance_to_new_setpoint;
 //	static int16_t ending_setpoint = 0;
 //	static uint32_t position_ramp_length = 0;
 //	uint16_t delta_s = 0;
@@ -302,16 +303,14 @@ int32_t motion_command_zebro() {
 
 //	static uint32_t touch_down_time = 0;
 //	static uint32_t lift_off_time = 0;
-	static uint32_t t_move_total = 0;
-	static uint32_t t_ad = 0;
+	static uint32_t delta_time = 0;
+//	static uint32_t t_ad = 0;
 	static uint32_t starting_time = 0;
 	static uint32_t time_old;
-	uint32_t t = 0;
-
-//	uint16_t ending_position_setpoint, delta_s;
-//	static uint16_t setpoint = 0;
-//	static uint32_t previous_time;
-//	int32_t delta_t;
+	static uint32_t time_old_1;
+	uint32_t dt = (TIM16->CNT) - time_old;
+	uint32_t dt_1 = (TIM16->CNT) - time_old_1;
+	static uint32_t time_until_next_position_setpoint;
 
 #ifdef DEBUG_VREGS
 	vregs_write(VREGS_PEAK_ADC_SD_A, (uint8_t) get_std_var());
@@ -330,8 +329,8 @@ int32_t motion_command_zebro() {
 			(uint8_t) (position_setpoint >> 8));
 	vregs_write(VREGS_MOTION_POSITION_SETPOINT_B,
 			(uint8_t) (position_setpoint));
-	vregs_write(VREGS_POSITION_DISTANCE_MOVE_A, (uint8_t) (distance_move >> 8));
-	vregs_write(VREGS_POSITION_DISTANCE_MOVE_B, (uint8_t) (distance_move));
+//	vregs_write(VREGS_POSITION_DISTANCE_MOVE_A, (uint8_t) (distance_move >> 8));
+//	vregs_write(VREGS_POSITION_DISTANCE_MOVE_B, (uint8_t) (distance_move));
 #endif
 
 	switch (state.mode) {
@@ -373,8 +372,8 @@ int32_t motion_command_zebro() {
 		}
 
 		if (fsm_flag == 1) {
-			/* every 10 ms */
-			if ((((TIM16->CNT) - time_old) >= 160) && (position_setpoint == encoder_get_position())) {
+			/* every 2.5 ms = 160 ticks*/
+			if ((dt >= 160) && (position_setpoint == encoder_get_position())) {
 				time_old = TIM16->CNT;
 				position_setpoint -= 1;
 			}
@@ -395,7 +394,6 @@ int32_t motion_command_zebro() {
 		if (fsm_flag == 2) {
 			peak_process_adc_values_sensor();
 			static uint16_t n = 0;
-//			if (time_get_time_ms() % 10 == 0) { /* We don't want to sample too often */
 			if ((position_setpoint - previous_setpoint) >= 2) { /* We don't want to sample too often */
 				previous_setpoint = position_setpoint;
 				adc_data[n] = adc_get_value(ADC_HAL_2_INDEX); /* We're only interested in the value of the 3rd hall sensor */
@@ -412,8 +410,8 @@ int32_t motion_command_zebro() {
 				std_var = std_var_stable(adc_data, n);
 				fsm_flag = 3;
 			} else {
-				/* every 5 ms */
-				if (((TIM16->CNT) - time_old) >= 160) {
+				/* every 2.5 ms  = 320 ticks */
+				if (dt >= 160) {
 					time_old = TIM16->CNT;
 					position_setpoint += 1;
 				}
@@ -431,7 +429,8 @@ int32_t motion_command_zebro() {
 				position_setpoint = last_known_position;
 				fsm_flag = 5;
 			} else {
-				if ((((TIM16->CNT) - time_old) >= 160)) {
+				/* every 2.5 ms  = 320 ticks */
+				if ((dt >= 160)) {
 					time_old = TIM16->CNT;
 					position_setpoint -= 1;
 				}
@@ -439,7 +438,8 @@ int32_t motion_command_zebro() {
 		}
 		/* wait for adstart to become 0 */
 		if (fsm_flag == 5) {
-			if ((ADC1->CR & ADC_CR_ADSTART) != 0) {
+			time_old = 0;
+			while ((ADC1->CR & ADC_CR_ADSTART) != 0) {
 				/* Set AD_STOP to 1 to stop measuring on the ADC. */
 				ADC1->CR |= ADC_CR_ADSTP;
 			}
@@ -465,54 +465,110 @@ int32_t motion_command_zebro() {
 		/* it is assumed that if we move to lift off, we will also always move to touch down. After that, we'll see what we'll do. */
 	case MOTION_MODE_WALK_FORWARD:
 		motion_control_position();
-		if (fsm_flag == 0) {
-			starting_setpoint = encoder_get_position();
-			absolute_starting_setpoint = absolute_position;
-			absolute_ending_setpoint = ((state.position_a << 8)
-					+ state.position_b);
-			starting_time = time_get_time_ms();
-			if (absolute_starting_setpoint >= absolute_ending_setpoint) {
-				distance_move =
-						ENCODER_PULSES_PER_ROTATION
-								- (absolute_starting_setpoint
-										- absolute_ending_setpoint);
-			} else {
-				distance_move = absolute_ending_setpoint
-						- absolute_starting_setpoint;
-			}
-			t_move_total = ((state.time_a * 1000) + (state.time_b * 4))
-					- starting_time;
-			t_ad = MOTION_ACC_DEC_TIME_MS;
-			fsm_flag = 6;
+		time_old = TIM16->CNT;
+		absolute_starting_setpoint = absolute_position;
+		starting_time = time_get_time_ms();
+		absolute_ending_setpoint = ((state.position_a << 8) + state.position_b);
+		if (absolute_starting_setpoint > absolute_ending_setpoint) {
+			delta_distance =
+			ENCODER_PULSES_PER_ROTATION
+					- (absolute_starting_setpoint - absolute_ending_setpoint);
+		} else if (absolute_starting_setpoint == absolute_ending_setpoint) {
+			motion_return_to_idle();
+		} else {
+			delta_distance = absolute_ending_setpoint
+					- absolute_starting_setpoint;
 		}
-		if (fsm_flag == 6) {
-			t = time_calculate_delta(time_get_time_ms(), starting_time);
-			if (t <= t_ad) {
-				position_setpoint = (starting_setpoint
-						+ ((distance_move * t * t)
-								/ (2 * t_ad * (t_move_total - t_ad))));
+		delta_time = ((state.time_a * 1000) + (state.time_b * 4))
+				- starting_time;
+		if (delta_time > 0) {
+			desired_speed = (delta_distance * 1000000) / delta_time; /* kilo-pulses per second */
+		}
+		if (dt_1 >= time_until_next_position_setpoint) {
+				position_setpoint += 1;
+				if (position_setpoint > (encoder_get_position()+delta_distance)) {
+					position_setpoint = (encoder_get_position()+delta_distance);
+				}
+
+			if (desired_speed > 0) {
+				time_until_next_position_setpoint = (1000
+						* TIME_ONE_SECOND_COUNTER_VALUE) / desired_speed;
+				time_old_1 = (TIM16->CNT);
+//				max_change_speed = ((MOTION_ACC_MAX
+//						* time_until_next_position_setpoint)
+//						/ TIME_ONE_SECOND_COUNTER_VALUE);
 			}
 
-			if ((t > t_ad) && (t <= (t_move_total - t_ad))) {
-				position_setpoint = (starting_setpoint
-						+ (((distance_move * t) / (t_move_total - t_ad))
-								- ((distance_move * t_ad)
-										/ (2 * (t_move_total - t_ad)))));
-			}
+//			if (current_speed > desired_speed) { /* decelerate */
+//				if (max_change_speed > (current_speed - desired_speed)) {
+//					new_speed = desired_speed;
+//				} else {
+//					new_speed = current_speed - max_change_speed;
+//				}
+//			} else if (current_speed < desired_speed) { /* accelerate */
+//				if (max_change_speed > (desired_speed - current_speed)) {
+//					new_speed = desired_speed;
+//				} else {
+//					new_speed = current_speed + max_change_speed;
+//				}
+//			} else { /* constant speed */
+//				new_speed = current_speed;
+//			}
 
-			if ((t > (t_move_total - t_ad)) && (t <= t_move_total)) {
-				position_setpoint = (starting_setpoint
-						+ (distance_move
-								- ((distance_move
-										* ((t_move_total - t)
-												* (t_move_total - t)))
-										/ (2 * t_ad * (t_move_total - t_ad)))));
-			}
-			if (t >= t_move_total) {
-				last_known_position = encoder_get_position();
-				motion_return_to_idle();
-			}
+//			if (new_speed > 0) {
+//				time_until_next_position_setpoint = (1000
+//						* TIME_ONE_SECOND_COUNTER_VALUE) / new_speed;
+//				time_old_1 = (TIM16->CNT);
+//			}
 		}
+
+//		if (fsm_flag == 0) {
+//			starting_setpoint = encoder_get_position();
+//			absolute_starting_setpoint = absolute_position;
+//			absolute_ending_setpoint = ((state.position_a << 8)
+//					+ state.position_b);
+//			starting_time = time_get_time_ms();
+//			if (absolute_starting_setpoint >= absolute_ending_setpoint) {
+//				distance_move =
+//						ENCODER_PULSES_PER_ROTATION
+//								- (absolute_starting_setpoint
+//										- absolute_ending_setpoint);
+//			} else {
+//				distance_move = absolute_ending_setpoint
+//						- absolute_starting_setpoint;
+//			}
+//			t_move_total = ((state.time_a * 1000) + (state.time_b * 4))
+//					- starting_time;
+//			t_ad = MOTION_ACC_DEC_TIME_MS;
+//			fsm_flag = 6;
+//		}
+//		if (fsm_flag == 6) {
+//			t = time_calculate_delta(time_get_time_ms(), starting_time);
+//			if (t <= t_ad) {
+//				position_setpoint = (starting_setpoint
+//						+ ((distance_move * t * t)
+//								/ (2 * t_ad * (t_move_total - t_ad))));
+//			}
+//
+//			if ((t > t_ad) && (t <= (t_move_total - t_ad))) {
+//				position_setpoint = (starting_setpoint
+//						+ (((distance_move * t) / (t_move_total - t_ad))
+//								- ((distance_move * t_ad)
+//										/ (2 * (t_move_total - t_ad)))));
+//			}
+//
+//			if ((t > (t_move_total - t_ad)) && (t <= t_move_total)) {
+//				position_setpoint = (starting_setpoint
+//						+ (distance_move
+//								- ((distance_move
+//										* ((t_move_total - t)
+//												* (t_move_total - t)))
+//										/ (2 * t_ad * (t_move_total - t_ad)))));
+//			}
+//			if (t > t_move_total) {
+//				motion_return_to_idle();
+//			}
+//		}
 		break;
 
 	case MOTION_MODE_WALK_BACKWARD:
@@ -530,6 +586,22 @@ int32_t motion_command_zebro() {
 	}
 	motion_write_state_to_vregs(state);
 	return return_value;
+}
+
+uint32_t calculate_current_speed(void) {
+	static int16_t encoder_position_old = 0;
+	static uint16_t time_old = 0;
+	static uint32_t current_speed = 0;
+
+	int16_t delta_distance = encoder_get_position() - encoder_position_old;
+	uint16_t delta_time = TIM6->CNT - time_old; /* TIM6 runs at 64000 ticks/sec */
+	/* assuming the speed is never SLOWER than around 1 pulse per second. This way the current_speed is never calculated to be too high, only sometimes too low. */
+	if ((delta_distance != 0) || (delta_time >= 63000)) {
+		encoder_position_old = encoder_get_position();
+		time_old = TIM6->CNT;
+		current_speed = (delta_distance * 64000000) / delta_time; /* kilo-pulses per second */
+	}
+	return current_speed;
 }
 
 /* Set the setpoint for current */

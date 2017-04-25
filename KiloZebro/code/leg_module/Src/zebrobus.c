@@ -84,7 +84,6 @@ struct zebrobus_write_request zebrobus_get_write_request() {
 			interrupts_enable();
 
 			return return_struct;
-
 		}
 
 		/**

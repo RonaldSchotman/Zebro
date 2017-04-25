@@ -274,18 +274,18 @@ def main(stdscr):
                 command = Command("[0x00 147 {0}]".format(position_control_kd), ";", 'Decrease kd position control')
 
             if input_char == 'w':
-                main.position = (main.position + 10)%910
+                main.position = (main.position + 100)%910
                 position_a = (main.position >> 8) & 0xff
                 position_b = main.position & 0xff
                 time_a = time_sync_counter
-                time_b = 50
+                time_b = 75
                 command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "w", 'walk forward')
             if input_char == 's':
                 main.position = (main.position + 900)%910
                 position_a = (main.position >> 8) & 0xff
                 position_b = main.position & 0xff
                 time_a = time_sync_counter
-                time_b = 50
+                time_b = 75
                 command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "s", 'walk backward')
             if input_char == 'z':
                 position = 610

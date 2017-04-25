@@ -8,8 +8,8 @@
 		<item value="321" key="DIALOG_Y_ORIGIN"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
-		<item value="134" key="size.height"/>
-		<item value="770" key="size.width"/>
+		<item value="128" key="size.height"/>
+		<item value="764" key="size.width"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
 	</section>
@@ -17,6 +17,29 @@
 		<item value="false" key="caseSensitive"/>
 		<item value="227191" key="searchFlags"/>
 		<list key="previousPatterns">
+			<item value="*delay*"/>
+			<item value="*for*"/>
+			<item value="for"/>
+			<item value="TIM6"/>
+			<item value="TIM7"/>
+			<item value="TIM15"/>
+			<item value="TIM3"/>
+			<item value="TIM2"/>
+			<item value="encoder_reset_position"/>
+			<item value="CR1"/>
+			<item value="IRQHandler"/>
+			<item value="ERRORS_POOTBUS_TIMOUT"/>
+			<item value="ERRORS_POOTBUS_NACK"/>
+			<item value="ERRORS_POOTBUS_ERROR"/>
+			<item value="ERRORS_POOTBUS_UNEXPECTED"/>
+			<item value="VREGS_TEST_FIELD"/>
+			<item value="VREGS_DEBUG_FLAG_4"/>
+			<item value="peak_process_adc_values_sensor"/>
+			<item value="adc_control_motor_current"/>
+			<item value="time17_get_time"/>
+			<item value="time_get_time_ms"/>
+			<item value="time_check_time"/>
+			<item value="time"/>
 			<item value="statemode"/>
 			<item value="pootbus_temperatures_fp3"/>
 			<item value="safety"/>
