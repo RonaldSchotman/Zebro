@@ -86,24 +86,39 @@ int32_t address_init(void){
  * ADDRESS_RIGHT_BACK
  */
 int32_t address_measure_position(void){
-	uint16_t adc_readout;
+	static uint32_t adc_readout;
+	static uint32_t adc_readout_temp;
+	static uint32_t adc_readout_mean;
 	int32_t cursor;
 	int32_t best_index = -1;
 	int32_t best_distance = INT32_MAX;
+	static uint8_t i=0;
 
 	/* list of values read from the ADC when an address resistor is read.
 	 * The INT32_MAX values are placeholders. */
+	/* correct values if one would take an average */
 	int32_t adc_values[ADDRESS_NUMBER_OF_POSITIONS]
-	    = {625, INT32_MAX, 1310, INT32_MAX, 1845, INT32_MAX,
-	    		2458, INT32_MAX, 3143, INT32_MAX, 3500, INT32_MAX}; // The highest value used to be 3724.
+	    = {625, INT32_MAX, 1310, INT32_MAX, 1870, INT32_MAX,
+	    		2458, INT32_MAX, 2800, INT32_MAX, 3370, INT32_MAX};
+	/* old values from BEP group */
+//	int32_t adc_values[ADDRESS_NUMBER_OF_POSITIONS]
+//	    = {625, INT32_MAX, 1310, INT32_MAX, 1845, INT32_MAX,
+//	    		2458, INT32_MAX, 3143, INT32_MAX, 3724, INT32_MAX};
+
+	for (i = 0; i<64; i++) {
+		adc_readout_temp = (adc_get_value(ADC_ID_RESISTOR_INDEX));
+		adc_readout += adc_readout_temp;
+		while (adc_get_value(ADC_ID_RESISTOR_INDEX) == adc_readout_temp) {
+			/* wait for new data */
+		}
+	}
 
 	/* left aligned 10 bit, so shift! */
-	adc_readout = (adc_get_value(ADC_ID_RESISTOR_INDEX))>>4;
-
+	adc_readout_mean = (adc_readout / 64)>>4;
 	/* find the closest element in the adc_values array */
 	for(cursor = 0; cursor < ADDRESS_NUMBER_OF_POSITIONS; cursor++){
 		int32_t distance;
-		distance = abs(adc_values[cursor] - adc_readout);
+		distance = abs(adc_values[cursor] - adc_readout_mean);
 		if (distance < best_distance){
 			best_index = cursor;
 			best_distance = distance;

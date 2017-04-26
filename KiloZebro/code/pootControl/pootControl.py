@@ -29,7 +29,7 @@ FORWARD = 0
 BACKWARD = 1
 
 class BusPirate:
-    def __init__(self, port = "/dev/ttyUSB1", baud = 115200):
+    def __init__(self, port = "/dev/ttyUSB0", baud = 115200):
         self.serial = serial.Serial(port, baud, timeout = 0)
         self.serial.write(b'#\n') # reset the BusPirate
         time.sleep(0.1) # wait a second
@@ -204,11 +204,24 @@ def main(stdscr):
     
     last_time_update = datetime.datetime.now()
     time_sync_counter = 0
-    position_control_kp = 0
+    position_control_kp = 240
     current_control_kp = 0
-    position_control_ki = 0
+    position_control_ki = 30
     current_control_ki = 0
-    position_control_kd = 0
+    position_control_kd = 50
+    main.position_touch_down = 600
+    main.position_lift_off = 630
+    main.position_stand_up = 610
+    position_touch_down_a = (main.position_touch_down >> 8) & 0xff
+    position_touch_down_b = main.position_touch_down & 0xff
+    position_lift_off_a = (main.position_lift_off >> 8) & 0xff
+    position_lift_off_b = main.position_lift_off & 0xff
+    position_stand_up_a = (main.position_stand_up >> 8) & 0xff
+    position_stand_up_b = main.position_stand_up & 0xff
+    main.walking = 0
+    main.time_a = 0
+    main.time_b = 0
+    main.toggle = 0
 
     while(True):
         display.get_data_from_bus_pirate(bus_pirate)
@@ -229,6 +242,7 @@ def main(stdscr):
             if input_char == 'e':
                 command = commands.find_command_by_key(input_char)
             if input_char == ' ':
+                walking = 0
                 command = commands.find_command_by_key(input_char)                
 
             if input_char == 'y':
@@ -274,33 +288,47 @@ def main(stdscr):
                 command = Command("[0x00 147 {0}]".format(position_control_kd), ";", 'Decrease kd position control')
 
             if input_char == 'w':
-                main.position = (main.position + 100)%910
-                position_a = (main.position >> 8) & 0xff
-                position_b = main.position & 0xff
-                time_a = time_sync_counter
-                time_b = 75
-                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "w", 'walk forward')
-            if input_char == 's':
-                main.position = (main.position + 900)%910
-                position_a = (main.position >> 8) & 0xff
-                position_b = main.position & 0xff
-                time_a = time_sync_counter
-                time_b = 75
-                command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "s", 'walk backward')
+                main.time_a = time_sync_counter + 1
+                main.time_b = 0
+                if main.toggle == 0:
+                    main.toggle = 1
+                    command = Command("[0x20 30 2 {0} {1} {2} {3} 1 0 [0x24 30 2 {4} {5} {2} {3} 1 0 [0x28 30 2 {0} {1} {2} {3} 1 0 [0x2c 30 2 {4} {5} {2} {3} 1 0 [0x30 30 2 {0} {1} {2} {3} 1 0 [0x34 30 2 {4} {5} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, main.time_a, main.time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')
+                else:
+                    main.toggle = 0
+                    command = Command("[0x20 30 2 {4} {5} {2} {3} 1 0 [0x24 30 2 {0} {1} {2} {3} 1 0 [0x28 30 2 {4} {5} {2} {3} 1 0 [0x2c 30 2 {0} {1} {2} {3} 1 0 [0x30 30 2 {4} {5} {2} {3} 1 0 [0x34 30 2 {0} {1} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, main.time_a, main.time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')
+                
+                # main.walking = 1
+                
+            # if input_char == 's':
+                # main.position = (main.position + 900)%910
+                # position_a = (main.position >> 8) & 0xff
+                # position_b = main.position & 0xff
+                # time_a = time_sync_counter
+                # time_b = 75
+                # command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "s", 'walk backward')
+            
             if input_char == 'z':
-                position = 610
-                position_a = (main.position >> 8) & 0xff
-                position_b = main.position & 0xff
-                time_a = time_sync_counter + 1
-                time_b = 0
-                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "z", 'stand up')
-
+                main.time_a = time_sync_counter + 1
+                main.time_b = 0
+                command = Command("[0x00 30 2 {0} {1} {2} {3} 1 0 1]".format(position_stand_up_a, position_stand_up_b, main.time_a, main.time_b), "z", 'stand up')
 
             if command:
                 bus_pirate.transmit_command(command)
   
+        # if main.walking == 1:
+        #     if time_sync_counter >= time_a:
+        #         time_a = time_sync_counter + 1
+        #         time_b = 0
+        #         if main.toggle == 0:
+        #             toggle = 1
+        #             command = Command("[0x20 30 2 {0} {1} {2} {3} 1 0 [0x24 30 2 {4} {5} {2} {3} 1 0 [0x28 30 2 {0} {1} {2} {3} 1 0 [0x2c 30 2 {4} {5} {2} {3} 1 0 [0x30 30 2 {0} {1} {2} {3} 1 0 [0x34 30 2 {4} {5} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, time_a, time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')
+        #         else:
+        #             main.toggle = 0
+        #             command = Command("[0x20 30 2 {4} {5} {2} {3} 1 0 [0x24 30 2 {0} {1} {2} {3} 1 0 [0x28 30 2 {4} {5} {2} {3} 1 0 [0x2c 30 2 {0} {1} {2} {3} 1 0 [0x30 30 2 {4} {5} {2} {3} 1 0 [0x34 30 2 {0} {1} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, time_a, time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')
+        #         bus_pirate.transmit_command(command)
+
         current_time = datetime.datetime.now()
-   
+        
         #send periodic timing ticks
         if  current_time >= last_time_update + datetime.timedelta(seconds = 1):
             command = "[0x00 11 {}]".format(time_sync_counter)

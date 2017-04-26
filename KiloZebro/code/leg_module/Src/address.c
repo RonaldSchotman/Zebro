@@ -99,7 +99,7 @@ int32_t address_measure_position(void){
 	/* correct values if one would take an average */
 	int32_t adc_values[ADDRESS_NUMBER_OF_POSITIONS]
 	    = {625, INT32_MAX, 1310, INT32_MAX, 1870, INT32_MAX,
-	    		2458, INT32_MAX, 2800, INT32_MAX, 3370, INT32_MAX};
+	    		2408, INT32_MAX, 2800, INT32_MAX, 3370, INT32_MAX};
 	/* old values from BEP group */
 //	int32_t adc_values[ADDRESS_NUMBER_OF_POSITIONS]
 //	    = {625, INT32_MAX, 1310, INT32_MAX, 1845, INT32_MAX,

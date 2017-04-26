@@ -84,7 +84,6 @@ struct zebrobus_write_request zebrobus_get_write_request() {
 			interrupts_enable();
 
 			return return_struct;
-
 		}
 
 		/**
@@ -238,37 +237,42 @@ struct zebrobus_write_request zebrobus_get_write_request() {
 				case VREGS_CURRENT_CONTROL_KP:
 					adc_current_control_set_kp(request.data);
 #ifdef DEBUG_VREGS
-					vregs_write(VREGS_CURRENT_CONTROL_KP, adc_current_control_get_kp());
+					vregs_write(VREGS_CURRENT_CONTROL_KP,
+							adc_current_control_get_kp());
 #endif
-				break;
+					break;
 
 				case VREGS_CURRENT_CONTROL_KI:
 					adc_current_control_set_ki(request.data);
 #ifdef DEBUG_VREGS
-					vregs_write(VREGS_CURRENT_CONTROL_KI, adc_current_control_get_ki());
+					vregs_write(VREGS_CURRENT_CONTROL_KI,
+							adc_current_control_get_ki());
 #endif
-				break;
+					break;
 
 				case VREGS_POSITION_CONTROL_KP:
 					motion_position_control_set_kp(request.data);
 #ifdef DEBUG_VREGS
-					vregs_write(VREGS_POSITION_CONTROL_KP, motion_position_control_get_kp());
+					vregs_write(VREGS_POSITION_CONTROL_KP,
+							motion_position_control_get_kp());
 #endif
-				break;
+					break;
 
 				case VREGS_POSITION_CONTROL_KI:
 					motion_position_control_set_ki(request.data);
 #ifdef DEBUG_VREGS
-					vregs_write(VREGS_POSITION_CONTROL_KI, motion_position_control_get_ki());
+					vregs_write(VREGS_POSITION_CONTROL_KI,
+							motion_position_control_get_ki());
 #endif
-				break;
+					break;
 
 				case VREGS_POSITION_CONTROL_KD:
 					motion_position_control_set_kd(request.data);
 #ifdef DEBUG_VREGS
-					vregs_write(VREGS_POSITION_CONTROL_KD, motion_position_control_get_kd());
+					vregs_write(VREGS_POSITION_CONTROL_KD,
+							motion_position_control_get_kd());
 #endif
-				break;
+					break;
 
 				case VREGS_TEST_FIELD:
 #ifdef DEBUG_VREGS

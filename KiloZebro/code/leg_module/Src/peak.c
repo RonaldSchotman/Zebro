@@ -44,7 +44,7 @@ uint8_t peak_process_adc_values_sensor(void) {
 		static uint16_t avgHistory[PEAK_NUM_OF_SENSORS][2];
 		uint32_t standard_deviation = get_std_var();
 		uint8_t sensor;
-		uint16_t threshold = 0; // 1 standard deviations for signal
+		uint16_t threshold = 0;
 		uint8_t influence = 5; // Now we need to shift the result inside the first if statement by 4 bits.
 		static uint16_t delta = 0;
 		static uint16_t avg_delta = 0;
@@ -89,7 +89,7 @@ uint8_t peak_process_adc_values_sensor(void) {
 			vregs_write(VREGS_PEAK_THRESHOLD, (uint8_t) (threshold));
 #endif
 			/* in our case std_var is always positive */
-			if (delta > (threshold * abs(standard_deviation))) {
+			if (delta > (threshold * abs(standard_deviation)) + 1) {
 				peak_detected[sensor] = 1;
 
 				move_over_array_elements(filteredHistory[sensor],

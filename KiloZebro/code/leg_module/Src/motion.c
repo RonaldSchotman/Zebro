@@ -44,7 +44,7 @@ uint8_t calibrate = 1; /* When Zebro is turned on, calibrate should first be on.
 static int16_t last_known_position = 0;
 //static uint8_t kp = 120, ki = 150, kd = 30;
 /* half pid values are also nice, but a bit slower. */
-static uint8_t kp = 96, ki = 120, kd = 24;
+static uint8_t kp = 240, ki = 30, kd = 50;
 /* current setpoint. This is a setpoint between -2^15 and 2^15 */
 static int32_t current_setpoint;
 static int16_t position_setpoint = 0;
