@@ -1,0 +1,476 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: peak.c
+ *
+ * Description:
+ * Detect the peaks in the data send from the hall sensors
+ *
+ * Authors:
+ * Piet De Vaere -- Piet@DeVae.re
+ */
+
+/*
+ * IMPORTANT:
+ * This file assumes that the magnets will cause an upward peak.
+ */
+
+#include "stm32f0xx_hal.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "peak.h"
+#include "adc.h"
+#include "time.h"
+#include "vregs.h"
+#include "motion.h"
+#include "globals.h"
+
+uint8_t peak_detected[PEAK_NUM_OF_SENSORS] = { 0, 0, 0 };
+//static uint32_t time_old;
+
+/**
+ * Process ADC data for a single hall sensor
+ */
+uint8_t peak_process_adc_values_sensor(uint8_t fill_up_arrays) {
+//	if (((TIM16->CNT) - time_old) >= 8) { /* every 1.25 ms, if this loop is too fast, peak detected does not stay high long enough and doesn't work because delta becomes too small. If too slow, the detection rate is too slow. */
+//		time_old = (TIM16->CNT);
+		uint16_t adc_data;
+		static uint16_t filteredHistory[PEAK_NUM_OF_SENSORS][PEAK_HISTORY_LAG];
+		static uint16_t array_deltas[PEAK_HISTORY_LAG];
+		static uint16_t avgHistory[PEAK_NUM_OF_SENSORS][2];
+		uint32_t standard_deviation = get_std_var();
+		uint8_t sensor;
+		static uint16_t threshold;
+		static uint8_t influence = 8; // Now we need to shift the result inside the first if statement by 4 bits.
+		static uint16_t delta = 0;
+		static uint16_t avg_delta = 0;
+		static uint16_t max_avg_delta;
+//		static uint16_t counter;
+
+		for (sensor = 0; sensor < PEAK_NUM_OF_SENSORS; sensor++) {
+			/* sanity check */
+			if (sensor < 0 || sensor > PEAK_NUM_OF_SENSORS) {
+				return PEAK_ERROR;
+			}
+
+			/* get the latest ADC value */
+			adc_data = adc_get_value(peak_get_adc_channel_index(sensor));
+
+//			if (counter <= (4 * PEAK_HISTORY_LAG)) {
+//				avgHistory[sensor][0] = adc_data;
+//				counter += 1;
+//			}
+
+			// We assume the magnet in the leg is positioned such that peaks will be positive.
+			delta = abs(adc_data - avgHistory[sensor][0]);
+			move_over_array_elements(array_deltas, PEAK_HISTORY_LAG);
+			array_deltas[PEAK_HISTORY_LAG - 1] = delta;
+			avg_delta = mean(array_deltas, PEAK_HISTORY_LAG);
+			/* avg_delta should not be more than a quarter of the range. We are measuring positive magnetic changes, so only the top half counts. More than half of that is enough range and max should not be higher. */
+			if ((avg_delta > max_avg_delta) && (fill_up_arrays == 1)) {
+				max_avg_delta = avg_delta;
+			}
+			if (standard_deviation != 0 && (fill_up_arrays == 2)) {
+				threshold = (max_avg_delta / standard_deviation);
+			}
+			/* in our case std_var is always positive */
+//			if ((avg_delta >= ((((threshold<<1) - 1) * standard_deviation)>>1)) && (fill_up_arrays == 3)) {
+			if ((avg_delta >= ((threshold - 1) * standard_deviation)) && (fill_up_arrays == 3)) {
+				peak_detected[sensor] = 1;
+				/* Make max_avg_delta 0 to be able to run calibration again and again. */
+				max_avg_delta = 0;
+				move_over_array_elements(filteredHistory[sensor],
+				PEAK_HISTORY_LAG);
+
+				filteredHistory[sensor][PEAK_HISTORY_LAG - 1] =
+						((influence * adc_data)
+								+ ((16 - influence)
+										* filteredHistory[sensor][PEAK_HISTORY_LAG
+												- 2])) >> 4; //Divide sum to get average of 16 samples. We lose some accuracy, but this is no problem.
+				avgHistory[sensor][0] = avgHistory[sensor][1];
+				avgHistory[sensor][1] = mean(filteredHistory[sensor],
+				PEAK_HISTORY_LAG); //Divide sum to get average. We lose some accuracy, but this is no problem.
+			} else {
+				//clearing the peak_detected flag is done where the flag is actually checked.
+				move_over_array_elements(filteredHistory[sensor],
+				PEAK_HISTORY_LAG);
+				filteredHistory[sensor][PEAK_HISTORY_LAG - 1] = adc_data;
+				avgHistory[sensor][0] = avgHistory[sensor][1];
+				avgHistory[sensor][1] = mean(filteredHistory[sensor],
+				PEAK_HISTORY_LAG);
+			}
+#ifdef DEBUG_VREGS
+			vregs_write(VREGS_PEAK_MAX_AVG_DELTA_A,
+					(uint8_t) (max_avg_delta >> 8));
+			vregs_write(VREGS_PEAK_MAX_AVG_DELTA_B, (uint8_t) (max_avg_delta));
+			vregs_write(VREGS_PEAK_AVG_DELTA, (uint8_t) (avg_delta >> 8));
+			vregs_write(VREGS_PEAK_THRESHOLD, (uint8_t) (threshold));
+			vregs_write((VREGS_PEAK_1_ADC_AVERAGE + sensor),
+					(avgHistory[sensor][1] >> 8));
+			vregs_write((VREGS_PEAK_1_DETECTED + sensor),
+					peak_detected[sensor]);
+#endif
+		}
+//	}
+	return 0;
+}
+
+// Move all elements of an array one to the left
+void move_over_array_elements(uint16_t *array, uint8_t array_size) {
+	uint8_t i;
+	for (i = 0; i < (array_size - 1); i++) {
+		array[i] = array[i + 1];
+	}
+}
+
+// Get the mean of an array of length array_size
+uint16_t mean(uint16_t *array, uint8_t array_size) {
+	uint8_t i = 0;
+	uint32_t sum = 0;
+	uint16_t average;
+	for (i = 0; i < array_size; i++) {
+		sum += array[i];
+	}
+	average = (uint16_t) (sum / array_size); //Divide sum to get average. We lose some accuracy, but this is no problem. Because array size is multiple of 2, compiler will make it a shift.
+	return average;
+}
+
+/**
+ * Translate a sensor number to an ADC index number
+ */
+uint8_t peak_get_adc_channel_index(uint8_t sensor) {
+	switch (sensor) {
+	case 0:
+		return ADC_HAL_1_INDEX;
+		break;
+
+	case 1:
+		return ADC_HAL_2_INDEX;
+		break;
+
+	case 2:
+		return ADC_HAL_3_INDEX;
+		break;
+
+	default:
+		return PEAK_ERROR;
+	}
+}
+
+// Return if a peak for a certain hall-sensor was detected.
+uint8_t get_peak_detected(uint8_t sensor) {
+	uint8_t peak = peak_detected[sensor];
+	if (peak == 1) {
+		reset_peak_detected(); //If 1 peak was detected, all of them should be cleared.
+	}
+	return peak;
+}
+
+// Clear all peak detection flags for all hall-sensors.
+void reset_peak_detected(void) {
+	uint8_t i = 0;
+	for (i = 0; i < PEAK_NUM_OF_SENSORS; i++) {
+		peak_detected[i] = 0;
+	}
+	return;
+}
+
+/* -------- OLD CODE -------------- */
+
+//#include "position.h"
+//static int32_t equilibrium[PEAK_NUM_OF_SENSORS] = { PEAK_DEFAULT_EQUILIBRIUM,
+//PEAK_DEFAULT_EQUILIBRIUM,
+//PEAK_DEFAULT_EQUILIBRIUM };
+//static int32_t state[PEAK_NUM_OF_SENSORS] = { PEAK_STATE_IDLE, PEAK_STATE_IDLE,
+//PEAK_STATE_IDLE };
+//static int32_t min_or_max[PEAK_NUM_OF_SENSORS] = { 0, 0, 0 };
+//static uint8_t peak_debug_counter = 0;
+//static uint8_t positive_peak_debug_counter = 0;
+///**
+// * Write out some debug info to the vregs
+// */
+//int8_t peak_write_debug_info(void) {
+//	vregs_write(VREGS_PEAK_1_STATE, state[0]);
+//	vregs_write(VREGS_PEAK_2_STATE, state[1]);
+//	vregs_write(VREGS_PEAK_3_STATE, state[2]);
+//	vregs_write(VREGS_PEAK_1_MIN_MAX, min_or_max[0] >> 4);
+//	vregs_write(VREGS_PEAK_2_MIN_MAX, min_or_max[1] >> 4);
+//	vregs_write(VREGS_PEAK_3_MIN_MAX, min_or_max[2] >> 4);
+//	vregs_write(VREGS_PEAK_1_EQUILIBRIUM, equilibrium[0] >> 4);
+//	vregs_write(VREGS_PEAK_2_EQUILIBRIUM, equilibrium[1] >> 4);
+//	vregs_write(VREGS_PEAK_3_EQUILIBRIUM, equilibrium[2] >> 4);
+//	return 0;
+//}
+///**
+// * Get the median of the last samples of the hall sensors.
+// */
+//int32_t peak_get_median_value(uint8_t sensor, int32_t adc_data) {
+//	static int32_t history[PEAK_NUM_OF_SENSORS][PEAK_MEDIAN_HISTORY_SIZE];
+//	int32_t *history_copy[PEAK_NUM_OF_SENSORS][PEAK_MEDIAN_HISTORY_SIZE];
+//	static int cursor = 0;
+//	int32_t median = 0;
+//	int i = 0;
+//
+//	history[sensor][cursor] = adc_data; //Acquire history data
+//	for (i = 0; i < PEAK_MEDIAN_HISTORY_SIZE; i++) {
+//		// Copy history data to be sorted by median algorithm.
+//		history_copy[sensor][i] = &history[sensor][i];
+//	}
+//
+//	vregs_write((VREGS_DEBUG_FLAG_4), (*history_copy[0][0] >> 4));
+//	vregs_write((VREGS_DEBUG_FLAG_5), (*history_copy[0][1] >> 4));
+//	vregs_write((VREGS_DEBUG_FLAG_6), (*history_copy[0][2] >> 4));
+//
+//	// Make history a FIFO buffer.)
+//	cursor++;
+//	if (cursor >= PEAK_MEDIAN_HISTORY_SIZE) {
+//		cursor = 0;
+//	}
+//
+//	// Calculate the median according to history size.
+//	switch (PEAK_MEDIAN_HISTORY_SIZE) {
+//	case 3:
+//		median = opt_med3(history_copy[sensor][0]);
+//		break;
+//	case 5:
+//		median = opt_med5(history_copy[sensor][0]);
+//		break;
+//	case 6:
+//		median = opt_med6(history_copy[sensor][0]);
+//		break;
+//	case 7:
+//		median = opt_med7(history_copy[sensor][0]);
+//		break;
+//	case 9:
+//		median = opt_med9(history_copy[sensor][0]);
+//		break;
+//	case 25:
+//		median = opt_med25(history_copy[sensor][0]);
+//		break;
+//	default:
+//		median = 1; //Happens only when an incorrect PEAK_MEDIAN_HISTORY_SIZE is given and we want people to notice.
+//		break;
+//	}
+//	return median;
+//}
+///**
+// * Process ADC data for all hall sensors
+// */
+//int32_t peak_process_adc_values(void) {
+//	int32_t sensor;
+//	int32_t adc_data;
+//
+//	for (sensor = 0; sensor < PEAK_NUM_OF_SENSORS; sensor++) {
+//		/* sanity check */
+//		if (sensor < 0 || sensor > PEAK_NUM_OF_SENSORS)
+//			return PEAK_ERROR;
+//
+//		/* get the latest ADC value */
+//		adc_data = adc_get_value(sensor);
+//		adc_data = peak_get_median_value(sensor, adc_data);
+//
+//		switch (state[sensor]) {
+//
+//		case PEAK_STATE_IDLE:
+//			/* store the minimum */
+//			min_or_max[sensor] = adc_data;
+//			/* make a guess, you have a 50-50 chance of being right */
+//			state[sensor] = PEAK_STATE_RISING;
+//			break;
+//
+//		case PEAK_STATE_RISING:
+//			peak_update_maximum(sensor, adc_data);
+//
+//			/* if we detect that we changed to a falling edge */
+//			if (peak_check_for_direction_change(sensor, adc_data)) {
+//				peak_check_for_equilibrium_change(sensor);
+//
+//				/* if this peak is an actual peak, and not just a direction
+//				 * change between two peaks. */
+//				if (peak_check_for_valid_peak(sensor)) {
+//					peak_debug_counter += 1;
+//					positive_peak_debug_counter += 1;
+//					if (sensor == 2) {
+//						if (calibration_peak_detected < 255) {
+//							calibration_peak_detected += 1;
+//						} else {
+//							calibration_peak_detected = 255;
+//						}
+//					}
+//					position_peak_detected(sensor, PEAK_INDEX_PEAK_DETECTED);
+//				}
+//				state[sensor] = PEAK_STATE_FALLING;
+//				min_or_max[sensor] = adc_data;
+//			}
+//			break;
+//
+//		case PEAK_STATE_FALLING:
+//			peak_update_minimum(sensor, adc_data);
+//
+//			/* if we detected that we changed to a rising edge */
+//			if (peak_check_for_direction_change(sensor, adc_data)) {
+//
+//				/* if this peak is an actual peak, and not just a direction
+//				 * change between two peaks. */
+//				if (peak_check_for_valid_peak(sensor)) {
+//					peak_debug_counter += 1;
+//					if (sensor == 2) {
+//						if (calibration_peak_detected < 255) {
+//							calibration_peak_detected += 1;
+//						} else {
+//							calibration_peak_detected = 255;
+//						}
+//					}
+//					position_peak_detected(sensor, PEAK_NORMAL_PEAK_DETECTED);
+//				}
+//				state[sensor] = PEAK_STATE_RISING;
+//				min_or_max[sensor] = adc_data;
+//			}
+//			break;
+//
+//		default:
+//			state[sensor] = PEAK_STATE_IDLE;
+//			return PEAK_ERROR;
+//		}
+//
+//		vregs_write(VREGS_PEAK_DEBUG_CNT, peak_debug_counter);
+//		vregs_write(VREGS_PEAK_POS_DEBUG_CNT, positive_peak_debug_counter);
+//		vregs_write(VREGS_DEBUG_FLAG_2, (uint8_t) (calibration_peak_detected));
+//	}
+//
+//	return 0;
+//}
+/*
+ * Check if a peak is an actual valid peak, and not just a direction change
+ * between two peak in.
+ *
+ *                           An actual peak
+ *                                 |
+ *
+ *                                 *
+ *          Not an actual peak    * *     Not an actual peak
+ *                  |            *   *            |
+ *                              *     *
+ * *******         ***         *       *         ***       **************
+ *        *       *   *       *         *       *   *     *
+ * 	       *     *     *     *           *     *     *   *
+ * 	        *   *       *   *             *   *       * *
+ * 	         * *         * *               * *         *
+ * 	   	      *           *                 *
+ *                                                     |
+ *            |                             |    An actual peak
+ *      An actual peak                An actual peak
+ *
+ * We do this check by seeing if the peak is far enough from
+ * the equilibrium state of the hall sensors.
+ *
+ */
+//int32_t peak_check_for_valid_peak(uint8_t sensor) {
+//	if (min_or_max[sensor] > (equilibrium[sensor] + PEAK_MINIMUM_PEAK_HEIGHT))
+//		return 1;
+//	if (min_or_max[sensor] < (equilibrium[sensor] - PEAK_MINIMUM_PEAK_HEIGHT))
+//		return 1;
+//	return 0;
+//}
+/**
+ * Check if the equilibrium should be updated
+ */
+//int32_t peak_check_for_equilibrium_change(uint8_t sensor) {
+//	static int32_t history[PEAK_NUM_OF_SENSORS][PEAK_EQUILIBRIUM_HISTORY_SIZE] =
+//			{ { PEAK_DEFAULT_EQUILIBRIUM, PEAK_DEFAULT_EQUILIBRIUM,
+//			PEAK_DEFAULT_EQUILIBRIUM }, { PEAK_DEFAULT_EQUILIBRIUM,
+//			PEAK_DEFAULT_EQUILIBRIUM,
+//			PEAK_DEFAULT_EQUILIBRIUM }, { PEAK_DEFAULT_EQUILIBRIUM,
+//			PEAK_DEFAULT_EQUILIBRIUM,
+//			PEAK_DEFAULT_EQUILIBRIUM } };
+//	static int32_t insert_point[PEAK_NUM_OF_SENSORS] = { 0, 0, 0 };
+//	int32_t cursor, sum, new_equilibrium_found;
+//
+//	history[sensor][insert_point[sensor]] = min_or_max[sensor];
+//	insert_point[sensor] = (insert_point[sensor] + 1)
+//			% PEAK_EQUILIBRIUM_HISTORY_SIZE;
+//
+//	sum = history[sensor][0];
+//	new_equilibrium_found = 1;
+//	for (cursor = 1; cursor < PEAK_EQUILIBRIUM_HISTORY_SIZE; cursor++) {
+//		int32_t delta;
+//
+//		sum += history[sensor][cursor];
+//
+//		delta = history[sensor][cursor - 1] - history[sensor][cursor];
+//		if (delta < 0)
+//			delta = -delta;
+//		if (delta > PEAK_MAX_HISTORY_DIFF) {
+//			new_equilibrium_found = 0;
+//			break;
+//		}
+//	}
+//
+//	if (new_equilibrium_found) {
+//		equilibrium[sensor] = sum / PEAK_EQUILIBRIUM_HISTORY_SIZE;
+//	}
+//
+//	vregs_write(VREGS_PEAK_1_HISTORY_1, history[0][0] >> 4);
+//	vregs_write(VREGS_PEAK_1_HISTORY_2, history[0][1] >> 4);
+//	vregs_write(VREGS_PEAK_1_HISTORY_3, history[0][2] >> 4);
+//	vregs_write(VREGS_PEAK_1_HISTORY_4, history[0][3] >> 4);
+//
+//	return 0;
+//}
+/**
+ * Check if we changed from rising to falling versions or vice versa
+ */
+//int32_t peak_check_for_direction_change(uint8_t sensor, int32_t adc_data) {
+//
+//	/* if we are currently rising */
+//	if (state[sensor] == PEAK_STATE_RISING) {
+//		int32_t change_threshold = min_or_max[sensor]
+//				- PEAK_STATE_CHANGE_HYSTERESIS;
+//
+//		if (adc_data < change_threshold) {
+//			return 1;
+//		}
+//
+//		return 0;
+//	}
+//
+//	/* if we are currently falling */
+//	if (state[sensor] == PEAK_STATE_FALLING) {
+//		int32_t change_threshold = min_or_max[sensor]
+//				+ PEAK_STATE_CHANGE_HYSTERESIS;
+//
+//		if (adc_data > change_threshold) {
+//			return 1;
+//		}
+//
+//		return 0;
+//	}
+//
+//	return PEAK_ERROR;
+//}
+//
+///**
+// * Update the maximum stored for this sensor
+// */
+//int32_t peak_update_maximum(uint8_t sensor, int32_t adc_data) {
+//	if (adc_data > min_or_max[sensor]) {
+//		min_or_max[sensor] = adc_data;
+//	}
+//
+//	return 0;
+//}
+//
+///**
+// * Update the minimum stored for this sensor
+// */
+//int32_t peak_update_minimum(uint8_t sensor, int32_t adc_data) {
+//	if (adc_data < min_or_max[sensor]) {
+//		min_or_max[sensor] = adc_data;
+//	}
+//
+//	return 0;
+//}

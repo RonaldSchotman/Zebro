@@ -99,9 +99,9 @@ int32_t errors_reset_emergency_stop(int32_t safety){
 		errors_report(ERRORS_EMERGENCY_STOP_RESET_ERROR);
 		return 1;
 	}
+	motion_return_to_idle();
 	emergency_stop = 0;
 	vregs_write(VREGS_EMERGENCY_STOP, 0);
-	motion_return_to_idle();
 	return 0;
 }
 

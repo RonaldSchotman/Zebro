@@ -204,14 +204,14 @@ def main(stdscr):
     
     last_time_update = datetime.datetime.now()
     time_sync_counter = 0
-    position_control_kp = 240
+    position_control_kp = 120
     current_control_kp = 0
-    position_control_ki = 30
+    position_control_ki = 150
     current_control_ki = 0
-    position_control_kd = 50
-    main.position_touch_down = 600
-    main.position_lift_off = 630
-    main.position_stand_up = 610
+    position_control_kd = 30
+    main.position_touch_down = 660
+    main.position_lift_off = 660
+    main.position_stand_up = 650
     position_touch_down_a = (main.position_touch_down >> 8) & 0xff
     position_touch_down_b = main.position_touch_down & 0xff
     position_lift_off_a = (main.position_lift_off >> 8) & 0xff
@@ -288,8 +288,8 @@ def main(stdscr):
                 command = Command("[0x00 147 {0}]".format(position_control_kd), ";", 'Decrease kd position control')
 
             if input_char == 'w':
-                main.time_a = time_sync_counter + 1
-                main.time_b = 0
+                main.time_a = time_sync_counter
+                main.time_b = 150
                 if main.toggle == 0:
                     main.toggle = 1
                     command = Command("[0x20 30 2 {0} {1} {2} {3} 1 0 [0x24 30 2 {4} {5} {2} {3} 1 0 [0x28 30 2 {0} {1} {2} {3} 1 0 [0x2c 30 2 {4} {5} {2} {3} 1 0 [0x30 30 2 {0} {1} {2} {3} 1 0 [0x34 30 2 {4} {5} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, main.time_a, main.time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')

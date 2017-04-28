@@ -1,0 +1,96 @@
+/**
+ * POOT
+ * The Zebro Project
+ * Delft University of Technology
+ * 2016
+ *
+ * Filename: motion.h
+ *
+ * Description:
+ * Motion controller. Keeps track of the current walking
+ * mode or assignment, and decides how to actuate the
+ * H-bridge.
+ * *
+ * Authors:
+ * Daniel Booms --d.booms@solcon.nl
+ * Piet De Vaere -- Piet@DeVae.re
+ *
+ * Last edited:
+ * 06-03-2017		Floris Rouwen		florisrouwen@outlook.com
+ */
+
+#ifndef __MOTION_H__
+#define __MOTION_H__
+
+#define MOTION_MODE_IDLE 0
+#define MOTION_MODE_CALIBRATE 1
+#define MOTION_MODE_WALK_FORWARD 2
+#define MOTION_MODE_WALK_BACKWARD 3
+#define MOTION_MODE_EMERGENCY_STOP 255
+
+#define MOTION_SETPOINT_GENERATOR_DT 5
+#define MOTION_ACC_MAX 18200000 /* kilo-pulses per s squared. Max constant speed is 2 rps = 1820 p/s. From 0 to max speed in 100 ms gives this number. */
+#define MOTION_ACC_DEC_TIME_MS 400
+#define MOTION_DIRECTION_FORWARD 0
+#define MOTION_DIRECTION_BACKWARD 1
+
+#define MOTION_CALIB_MAX_CURRENT_MA 800
+/* every 2.5 ms = 160 clock ticks*/
+#define MOTION_CALIB_ROTATE_DT 400
+#define MOTION_CURRENT_SETPOINT_MAX 16383
+#define MOTION_CURRENT_SETPOINT_MIN -16383
+#define MOTION_CALIBRATION_HALL_SENSOR 2
+
+/* At a very maximum a leg should be able to spin 2 rounds in 1 second (120 RPM). This is 1820 pulses per second.
+ * The motor is measured to do 140 RPM at full dutycycle. So our max dutycycle is 223 for 120 RPM. Now we have (1820/1)/223 ~= 8.
+ */
+/* This is not 8 because it is also a measure of how aggressive the speed up is when the leg is delayed. Lower is more aggressive. */
+//#define DUTYCYCLE_PER_PULSE_PER_SECOND 5
+/* This determines how many pulses the encoder can pass a certain position and still say it reached the position. This is necessary especially when the loop is not fast enough. */
+//#define MOTION_POSITION_HYSTERESIS 5
+/* Time in ms the leg gets to turn back the leg to the last known position. */
+//#define STABALIZING_TIME 250
+
+#define ARRAY_SIZE 256
+
+#include "stdint.h"
+
+struct motion_state{
+	uint8_t mode;
+	uint8_t position_a;
+	uint8_t position_b;
+	uint8_t time_a;
+	uint8_t time_b;
+	uint8_t new_data_flag;
+	uint8_t crc;
+};
+
+int32_t motion_new_zebrobus_data(uint32_t address, uint8_t data);
+int32_t motion_write_state_to_vregs(struct motion_state motion_state);
+int32_t motion_validate_state(struct motion_state motion_state);
+void set_current_setpoint (int32_t value);
+int32_t get_current_setpoint (void);
+uint8_t get_state_mode (void);
+void set_state_mode (uint8_t mode);
+void motion_control_position(void);
+void motion_position_control_set_kp(uint8_t value);
+void motion_position_control_set_ki(uint8_t value);
+void motion_position_control_set_kd(uint8_t value);
+uint8_t motion_position_control_get_kp(void);
+uint8_t motion_position_control_get_ki(void);
+uint8_t motion_position_control_get_kd(void);
+void motion_absolute_position_calculator(void);
+void motion_reset_absolute_position_calculator(void);
+int32_t motion_command_zebro(void);
+uint32_t calculate_current_speed(void);
+uint32_t get_std_var (void);
+uint32_t std_var_stable(uint16_t *a, uint16_t n);
+uint64_t isqrt(uint64_t x);
+void motion_set_state(uint8_t mode, uint8_t lift_off_time_a, uint8_t lift_off_time_b, uint8_t touch_down_time_a,
+		uint8_t touch_down_time_b, uint8_t new_data_flag, uint8_t crc);
+int32_t motion_return_to_idle(void);
+int32_t motion_emergency_stop(void);
+uint8_t get_calibrate(void);
+void set_calibrate(uint8_t value);
+void motion_init(void);
+#endif /* __MOTION_H__ */

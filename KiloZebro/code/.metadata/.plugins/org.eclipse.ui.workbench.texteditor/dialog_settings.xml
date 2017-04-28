@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="t_old" key="selection"/>
+		<item value="" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="set_calibrate"/>
+			<item value="calibrate"/>
+			<item value="position_touch_down"/>
+			<item value="starting_time"/>
 			<item value="t_old"/>
 			<item value="speed"/>
 			<item value="TIM6"/>
 			<item value="TIM7"/>
-			<item value="TIM2"/>
-			<item value="encoder_reset_position"/>
-			<item value="zebrobus_process_write_requests"/>
-			<item value="`"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>

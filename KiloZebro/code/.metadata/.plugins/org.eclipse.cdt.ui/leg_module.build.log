@@ -1,22 +1,10 @@
-16:54:39 **** Build of configuration Debug for project leg_module ****
+16:54:27 **** Incremental Build of configuration Debug for project leg_module ****
 make all 
-Building file: ../Src/address.c
-Invoking: MCU GCC Compiler
-/home/rob/zebro/KiloZebro/code/leg_module/Debug
-arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/address.d" -MT"Src/address.o" -o "Src/address.o" "../Src/address.c"
-Finished building: ../Src/address.c
- 
 Building file: ../Src/motion.c
 Invoking: MCU GCC Compiler
 /home/rob/zebro/KiloZebro/code/leg_module/Debug
 arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/motion.d" -MT"Src/motion.o" -o "Src/motion.o" "../Src/motion.c"
 Finished building: ../Src/motion.c
- 
-Building file: ../Src/peak.c
-Invoking: MCU GCC Compiler
-/home/rob/zebro/KiloZebro/code/leg_module/Debug
-arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -mfloat-abi=soft -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F030x8 -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Inc -Os -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"Src/peak.d" -MT"Src/peak.o" -o "Src/peak.o" "../Src/peak.c"
-Finished building: ../Src/peak.c
  
 Building target: poot.elf
 Invoking: MCU GCC Linker
@@ -28,8 +16,8 @@ Generating binary and Printing size information:
 arm-none-eabi-objcopy -O binary "poot.elf" "poot.bin"
 arm-none-eabi-size "poot.elf"
    text	   data	    bss	    dec	    hex	filename
-  17040	     20	   4092	  21152	   52a0	poot.elf
+  17096	     20	   4084	  21200	   52d0	poot.elf
  
 
-16:54:43 Build Finished (took 3s.748ms)
+16:54:27 Build Finished (took 524ms)
 

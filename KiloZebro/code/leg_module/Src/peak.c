@@ -30,26 +30,26 @@
 #include "globals.h"
 
 uint8_t peak_detected[PEAK_NUM_OF_SENSORS] = { 0, 0, 0 };
-static uint32_t time_old;
+//static uint32_t time_old;
 
 /**
  * Process ADC data for a single hall sensor
  */
-uint8_t peak_process_adc_values_sensor(void) {
-	if (((TIM16->CNT) - time_old) >= 8) { /* every 1.25 ms, if this loop is too fast, peak detected does not stay high long enough and doesn't work because delta becomes too small. If too slow, the detection rate is too slow. */
-		time_old = (TIM16->CNT);
+uint8_t peak_process_adc_values_sensor(uint8_t fill_up_arrays) {
+//	if (((TIM16->CNT) - time_old) >= 8) { /* every 1.25 ms, if this loop is too fast, peak detected does not stay high long enough and doesn't work because delta becomes too small. If too slow, the detection rate is too slow. */
+//		time_old = (TIM16->CNT);
 		uint16_t adc_data;
 		static uint16_t filteredHistory[PEAK_NUM_OF_SENSORS][PEAK_HISTORY_LAG];
 		static uint16_t array_deltas[PEAK_HISTORY_LAG];
 		static uint16_t avgHistory[PEAK_NUM_OF_SENSORS][2];
 		uint32_t standard_deviation = get_std_var();
 		uint8_t sensor;
-		uint16_t threshold = 0;
-		uint8_t influence = 5; // Now we need to shift the result inside the first if statement by 4 bits.
+		static uint16_t threshold;
+		static uint8_t influence = 8; // Now we need to shift the result inside the first if statement by 4 bits.
 		static uint16_t delta = 0;
 		static uint16_t avg_delta = 0;
-		static uint16_t max_avg_delta = 1;
-		static uint16_t counter;
+		static uint16_t max_avg_delta;
+//		static uint16_t counter;
 
 		for (sensor = 0; sensor < PEAK_NUM_OF_SENSORS; sensor++) {
 			/* sanity check */
@@ -60,38 +60,31 @@ uint8_t peak_process_adc_values_sensor(void) {
 			/* get the latest ADC value */
 			adc_data = adc_get_value(peak_get_adc_channel_index(sensor));
 
-			if (counter <= (4 * PEAK_HISTORY_LAG)) {
-				avgHistory[sensor][0] = adc_data;
-				counter += 1;
-			}
+//			if (counter <= (4 * PEAK_HISTORY_LAG)) {
+//				avgHistory[sensor][0] = adc_data;
+//				counter += 1;
+//			}
 
 			// We assume the magnet in the leg is positioned such that peaks will be positive.
 			delta = abs(adc_data - avgHistory[sensor][0]);
-//		if (delta > 5000) { /* a delta larger than 5000 wouldn't make sense looking at the ADC data */
-//			delta = 0;
-//		}
-
 			move_over_array_elements(array_deltas, PEAK_HISTORY_LAG);
 			array_deltas[PEAK_HISTORY_LAG - 1] = delta;
 			avg_delta = mean(array_deltas, PEAK_HISTORY_LAG);
 			/* avg_delta should not be more than a quarter of the range. We are measuring positive magnetic changes, so only the top half counts. More than half of that is enough range and max should not be higher. */
-			if ((avg_delta > max_avg_delta)) {
+			if ((avg_delta > max_avg_delta) && (fill_up_arrays == 1)) {
 				max_avg_delta = avg_delta;
 			}
-			if (standard_deviation != 0) {
-				threshold = (max_avg_delta / (abs(standard_deviation)));
+			if (standard_deviation != 0 && (fill_up_arrays == 2)) {
+				threshold = (max_avg_delta / standard_deviation);
 			}
-#ifdef DEBUG_VREGS
-			vregs_write(VREGS_PEAK_MAX_AVG_DELTA_A,
-					(uint8_t) (max_avg_delta >> 8));
-			vregs_write(VREGS_PEAK_MAX_AVG_DELTA_B, (uint8_t) (max_avg_delta));
-			vregs_write(VREGS_PEAK_AVG_DELTA, (uint8_t) (avg_delta >> 8));
-			vregs_write(VREGS_PEAK_THRESHOLD, (uint8_t) (threshold));
-#endif
-			/* in our case std_var is always positive */
-			if (delta > (threshold * abs(standard_deviation)) + 1) {
+			/* in our case std_var is always positive
+			 * threshold-1 is just right. Threshold-2 is too much and threshold - 0.5 can be too little
+			 */
+//			if ((avg_delta >= ((((threshold - 1)<<1) * standard_deviation)>>1)) && (fill_up_arrays == 3)) {
+			if ((avg_delta >= ((threshold - 2) * standard_deviation)) && (fill_up_arrays == 3)) {
 				peak_detected[sensor] = 1;
-
+				/* Make max_avg_delta 0 to be able to run calibration again and again. */
+				max_avg_delta = 0;
 				move_over_array_elements(filteredHistory[sensor],
 				PEAK_HISTORY_LAG);
 
@@ -113,13 +106,18 @@ uint8_t peak_process_adc_values_sensor(void) {
 				PEAK_HISTORY_LAG);
 			}
 #ifdef DEBUG_VREGS
+			vregs_write(VREGS_PEAK_MAX_AVG_DELTA_A,
+					(uint8_t) (max_avg_delta >> 8));
+			vregs_write(VREGS_PEAK_MAX_AVG_DELTA_B, (uint8_t) (max_avg_delta));
+			vregs_write(VREGS_PEAK_AVG_DELTA, (uint8_t) (avg_delta >> 8));
+			vregs_write(VREGS_PEAK_THRESHOLD, (uint8_t) (threshold));
 			vregs_write((VREGS_PEAK_1_ADC_AVERAGE + sensor),
 					(avgHistory[sensor][1] >> 8));
 			vregs_write((VREGS_PEAK_1_DETECTED + sensor),
 					peak_detected[sensor]);
 #endif
 		}
-	}
+//	}
 	return 0;
 }
 

@@ -109,11 +109,6 @@ int main(void) {
 		time_check_time();
 //		time_dumy_locmotive_controller();
 
-		/* Only process hall-sensor data when we are calibrating. After that it is just a waste of time. */
-//		if (get_calibrate() == 1) {
-//			peak_process_adc_values_sensor();
-//		}
-
 		encoder_write_to_vregs();
 		motion_absolute_position_calculator();
 		motion_command_zebro();

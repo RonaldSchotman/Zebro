@@ -180,21 +180,6 @@ void adc_write_data_to_vregs(void) {
 		vregs_write((VREGS_ADC_DATA0B + (2 * i)),
 				(uint8_t) (adc_data_dump[i] >> 6)); //internal temp, motor current, Battery, ID resistor, hall3b, hall2b, hall1b
 	}
-//	vregs_write(VREGS_ADC_DATA0A, (uint8_t) (adc_data_dump[0] >> 14)); //internal temp
-//	vregs_write(VREGS_ADC_DATA1A, (uint8_t) (adc_data_dump[1] >> 14)); //motor current
-//	vregs_write(VREGS_ADC_DATA2A, (uint8_t) (adc_data_dump[2] >> 14)); //Battery
-//	vregs_write(VREGS_ADC_DATA3A, (uint8_t) (adc_data_dump[3] >> 14)); //ID resistor
-//	vregs_write(VREGS_ADC_DATA4A, (uint8_t) (adc_data_dump[4] >> 14)); //hall3b
-//	vregs_write(VREGS_ADC_DATA5A, (uint8_t) (adc_data_dump[5] >> 14)); //hall2b
-//	vregs_write(VREGS_ADC_DATA6A, (uint8_t) (adc_data_dump[6] >> 14)); //hall1b
-//
-//	vregs_write(VREGS_ADC_DATA0B, (uint8_t) (adc_data_dump[0] >> 6)); //internal temp
-//	vregs_write(VREGS_ADC_DATA1B, (uint8_t) (adc_data_dump[1] >> 6)); //motor current
-//	vregs_write(VREGS_ADC_DATA2B, (uint8_t) (adc_data_dump[2] >> 6)); //Battery
-//	vregs_write(VREGS_ADC_DATA3B, (uint8_t) (adc_data_dump[3] >> 6)); //ID resistor
-//	vregs_write(VREGS_ADC_DATA4B, (uint8_t) (adc_data_dump[4] >> 6)); //hall3b
-//	vregs_write(VREGS_ADC_DATA5B, (uint8_t) (adc_data_dump[5] >> 6)); //hall2b
-//	vregs_write(VREGS_ADC_DATA6B, (uint8_t) (adc_data_dump[6] >> 6)); //hall1b
 #endif
 	current_measured = abs(
 			((adc_data_dump[ADC_MOTOR_CURRENT_INDEX])) - ADC_MID_RANGE_COUNT);
