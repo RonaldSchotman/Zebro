@@ -35,7 +35,7 @@
 #define MOTION_DIRECTION_BACKWARD 1
 
 #define MOTION_CALIB_MAX_CURRENT_MA 800
-/* every 1.25 ms = 160 clock ticks*/
+/* every 2.5 ms = 160 clock ticks*/
 #define MOTION_CALIB_ROTATE_DT 80
 #define MOTION_CURRENT_SETPOINT_MAX 16383
 #define MOTION_CURRENT_SETPOINT_MIN -16383

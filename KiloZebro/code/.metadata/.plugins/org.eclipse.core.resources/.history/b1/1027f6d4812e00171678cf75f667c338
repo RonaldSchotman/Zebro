@@ -368,9 +368,9 @@ void adc_check_battery_voltage(void) {
 	/* Battery voltage = (adc_data * 3300mV * (330 + 47)) / (uint16_max * 47)
 	 * There is a voltage divider with resisters of 33k and 4k7.
 	 */
-//	battery_voltage = (adc_get_value * 1244100) / 3080145;
-	vregs_write(VREGS_BATTERY_VOLTAGE, (battery_voltage>>8));
-	if ((battery_voltage >= ADC_OVER_VOLTAGE_COUNT) || (battery_voltage <= ADC_UNDER_VOLTAGE_COUNT)) {
+	battery_voltage = (battery_voltage * 1244100) / 3080145;
+	vregs_write(VREGS_BATTERY_VOLTAGE, (battery_voltage>>7));
+	if ((battery_voltage >= ADC_OVER_VOLTAGE) || (battery_voltage <= ADC_UNDER_VOLTAGE)) {
 		out_of_bound_voltage_counter++;
 		if (out_of_bound_voltage_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
 			errors_emergency_stop();

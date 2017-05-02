@@ -359,28 +359,6 @@ int16_t adc_get_absolute_current_measured_mA(void) {
 	return current_measured;
 }
 
-/* function checks if the battery voltage is within reasonable bounds (18 - 26 V)
- * Otherwise the leg goes into emergency state
- */
-void adc_check_battery_voltage(void) {
-	static uint32_t out_of_bound_voltage_counter = 0;
-	uint32_t battery_voltage = adc_get_value(ADC_BATTERY_INDEX);
-	/* Battery voltage = (adc_data * 3300mV * (330 + 47)) / (uint16_max * 47)
-	 * There is a voltage divider with resisters of 33k and 4k7.
-	 */
-//	battery_voltage = (adc_get_value * 1244100) / 3080145;
-	vregs_write(VREGS_BATTERY_VOLTAGE, (battery_voltage>>8));
-	if ((battery_voltage >= ADC_OVER_VOLTAGE_COUNT) || (battery_voltage <= ADC_UNDER_VOLTAGE_COUNT)) {
-		out_of_bound_voltage_counter++;
-		if (out_of_bound_voltage_counter > ADC_CURRENT_EMERGENCY_SAMPLES) {
-			errors_emergency_stop();
-			errors_report(ERRORS_MOTOR_OVERCURRENT);
-		}
-	} else if (out_of_bound_voltage_counter > 0) {
-		out_of_bound_voltage_counter--;
-	}
-}
-
 /* ------------------------------
  *
  * OLD CODE

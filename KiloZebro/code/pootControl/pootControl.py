@@ -222,6 +222,7 @@ def main(stdscr):
     main.time_a = 0
     main.time_b = 0
     main.toggle = 0
+    position = 0
 
     while(True):
         display.get_data_from_bus_pirate(bus_pirate)
@@ -296,17 +297,21 @@ def main(stdscr):
                 else:
                     main.toggle = 0
                     command = Command("[0x20 30 2 {4} {5} {2} {3} 1 0 [0x24 30 2 {0} {1} {2} {3} 1 0 [0x28 30 2 {4} {5} {2} {3} 1 0 [0x2c 30 2 {0} {1} {2} {3} 1 0 [0x30 30 2 {4} {5} {2} {3} 1 0 [0x34 30 2 {0} {1} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, main.time_a, main.time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')
-                
-                # main.walking = 1
-                
-            # if input_char == 's':
-                # main.position = (main.position + 900)%910
-                # position_a = (main.position >> 8) & 0xff
-                # position_b = main.position & 0xff
-                # time_a = time_sync_counter
-                # time_b = 75
-                # command = Command("[0x00 30 3 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, time_a, time_b), "s", 'walk backward')
-            
+
+            if input_char == 's':
+                # position = (position + 810)%910
+                # position_a = ((position) >> 8) & 0xff
+                # position_b = (position) & 0xff
+                main.time_a = time_sync_counter
+                main.time_b = 150
+                # command = Command("[0x20 30 3 {0} {1} {2} {3} 1 0 1]".format(position_a, position_b, main.time_a, main.time_b), "s", 'walk backward')
+                if main.toggle == 0:
+                    main.toggle = 1
+                    command = Command("[0x20 30 3 {0} {1} {2} {3} 1 0 [0x24 30 3 {4} {5} {2} {3} 1 0 [0x28 30 3 {0} {1} {2} {3} 1 0 [0x2c 30 3 {4} {5} {2} {3} 1 0 [0x30 30 3 {0} {1} {2} {3} 1 0 [0x34 30 3 {4} {5} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, main.time_a, main.time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')
+                else:
+                    main.toggle = 0
+                    command = Command("[0x20 30 3 {4} {5} {2} {3} 1 0 [0x24 30 3 {0} {1} {2} {3} 1 0 [0x28 30 3 {4} {5} {2} {3} 1 0 [0x2c 30 3 {0} {1} {2} {3} 1 0 [0x30 30 3 {4} {5} {2} {3} 1 0 [0x34 30 3 {0} {1} {2} {3} 1 0 [0x00 37 0]".format(position_touch_down_a, position_touch_down_b, main.time_a, main.time_b, position_lift_off_a, position_lift_off_a), "w", 'walk forward')
+
             if input_char == 'z':
                 main.time_a = time_sync_counter + 1
                 main.time_b = 0

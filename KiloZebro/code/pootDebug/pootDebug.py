@@ -358,7 +358,7 @@ if __name__ == "__main__":
                 y: disable UDP transmitions | space: start writing log file""",
             add_help = True)
     parser.add_argument("-p", "--port",
-            default = "/dev/ttyUSB1",
+            default = "/dev/ttyUSB0",
             help = "The serial port to read from",
             dest = "serial_port")
     parser.add_argument("-b", "--baud",

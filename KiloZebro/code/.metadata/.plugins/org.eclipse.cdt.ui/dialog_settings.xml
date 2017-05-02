@@ -17,6 +17,9 @@
 		<item value="false" key="caseSensitive"/>
 		<item value="227191" key="searchFlags"/>
 		<list key="previousPatterns">
+			<item value="*VREGS_BATTERY_VOLTAGE*"/>
+			<item value="VREGS_BATTERY_VOLTAGE"/>
+			<item value="*calibrate*"/>
 			<item value="*set_calibrate*"/>
 			<item value="set_calibrate1"/>
 			<item value="VREGS_DEBUG_FLAG_2"/>

@@ -98,8 +98,8 @@ int main(void) {
 
 		/* process data from ADC */
 		adc_write_data_to_vregs(); /* not the most recent data, maybe, but that's not important */
-		adc_check_battery_voltage();
 		adc_get_temperature();
+
 		fans_calc_and_set_speeds();
 
 		/* process commands from ZebroBus */

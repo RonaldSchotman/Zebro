@@ -26,7 +26,6 @@ int32_t adc_get_temperature(void);
 //int32_t adc_get_motor_current_ma(void);
 //uint32_t adc_get_absolute_motor_current_ma(void);
 uint8_t adc_check_motor_current(uint16_t current_measured);
-void adc_check_battery_voltage(void);
 int16_t adc_get_absolute_current_measured_mA(void);
 void adc_control_motor_current(int32_t current_setpoint, uint16_t current_measured);
 void adc_current_control_set_kp(uint8_t value);
@@ -47,8 +46,8 @@ uint16_t adc_get_value(int32_t index);
 #define ADC_MID_RANGE_MILLIVOLT 1650 // voltage at 0A = vcc/2 = 1.65V
 #define ADC_OVER_CURRENT_COUNT 26000
 
-#define ADC_OVER_VOLTAGE_COUNT 48384 /* value measured on leg */
-#define ADC_UNDER_VOLTAGE_COUNT 40320 /* value measured on leg */
+#define ADC_OVER_VOLTAGE 26000 /* over voltage in mV */
+#define ADC_UNDER_VOLTAGE 18000 /* under voltage in mV */
 
 #define ADC_CURRENT_SENSITIVITY 55 // 55 mV/A See acs711 25AB-T datasheet. (65536/(1650/55)) = 1092.26667 #/Amp
 #define ADC_CURRENT_EMERGENCY_SAMPLES 100

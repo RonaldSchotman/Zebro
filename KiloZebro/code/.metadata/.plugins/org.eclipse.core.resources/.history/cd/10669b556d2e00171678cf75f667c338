@@ -615,37 +615,7 @@ int32_t motion_command_zebro() {
 //		}
 
 	case MOTION_MODE_WALK_BACKWARD:
-		motion_control_position();
-		time_old = TIM16->CNT;
-		absolute_starting_setpoint = absolute_position;
-		starting_time = time_get_time_ms();
-		absolute_ending_setpoint = ((state.position_a << 8) + state.position_b);
-		if (absolute_starting_setpoint < absolute_ending_setpoint) {
-			delta_distance =
-			ENCODER_PULSES_PER_ROTATION
-					- (absolute_ending_setpoint - absolute_starting_setpoint);
-		} else if (absolute_starting_setpoint == absolute_ending_setpoint) {
-			motion_return_to_idle();
-		} else {
-			delta_distance = absolute_starting_setpoint - absolute_ending_setpoint;
-		}
-		delta_time = ((state.time_a * 1000) + (state.time_b * 4))
-				- starting_time;
-		if (delta_time > 0) {
-			desired_speed = (delta_distance * 1000000) / delta_time; /* kilo-pulses per second */
-		}
-		if (dt_1 >= time_until_next_position_setpoint) {
-			position_setpoint -= 1;
-			if (position_setpoint < (encoder_get_position() - delta_distance)) {
-				position_setpoint = (encoder_get_position() - delta_distance);
-			}
 
-			if (desired_speed > 0) {
-				time_until_next_position_setpoint = (1000
-						* TIME_ONE_SECOND_COUNTER_VALUE) / desired_speed;
-				time_old_1 = (TIM16->CNT);
-			}
-		}
 		break;
 
 	case MOTION_MODE_EMERGENCY_STOP:

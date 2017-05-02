@@ -623,7 +623,7 @@ int32_t motion_command_zebro() {
 		if (absolute_starting_setpoint < absolute_ending_setpoint) {
 			delta_distance =
 			ENCODER_PULSES_PER_ROTATION
-					- (absolute_ending_setpoint - absolute_starting_setpoint);
+					- (absolute_starting_setpoint - absolute_ending_setpoint);
 		} else if (absolute_starting_setpoint == absolute_ending_setpoint) {
 			motion_return_to_idle();
 		} else {
@@ -636,8 +636,8 @@ int32_t motion_command_zebro() {
 		}
 		if (dt_1 >= time_until_next_position_setpoint) {
 			position_setpoint -= 1;
-			if (position_setpoint < (encoder_get_position() - delta_distance)) {
-				position_setpoint = (encoder_get_position() - delta_distance);
+			if (position_setpoint > (encoder_get_position() + delta_distance)) {
+				position_setpoint = (encoder_get_position() + delta_distance);
 			}
 
 			if (desired_speed > 0) {
